@@ -1,7 +1,7 @@
 %% prolog//0 is the entry point for the library's
 %%   interfaces.
 prolog -->
-    variable_token.
+    read_term_.
 
 /* 6.3 TERMS */
 

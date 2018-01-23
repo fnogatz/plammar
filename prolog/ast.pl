@@ -124,11 +124,9 @@ token(In, [token(Token_Res)|Rest]) :-
     Rest = []
   ;
     Rest = [_One_More_Element|Rests],
-    % consuming one element does not succeed
+    % consuming one element more does not succeed
     \+ token_(In, [token(_)|Rests])
   ).
 
 
 :- consult('iso-grammar.pl').
-
-test --> *alphanumeric_char.
