@@ -1,3 +1,5 @@
+.PHONY: all test clean
+
 version := $(shell swipl -q -s pack -g 'version(V),writeln(V)' -t halt)
 
 SWIPL := swipl

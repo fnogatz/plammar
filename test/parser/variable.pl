@@ -1,17 +1,14 @@
 named_variable('Var'):
   named_variable(
-    [ capital_letter_char(
-        'V'),
+    [ capital_letter_char('V'),
       alphanumeric_char(
         alpha_char(
-    letter_char(
-      small_letter_char(
-        a)))),
+          letter_char(
+            small_letter_char(a)))),
       alphanumeric_char(
         alpha_char(
-    letter_char(
-      small_letter_char(
-        r))))
+          letter_char(
+            small_letter_char(r))))
     ]).
 
 named_variable('smallletter'):
@@ -31,21 +28,17 @@ anonymous_variable('_'):
 named_variable('_var'):
   named_variable(
     [ variable_indicator_char(
-        underscore_char(
-    '_')),
+        underscore_char('_')),
       alphanumeric_char(
         alpha_char(
-    letter_char(
-      small_letter_char(
-        v)))),
+          letter_char(
+            small_letter_char(v)))),
       alphanumeric_char(
         alpha_char(
-    letter_char(
-      small_letter_char(
-        a)))),
+          letter_char(
+            small_letter_char(a)))),
       alphanumeric_char(
         alpha_char(
-    letter_char(
-      small_letter_char(
-        r))))
+          letter_char(
+            small_letter_char(r))))
     ]).

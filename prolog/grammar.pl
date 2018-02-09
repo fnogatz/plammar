@@ -24,7 +24,7 @@ token(In, Out) :-
     Out = []
   ;
     Out = [_One_More_Element|Rests],
-    % consuming one element does not succeed
+    % consuming one element more does not succeed
     \+ token_(In, Rests)
   ).
 

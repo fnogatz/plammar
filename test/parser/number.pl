@@ -1,12 +1,9 @@
 integer_token('123'):
   integer_token(
     integer_constant(
-      [ decimal_digit_char(
-    '1'),
-        decimal_digit_char(
-    '2'),
-        decimal_digit_char(
-    '3')
+      [ decimal_digit_char('1'),
+        decimal_digit_char('2'),
+        decimal_digit_char('3')
   ])).
 
 % integers are allowed to start with zeroes
@@ -33,8 +30,7 @@ float_number_token('1.2'):
         [ decimal_digit_char('1') ]),
       fraction(
         [ decimal_point_char('.'),
-          decimal_digit_char('2') ]),
-      exponent([])
+          decimal_digit_char('2') ])
     ]).
 
 % no space in between
@@ -56,7 +52,7 @@ float_number_token('1.2e3'):
         ]),
         exponent(
           [ exponent_char(e),
-            sign(positive_sign_char([])),
+            sign([]),
             integer_constant(
               [ decimal_digit_char('3') ])
           ]) ]).

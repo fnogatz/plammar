@@ -37,38 +37,3 @@ After the pre-compilation step mentioned before, the created executable can be c
 ## Usage with SWI-Prolog
 
 (tbd.)
-
-## Open Issues
-
-#### No combined AND/OR allowed
-
-The term expansions defined in `/prolog/ast.pl` currently do not support nested disjunctions (`|`) and conjunctions (`,`). Since the conjunction parts are expanded two times, this results in AST terms containing multiple occurrences of the same element. E.g., consider the following DCG:
-
-```prolog
-named_variable -->
-    variable_indicator_char
-  , alphanumeric_char
-  , *alphanumeric_char
-  | capital_letter_char
-  , *alphanumeric_char.
-```
-
-This creates the following terms:
-
-```prolog
-> swipl -s ast.pl
-?- tree(named_variable,_,T).
-T = named_variable(named_variable([ ... ]))
-```
-
-A current workaround is to split the disjunctions into multiple rules:
-
-```prolog
-named_variable -->
-    variable_indicator_char
-  , alphanumeric_char
-  , *alphanumeric_char.
-named_variable -->
-    capital_letter_char
-  , *alphanumeric_char.
-```
