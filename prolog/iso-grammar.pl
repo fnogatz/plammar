@@ -1,3 +1,10 @@
+%%%%
+%%%% THIS IS JUST LEGACY CODE
+%%%%
+%%%% PLEASE IGNORE
+%%%%
+
+
 :- discontiguous
   ast:term/5,
   ast:lterm/5.
