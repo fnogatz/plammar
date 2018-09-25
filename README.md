@@ -4,7 +4,9 @@ A Prolog Grammar written in Prolog.
 
 ## Installation
 
-All you need is [SWI-Prolog](http://www.swi-prolog.org/). See there for installation instructions.
+First, you need [SWI-Prolog](http://www.swi-prolog.org/). See there for installation instructions.
+
+We make use of `(library(edcgs_expand))` which is part of the `edcgs` package. Make sure it is correctly installed, e.g., by calling `?- use_module(library(edcgs)).` in SWI-Prolog.
 
 Only for development purposes the [`library(tap)`](https://github.com/mndrix/tap) is needed.
 
@@ -36,4 +38,57 @@ After the pre-compilation step mentioned before, the created executable can be c
 
 ## Usage with SWI-Prolog
 
-(tbd.)
+Call the `ast.pl` script as follows:
+
+```sh
+> swipl -s prolog/ast.pl
+```
+
+Then, you can interact with the Prolog parser, e.g.:
+
+```prolog
+?- In = "a b c",
+string_chars(In, Chars),
+ast:parse(Prec, ops(Ops,Nots), AST, Chars, []),
+writeln('-----------'),
+ast:pp(AST), nl.
+```
+
+In `Ops`, the inferred operators are given. In `Nots`, all constraints on atoms which are not allowed to be an operator are specified. `Prec` is the inferred precedence of the given term with these operator definition. `AST` is the abstract syntax tree of the parsed term.
+
+### Examples
+
+The previous call yields for instance the following allowed operator definitions:
+
+```prolog
+Ops = [op(Prec, xfx, b)],
+Nots = [op(_, _, a), op(_, _, c)],
+Prec in ..(1, 1201)
+----------------------------------
+Ops = [op(Prec, xfy, b)],
+Nots = [op(_, _, a), op(_, _, c)],
+Prec in ..(1, 1201)
+----------------------------------
+Ops = [op(1201, xfx, b), op(_, _, a)],
+Nots = [op(_, _, c)]
+Prec = 1201
+----------------------------------
+Ops = [op(Prec, xfy, b)],
+Nots = [op(_, _, a), op(_, _, c)],
+Prec in ..(1, 1201)
+----------------------------------
+  ...
+----------------------------------
+Ops = [op(Prec, yf, c), op(_, yf, b)],
+Nots = [op(P1, _, a)],
+Prec in ..(0, 1201),
+Prec #>= P1,
+P1 in ..(0, 1201)
+----------------------------------
+  ...
+```
+
+## Current limitations (a.k.a. TODO-list)
+
+- only single-character atoms are supported
+- no support for compound terms like `a(b)`
