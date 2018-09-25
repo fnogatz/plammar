@@ -152,11 +152,40 @@ term(0, _Ops) ==>
 
 /* 6.3.4.1 Operand */
 
-
+%% not necesarry, since we do not distinguish between
+%%   `term` and `lterm`  
 
 /* 6.3.4.2 Operators as functors */
 
-%% TODO
+% term = term, op, term (xfx)
+term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+    P_Term1 #< P
+  , P_Term2 #< P
+  , append(Term_Part, Out, In)
+  , append(Term1, [Op|Term2], Term_Part)
+  , phrase(op(P, xfx, Ops, Op_Tree), [Op])
+  , phrase(term(P_Term1, Ops, Term1_Tree), Term1)
+  , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
+
+% term = term, op, term (yfx)
+term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+    P_Term1 #=< P
+  , P_Term2 #< P
+  , append(Term_Part, Out, In)
+  , append(Term1, [Op|Term2], Term_Part)
+  , phrase(op(P, xfy, Ops, Op_Tree), [Op])
+  , phrase(term(P_Term1, Ops, Term1_Tree), Term1)
+  , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
+
+% term = term, op, term (xfy)
+term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+    P_Term1 #< P
+  , P_Term2 #=< P
+  , append(Term_Part, Out, In)
+  , append(Term1, [Op|Term2], Term_Part)
+  , phrase(op(P, xfy, Ops, Op_Tree), [Op])
+  , phrase(term(P_Term1, Ops, Term1_Tree), Term1)
+  , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
 
 % term = term, op (yf)
 term(P, Ops, term([Term_Tree, Op_Tree]), In, Out) :-
