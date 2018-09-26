@@ -3,11 +3,8 @@
     tree/4
   ]).
 
-:- op(1200, xfx, ==>).
-
 pp(A) :-
   print_term(A, [indent_arguments(0)]).
-
 
 tree(Body, In, Tree) :-
   tree(Body, In, Tree, []).
@@ -23,21 +20,10 @@ tree_from_file(Body, Filename, Tree) :-
   maplist(char_code, Chars, Codes),
   tree(Body, Chars, Tree).
 
-/* 6.3.4.3 Operators */
-/*
-op(P, Specifier, Ops, In, [op(Atom_Tree)|Rest]) :-
-  atom(In, [Atom_Tree|Rest]),
-  atom_chars(Atom, In),
-  member(op(P, Specifier, Atom), Ops).
-*/
-
-
-
 parse(Prec, Ops, AST, In, Out) :-
   phrase(term(Token_Tree), In, Out),
   Token_Tree = term(Tokens),
   phrase(term(Prec, Ops, AST), Tokens, []).
-
 
 
 %% "A token shall not be followed by characters such that
@@ -54,62 +40,34 @@ token(Tree, In, Rest) :-
 
 :- use_module(library(edcgs_expand)).
 
-*(A, B, C, D) :-
-  % use `**` to consume as most as possible at first
-  sequence('*', A, B, C, D).
-?(A, B, C, D) :-
-  % use `**` to consume as most as possible at first
-  sequence('?', A, B, C, D).
+/*
+  *(DCGBody, Tree, In, Out) <-
 
-/*
-%% op `*` to denote any number of occurences
+  op `*` to denote any number of occurences.
+  The distinction depending on the groundness
+  of `In` is done only for performing reasons;
+  if the input list `In` is given, it is more
+  likely that many items can be consumed;
+  whereas with an unbound `In` and given `Tree`
+  we want to created the smallest possibilities
+  at first.
+*/
 :- op(800, fy, *).
-*(A, B, C, D) :-
+*(DCGBody, Tree, In, Out) :-
   % only if input list is given 
-  \+var(C), !,
+  \+var(In), !,
   % use `**` to consume as most as possible at first
-  sequence('**', A, B, C, D).
-*(A, B, C, D) :-
+  sequence('**', DCGBody, Tree, In, Out).
+*(DCGBody, Tree, In, Out) :-
   % only if input list should be calculated
-  var(C), !,
+  var(In), !,
   % use `*` to produce as small as possible at first
-  sequence('*', A, B, C, D).
-*/
-/*
-*(_A, [], C, D) :-
-  % only if input list should be calculated
-  var(C),
-  C = D.
-*(A, [B|Rec], C, D) :-
-  % only if input list should be calculated
-  var(C),
-  Callable =.. [A, B],
-  phrase(Callable, C, Res),
-  *(A, Rec, Res, D).
-*/
+  sequence('*', DCGBody, Tree, In, Out).
 
 %% op `?` to denote zero or one occurences
-/*
 :- op(800, fy, ?).
-?(A, B, C, D) :-
-  % only if input list is given
-  \+var(C), !,
-  sequence('?', A, B, C, D).
-?(A, B, C, D) :-
-  % only if input list should be calculated
-  var(C), !,
-  % try not present at first
-  (
-    % not present
-    B = [],
-    C = D
-  ;
-    % is present
-    Callable =.. [A, B],
-    phrase(Callable, C, D)
-  ).
-*/
+?(DCGBody, Tree, In, Out) :-
+  sequence('?', DCGBody, Tree, In, Out).
 
-% :- load_files('iso-grammar.pl', [module(ast)]).
 :- load_files('lexer.pl', [module(ast)]).
 :- load_files('parser.pl', [module(ast)]).
