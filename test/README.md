@@ -4,10 +4,10 @@ Definition of input/output tests for `plammar` parser following the [Test Anythi
 
 ## Run Tests
 
-The defined tests can be run using the following command:
+The defined tests can be run using the following command from the project's root directory:
 
 ```shell
-swipl -q -g main -t halt -s test.pl
+> swipl -q -g main -t halt -s test/test.pl
 ```
 
 This produces a TAP compatible output like the following:

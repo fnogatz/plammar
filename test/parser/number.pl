@@ -24,6 +24,9 @@ integer_token('a'):
 integer_token('1.2'):
   fail.
 
+integer('123'):
+  true.
+
 float_number_token('1.2'):
   float_number_token(
     [ integer_constant(

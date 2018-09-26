@@ -42,3 +42,12 @@ named_variable('_var'):
           letter_char(
             small_letter_char(r))))
     ]).
+
+variable('_var'):
+  true.
+
+variable('V'):
+  true.
+
+variable('Var'):
+  true.
