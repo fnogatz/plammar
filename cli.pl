@@ -1,6 +1,8 @@
 :- consult('pack.pl').
 :- use_module('prolog/ast').
 
+:- use_module(library(clitable)).
+
 opts_spec([
   [
     opt(help),
@@ -25,7 +27,6 @@ opts_spec([
   [
     opt(dcg),
     type(atom),
-    default(prolog),
     shortflags([ d ]),
     longflags([ dcg ]),
     help([
@@ -40,6 +41,22 @@ opts_spec([
     longflags([ pretty ]),
     help([
       'pretty output'
+    ])
+  ],
+  [
+    opt(ops),
+    type(term),
+    longflags([ ops ]),
+    help([
+      'pre-defined operators'
+    ])
+  ],
+  [
+    opt(nots),
+    type(term),
+    longflags([ 'not-ops' ]),
+    help([
+      'disallow operators'
     ])
   ]
 ]).
@@ -68,17 +85,14 @@ main(Opts,_PositionalArgs) :-
   writeln(Help),
   halt(0).
 
-main(Opts,PositionalArgs) :-
-  PositionalArgs = [Filename],
-  ( from_file(Opts,Filename) ->
-    success
-  ; no_success ).
+main(Opts, [Filename]) :-
+  read_file_to_codes(Filename, Codes, []),
+  maplist(char_code, Chars, Codes),
+  process(Opts, Chars).
 
-main(Opts,PositionalArgs) :-
-  PositionalArgs = [],
-  ( from_stdin(Opts) ->
-    success
-  ; no_success ).
+main(Opts, []) :-
+  collect_stdin(Chars),
+  process(Opts, Chars).
 
 no_success :-
   writeln('no'),
@@ -89,7 +103,7 @@ success :-
   halt(0).
 
 success(Opts, Result) :-
-  memberchk(pretty(Pretty), Opts),
+  option(pretty(Pretty), Opts),
   (
     Pretty = true,
     print_term(Result, [
@@ -102,17 +116,65 @@ success(Opts, Result) :-
   ),
   halt(0).
 
-from_file(Opts, Filename) :-
-  memberchk(dcg(Start_Body), Opts),
-  ( ast:tree_from_file(Start_Body, Filename, Tree) ->
+collect_stdin(Chars) :-
+  repeat,
+  read_line_to_codes(user_input, Codes),
+  maplist(char_code, Chars, Codes).
+
+process(Opts, Chars) :-
+  option(dcg(DCGBody), Opts),
+  \+var(DCGBody),
+  ( ast:tree(DCGBody, Chars, Tree) ->
     success(Opts, Tree)
   ; no_success ).
 
-from_stdin(Opts) :-
-  memberchk(dcg(Start_Body), Opts),
-  repeat,
-  read_line_to_codes(user_input, Codes),
-  maplist(char_code, Chars, Codes),
-  ( ast:tree(Start_Body, Chars, Tree) ->
-    success(Opts, Tree)
-  ; no_success ).
+process(Opts, Chars) :-
+  option(dcg(DCGBody), Opts),
+  var(DCGBody),
+
+  option(ops(Ops), Opts),
+  option(nots(Nots), Opts),
+
+  forall(
+    ast:parse(term(Prec, ops(Ops,Nots), AST), Chars),
+    print_result(Prec, Ops, Nots, AST, Chars)
+  ).
+
+print_result(Prec, Ops, Nots, _AST, _Chars) :-
+  nl,
+  writeln('--------------------------------'),
+  ansi_format([bold,fg(blue)], 'Precedence: ', []),
+  precedence_output(Prec, Prec_, _),
+  ansi_format([], '~w', [Prec_]),
+  nl, nl,
+  ansi_format([bold, fg(green)], 'Operators:~n', []),
+  print_operators(Ops),
+  nl,
+  ansi_format([bold, fg(red)], 'Not Operators:~n', []),
+  print_operators(Nots),
+  nl.
+
+print_operators([]) :-
+  !,
+  writeln('(none)').
+print_operators(Ops) :-
+  maplist(op_entry, Ops, Op_List),
+  clitable(Op_List, [head(['Precedence', 'Type', 'Name'])]).
+
+op_entry(op(Prec, Spec, Name), [Prec_, Spec_, Name_]) :-
+  ( var(Name) -> Name_ = '*' ; Name_ = Name ),
+  precedence_output(Prec, Prec_, Name_),
+  ( var(Spec) -> Spec_ = '*' ; Spec_ = Spec ).
+
+precedence_output(Prec, Res, _) :-
+  number(Prec), !,
+  Res = Prec.
+precedence_output(Prec, Res, Name) :-
+  attvar(Prec),
+  get_attr(Prec, clpfd, Attr),
+  Attr = clpfd_attr(_,_,_,from_to(n(From), n(To)), _),
+  ( var(Name) -> Name_ = 'P' ; format(atom(Name_), 'P(~w)', [Name])),
+  format(atom(Res), '~d =< ~w =< ~d', [From, Name_, To]).
+
+precedence_output(_Prec, '*', _).
+
