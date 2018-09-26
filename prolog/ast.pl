@@ -1,6 +1,8 @@
 :- module(ast, [
     tree/3,
-    tree/4
+    tree/4,
+    parse/2,
+    parse/3
   ]).
 
 pp(A) :-
@@ -20,10 +22,15 @@ tree_from_file(Body, Filename, Tree) :-
   maplist(char_code, Chars, Codes),
   tree(Body, Chars, Tree).
 
-parse(Prec, Ops, AST, In, Out) :-
+
+parse(DCGBody, In) :-
+  string_chars(In, Chars),
+  parse(DCGBody, Chars, []).
+
+parse(DCGBody, In, Out) :-
   phrase(term(Token_Tree), In, Out),
   Token_Tree = term(Tokens),
-  phrase(term(Prec, Ops, AST), Tokens, []).
+  phrase(DCGBody, Tokens, []).
 
 
 %% "A token shall not be followed by characters such that

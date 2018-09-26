@@ -63,9 +63,6 @@ remove_whitespaces([X|Xs], [X_|Xs_]) :-
   remove_whitespaces(X, X_),
   remove_whitespaces(Xs, Xs_).
 
-%% TODO
-
-
 
 :- discontiguous
   ast:term/5,
@@ -78,7 +75,7 @@ remove_whitespaces([X|Xs], [X_|Xs_]) :-
 /* 6.3.1.1 Numbers */
 
 term(0, _Ops) ==>
-    [ integer(_,_) ].
+    [ integer(_) ].
 
 term(0, _Ops) ==>
     [ float_number(_) ].
@@ -111,10 +108,8 @@ negative_sign_name(negative_sign_name(T), [T|Out], Out) :-
   ( Pre = []
   ; Pre = [Layout_Text_Sequence], is_whitespace(Layout_Text_Sequence)).
 
-
-%% TODO: Any number of whitespaces allowed
 is_whitespace(A) :-
-  A = layout_text_sequence([layout_text(layout_char(space_char(' ')))]).
+  A = layout_text_sequence([_]).
 
 /* 6.3.1.3 Atoms */
 
@@ -146,14 +141,49 @@ term(0, _Ops) ==>
 
 /* 6.3.3 Compund terms - functional notation */
 
-%% TODO
+term(0, Ops) ==>
+    atom
+  , [ open_ct(_) ]
+  , arg_list(Ops)
+  , [ close_(_) ].
+
+arg_list(Ops) ==>
+    arg(Ops).
+
+arg_list(Ops) ==>
+    arg(Ops)
+  , [ comma(_) ]
+  , arg_list(Ops).
+
+/* 6.3.3.1 Arguments */
+
+arg(Ops, arg(Atom_Tree), In, Out) :-
+    phrase(atom(Atom_Tree), In, Out)
+  , atom_tree(Atom, Atom_Tree)
+  , is_operator(Atom, Ops).
+
+arg(Ops, arg(Term_Tree), In, Out) :-
+    phrase(term(P, Ops, Term_Tree), In, Out)
+  , is_priority(P)
+  , P #=< 999.
 
 /* 6.3.4 Compund terms - operator notation */
 
 /* 6.3.4.1 Operand */
 
-%% not necesarry, since we do not distinguish between
-%%   `term` and `lterm`  
+%% Note that we do not distinguish between
+%% `term` and `lterm` to avoid trivial
+%% non-termination because of left-recursion
+
+term(0, Ops) ==>
+    [ open_(_) ]
+  , term(1201, Ops)
+  , [ close_(_) ].
+
+term(0, Ops) ==>
+    [ open_ct(_) ]
+  , term(1201, Ops)
+  , [ close_(_) ].
 
 /* 6.3.4.2 Operators as functors */
 

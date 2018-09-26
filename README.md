@@ -48,8 +48,7 @@ Then, you can interact with the Prolog parser, e.g.:
 
 ```prolog
 ?- In = "a b c",
-string_chars(In, Chars),
-ast:parse(Prec, ops(Ops,Nots), AST, Chars, []),
+parse(term(Prec, ops(Ops,Nots), AST), In),
 writeln('-----------'),
 ast:pp(AST), nl.
 ```
@@ -88,7 +87,9 @@ P1 in ..(0, 1201)
   ...
 ```
 
-## Current limitations (a.k.a. TODO-list)
+## TODO list
 
-- only single-character atoms are supported
-- no support for compound terms like `a(b)`
+- `- 1` is currently accepted
+- Extend testing framework:
+  - Test for valid and invalid terms of Table 5 on ISO Standard (p. 17)
+- Extend tool chain, e.g., present inferred operators as table
