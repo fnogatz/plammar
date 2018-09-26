@@ -1,5 +1,8 @@
 :- module(lexer, []).
 
+:- op(800, fy, *).
+:- op(800, fy, ?).
+
 /* 6.4 TOKENS */
 
 term ==>                            % 6.4

@@ -6,7 +6,7 @@
 :- op(1200, xfx, ==>).
 
 pp(A) :-
-  print_term(A, [indent_arguments(2)]).
+  print_term(A, [indent_arguments(0)]).
 
 
 tree(Body, In, Tree) :-
@@ -54,6 +54,14 @@ token(Tree, In, Rest) :-
 
 :- use_module(library(edcgs_expand)).
 
+*(A, B, C, D) :-
+  % use `**` to consume as most as possible at first
+  sequence('*', A, B, C, D).
+?(A, B, C, D) :-
+  % use `**` to consume as most as possible at first
+  sequence('?', A, B, C, D).
+
+/*
 %% op `*` to denote any number of occurences
 :- op(800, fy, *).
 *(A, B, C, D) :-
@@ -61,24 +69,45 @@ token(Tree, In, Rest) :-
   \+var(C), !,
   % use `**` to consume as most as possible at first
   sequence('**', A, B, C, D).
-*(_A, B, C, D) :-
+*(A, B, C, D) :-
+  % only if input list should be calculated
+  var(C), !,
+  % use `*` to produce as small as possible at first
+  sequence('*', A, B, C, D).
+*/
+/*
+*(_A, [], C, D) :-
   % only if input list should be calculated
   var(C),
-  C = D,
-  B = [].
+  C = D.
+*(A, [B|Rec], C, D) :-
+  % only if input list should be calculated
+  var(C),
+  Callable =.. [A, B],
+  phrase(Callable, C, Res),
+  *(A, Rec, Res, D).
+*/
 
 %% op `?` to denote zero or one occurences
+/*
 :- op(800, fy, ?).
 ?(A, B, C, D) :-
   % only if input list is given
-%  \+var(C), !,
+  \+var(C), !,
   sequence('?', A, B, C, D).
-/*
-?(_A, B, C, D) :-
+?(A, B, C, D) :-
   % only if input list should be calculated
-  var(C),
-  C = D,
-  B = [].
+  var(C), !,
+  % try not present at first
+  (
+    % not present
+    B = [],
+    C = D
+  ;
+    % is present
+    Callable =.. [A, B],
+    phrase(Callable, C, D)
+  ).
 */
 
 % :- load_files('iso-grammar.pl', [module(ast)]).
