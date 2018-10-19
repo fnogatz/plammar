@@ -141,8 +141,7 @@ process(Opts, Chars) :-
   ).
 
 print_result(Prec, Ops, Nots, _AST, _Chars) :-
-  nl,
-  writeln('--------------------------------'),
+  writeln('--------------------------------'), nl,
   ansi_format([bold,fg(blue)], 'Precedence: ', []),
   precedence_output(Prec, Prec_, _),
   ansi_format([], '~w', [Prec_]),
