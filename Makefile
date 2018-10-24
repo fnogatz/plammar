@@ -10,7 +10,25 @@ all: install
 version:
 	echo $(version)
 
-install: cli
+install: install.packs cli
+
+install.packs: install.packs.edcgs install.packs.clitable
+
+install.packs.edcgs:
+	@$(SWIPL) -q -g 'pack_install(edcgs,[interactive(false)]),halt(0)' -t 'halt(1)'
+
+install.packs.clitable:
+	@$(SWIPL) -q -g 'pack_install(clitable,[interactive(false)]),halt(0)' -t 'halt(1)'
+
+upgrade: upgrade.packs
+
+upgrade.packs: upgrade.packs.edcgs upgrade.packs.clitable
+
+upgrade.packs.edcgs:
+	@$(SWIPL) -q -g 'pack_install(edcgs,[interactive(false),upgrade(true)]),halt(0)' -t 'halt(1)'
+
+upgrade.packs.clitable:
+	@$(SWIPL) -q -g 'pack_install(clitable,[interactive(false),upgrade(true)]),halt(0)' -t 'halt(1)'
 
 test: cli test.cli test.parser
 
