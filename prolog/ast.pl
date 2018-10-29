@@ -5,6 +5,8 @@
     parse/3
   ]).
 
+:- use_module(library(clpfd)).
+
 pp(A) :-
   print_term(A, [indent_arguments(0)]).
 
@@ -26,6 +28,30 @@ tree_from_file(Body, Filename, Tree) :-
 parse(DCGBody, In) :-
   string_chars(In, Chars),
   parse(DCGBody, Chars, []).
+
+parse(_Module:directive_term(Ops, Tree), In, Out) :-
+  !,
+  phrase(term(Token_Tree), In, Rest),
+  Token_Tree = term(Tokens),
+  phrase(end(End_Tree), Rest, Out),
+  phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
+  Tree = directive_term([Term_Tree, End_Tree]),
+  % Condition:
+  %   The principal functor is (:-)/1
+  principal_functor(Term_Tree, Principal_Functor),
+  Principal_Functor = (:-).
+
+parse(_Module:clause_term(Ops, Tree), In, Out) :-
+  !,
+  phrase(term(Token_Tree), In, Rest),
+  Token_Tree = term(Tokens),
+  phrase(end(End_Tree), Rest, Out),
+  phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
+  Tree = clause_term([Term_Tree, End_Tree]),
+  % Condition:
+  %   The principal functor is not (:-)/1
+  principal_functor(Term_Tree, Principal_Functor),
+  Principal_Functor \= (:-).
 
 parse(DCGBody, In, Out) :-
   phrase(term(Token_Tree), In, Out),

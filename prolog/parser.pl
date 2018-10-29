@@ -1,7 +1,5 @@
 :- module(lexer, []).
 
-:- use_module(library(clpfd)).
-
 is_priority(P) :-
   P #>= 0,
   P #=< 1201.
@@ -37,6 +35,17 @@ not_member(X, [Y|Ys]) :-
   X \= Y,
   not_member(X, Ys).
 
+principal_functor(term(_), indef).
+principal_functor(term(Spec, [_, op(Atom_Tree), _]), Atom) :-
+  member(Spec, [xfx, yfx, xfy]),
+  atom_tree(Atom, Atom_Tree).
+principal_functor(term(Spec, [_, op(Atom_Tree)]), Atom) :-
+  member(Spec, [yf, xf]),
+  atom_tree(Atom, Atom_Tree).
+principal_functor(term(Spec, [op(Atom_Tree), _]), Atom) :-
+  member(Spec, [fy, fx]),
+  atom_tree(Atom, Atom_Tree).
+
 atom_tree(Atom, Tree) :-
   remove_whitespaces(Tree, atom(Tree_Wo_Whitespace)),
   atom_tree_(Atom, Tree_Wo_Whitespace).
@@ -64,11 +73,28 @@ remove_whitespaces([X|Xs], [X_|Xs_]) :-
   remove_whitespaces(Xs, Xs_).
 
 
-:- discontiguous
-  ast:term/5,
-  ast:lterm/5.
+/* 6.2 PROLOG TEXT AND DATA */
+
+/* 6.2.1 Prolog text */
+
+%% TODO
+
+/* 6.2.1.2 Clauses */
+
+
+/*
+clause_term(Ops, clause_term([Term_Tree, End_Tree]), In, Out) :-
+  phrase(term(Prec, Ops, Term_Tree), In, Rest),
+  phrase(end(End_Tree), Rest, Out),
+  true.
+*/
+
+%% TODO
+
 
 /* 6.3 TERMS */
+
+:- discontiguous ast:term/5.
 
 /* 6.3.1 Atomic terms */
 
@@ -188,7 +214,7 @@ term(0, Ops) ==>
 /* 6.3.4.2 Operators as functors */
 
 % term = term, op, term (xfx)
-term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+term(P, Ops, term(xfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #< P
   , P_Term2 #< P
   , append(Term_Part, Out, In)
@@ -198,7 +224,7 @@ term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
   , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
 
 % term = term, op, term (yfx)
-term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+term(P, Ops, term(yfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #=< P
   , P_Term2 #< P
   , append(Term_Part, Out, In)
@@ -208,7 +234,7 @@ term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
   , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
 
 % term = term, op, term (xfy)
-term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+term(P, Ops, term(xfy, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #< P
   , P_Term2 #=< P
   , append(Term_Part, Out, In)
@@ -218,27 +244,27 @@ term(P, Ops, term([Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
   , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
 
 % term = term, op (yf)
-term(P, Ops, term([Term_Tree, Op_Tree]), In, Out) :-
+term(P, Ops, term(yf, [Term_Tree, Op_Tree]), In, Out) :-
     P_Term #=< P
   , append(Term_Part, [Op | Out], In)
   , phrase(op(P, yf, Ops, Op_Tree), [Op])
   , phrase(term(P_Term, Ops, Term_Tree), Term_Part).
 
 % term = term, op (xf)
-term(P, Ops, term([Term_Tree, Op_Tree]), In, Out) :-
+term(P, Ops, term(xf, [Term_Tree, Op_Tree]), In, Out) :-
     P_Term #< P
   , append(Term_Part, [Op | Out], In)
   , phrase(op(P, xf, Ops, Op_Tree), [Op])
   , phrase(term(P_Term, Ops, Term_Tree), Term_Part).
 
 % term = op, term (fy)
-term(P, Ops, term([Op_Tree, Term_Tree]), [Op|Rest], Out) :-
+term(P, Ops, term(fy, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
     P_Term #=< P
   , phrase(op(P, fy, Ops, Op_Tree), [Op])
   , phrase(term(P_Term, Ops, Term_Tree), Rest, Out).
 
 % term = op, term (fx)
-term(P, Ops, term([Op_Tree, Term_Tree]), [Op|Rest], Out) :-
+term(P, Ops, term(fx, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
     P_Term #< P
   , phrase(op(P, fx, Ops, Op_Tree), [Op])
   , phrase(term(P_Term, Ops, Term_Tree), Rest, Out).
