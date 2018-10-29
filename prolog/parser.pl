@@ -73,25 +73,6 @@ remove_whitespaces([X|Xs], [X_|Xs_]) :-
   remove_whitespaces(Xs, Xs_).
 
 
-/* 6.2 PROLOG TEXT AND DATA */
-
-/* 6.2.1 Prolog text */
-
-%% TODO
-
-/* 6.2.1.2 Clauses */
-
-
-/*
-clause_term(Ops, clause_term([Term_Tree, End_Tree]), In, Out) :-
-  phrase(term(Prec, Ops, Term_Tree), In, Rest),
-  phrase(end(End_Tree), Rest, Out),
-  true.
-*/
-
-%% TODO
-
-
 /* 6.3 TERMS */
 
 :- discontiguous ast:term/5.

@@ -2,8 +2,12 @@
     tree/3,
     tree/4,
     parse/2,
-    parse/3
+    parse/3,
+    prolog/3,
+    prolog/4
   ]).
+
+:- reexport(iso).
 
 :- use_module(library(clpfd)).
 
@@ -23,6 +27,28 @@ tree_from_file(Body, Filename, Tree) :-
   read_file_to_codes(Filename, Codes, []),
   maplist(char_code, Chars, Codes),
   tree(Body, Chars, Tree).
+
+
+prolog(Ops, Tree, In) :-
+  string_chars(In, Chars),
+  !,
+  prolog(Ops, Tree, Chars, []).
+
+prolog(Ops, Tree, In) :-
+  prolog(Ops, Tree, In, []).
+
+prolog(Ops, Tree, In, Out) :-
+  p_text(Ops, Tree, In, Out).
+
+p_text(_Ops, p_text([]), In, In).
+
+p_text(Ops, p_text([Clause_Tree|Rec]), In, Out) :-
+  parse(ast:clause_term(Ops, Clause_Tree), In, Rest),
+  p_text(Ops, p_text(Rec), Rest, Out).
+
+p_text(Ops, p_text([Directive_Tree|Rec]), In, Out) :-
+  parse(ast:directive_term(Ops, Directive_Tree), In, Rest),
+  p_text(Ops, p_text(Rec), Rest, Out).
 
 
 parse(DCGBody, In) :-
