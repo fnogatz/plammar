@@ -208,7 +208,7 @@ term(P, Ops, term(yfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
   , P_Term2 #< P
   , append(Term_Part, Out, In)
   , append(Term1, [Op|Term2], Term_Part)
-  , phrase(op(P, xfy, Ops, Op_Tree), [Op])
+  , phrase(op(P, yfx, Ops, Op_Tree), [Op])
   , phrase(term(P_Term1, Ops, Term1_Tree), Term1)
   , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
 
