@@ -6,9 +6,13 @@ A Prolog Grammar written in Prolog.
 
 First, you need [SWI-Prolog](http://www.swi-prolog.org/). See there for installation instructions.
 
-We make use of `(library(edcgs_expand))` which is part of the `edcgs` package. Make sure it is correctly installed, e.g., by calling `?- use_module(library(edcgs)).` in SWI-Prolog.
+We make use of the following packages:
+- [`library(edcgs)`](https://github.com/fnogatz/edcgs)
+- [`library(clitable)`](https://github.com/fnogatz/clitable)
 
-Only for development purposes the [`library(tap)`](https://github.com/mndrix/tap) is needed.
+Both can be installed by calling `?- pack_install(edcgs).` resp. `?- pack_install(clitable)` in SWI-Prolog.
+
+Only for development purposes the [`library(tap)`](https://github.com/mndrix/tap) is needed, which can be installed the same way.
 
 ### Pre-Compilation
 
