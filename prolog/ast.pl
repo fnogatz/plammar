@@ -37,8 +37,14 @@ prolog(Ops, Tree, In) :-
 prolog(Ops, Tree, In) :-
   prolog(Ops, Tree, In, []).
 
-prolog(Ops, Tree, In, Out) :-
-  p_text(Ops, Tree, In, Out).
+prolog(Ops, p_text(P_Text_List_With_Ws), In, Out) :-
+  p_text(Ops, p_text(P_Text_List), In, Rest),
+  % there might be trailing white space
+  phrase(?(ast:layout_text_sequence, Layout_Tree), Rest, Out),
+  (  Layout_Tree = []
+  -> P_Text_List_With_Ws = P_Text_List
+  ;  append(P_Text_List, Layout_Tree, P_Text_List_With_Ws) ).
+
 
 p_text(_Ops, p_text([]), In, In).
 
