@@ -43,41 +43,34 @@ prolog(Ops, Tree, In, Out) :-
 p_text(_Ops, p_text([]), In, In).
 
 p_text(Ops, p_text([Clause_Tree|Rec]), In, Out) :-
-  parse(ast:clause_term(Ops, Clause_Tree), In, Rest),
+  parse_prolog_term(Ops, Clause_Tree, In, Rest),
   p_text(Ops, p_text(Rec), Rest, Out).
 
-p_text(Ops, p_text([Directive_Tree|Rec]), In, Out) :-
-  parse(ast:directive_term(Ops, Directive_Tree), In, Rest),
-  p_text(Ops, p_text(Rec), Rest, Out).
+
+parse_prolog_term(Ops, Tree, In, Out) :-
+  append(First, ['.'|Out], In),
+  phrase(term(Token_Tree), First, FirstRest),
+  % FirstRest might be `?layout_text_sequence` (6.4)
+  phrase(?(ast:layout_text_sequence, Layout_Tree), FirstRest, []),
+  Token_Tree = term(Tokens),
+  phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
+  % Check whether the principal functor is (:-)/1 or not
+  principal_functor(Term_Tree, Principal_Functor),
+  (  Principal_Functor = (:-)
+  -> Tree_Name = directive_term
+  ;  Tree_Name = clause_term ),
+  % Build resulting parse tree
+  End_Tree_List = [end_token(end_char('.'))],
+  (  Layout_Tree = []
+  -> End_Tree_With_Layout = end(End_Tree_List)
+  ;  append(Layout_Tree, End_Tree_List, End_Tree_List_With_Layout),
+     End_Tree_With_Layout = end(End_Tree_List_With_Layout) ),
+  Tree =.. [Tree_Name, [Term_Tree, End_Tree_With_Layout]].
 
 
 parse(DCGBody, In) :-
   string_chars(In, Chars),
   parse(DCGBody, Chars, []).
-
-parse(_Module:directive_term(Ops, Tree), In, Out) :-
-  !,
-  phrase(term(Token_Tree), In, Rest),
-  Token_Tree = term(Tokens),
-  phrase(end(End_Tree), Rest, Out),
-  phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
-  Tree = directive_term([Term_Tree, End_Tree]),
-  % Condition:
-  %   The principal functor is (:-)/1
-  principal_functor(Term_Tree, Principal_Functor),
-  Principal_Functor = (:-).
-
-parse(_Module:clause_term(Ops, Tree), In, Out) :-
-  !,
-  phrase(term(Token_Tree), In, Rest),
-  Token_Tree = term(Tokens),
-  phrase(end(End_Tree), Rest, Out),
-  phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
-  Tree = clause_term([Term_Tree, End_Tree]),
-  % Condition:
-  %   The principal functor is not (:-)/1
-  principal_functor(Term_Tree, Principal_Functor),
-  Principal_Functor \= (:-).
 
 parse(DCGBody, In, Out) :-
   phrase(term(Token_Tree), In, Out),
