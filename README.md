@@ -42,7 +42,7 @@ After the pre-compilation step mentioned before, the created executable can be c
 
 ## Usage with SWI-Prolog
 
-Call the `ast.pl` script as follows:
+Load the `ast.pl` script as follows:
 
 ```sh
 > swipl -s prolog/ast.pl
@@ -96,4 +96,3 @@ P1 in ..(0, 1201)
 - `- 1` is currently accepted
 - Extend testing framework:
   - Test for valid and invalid terms of Table 5 on ISO Standard (p. 17)
-- Extend tool chain, e.g., present inferred operators as table

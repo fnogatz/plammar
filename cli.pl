@@ -47,6 +47,7 @@ opts_spec([
     opt(ops),
     type(term),
     longflags([ ops ]),
+    default([]),
     help([
       'pre-defined operators'
     ])
@@ -103,6 +104,10 @@ success :-
   halt(0).
 
 success(Opts, Result) :-
+  write_result(Opts, Result),
+  halt(0).
+
+write_result(Opts, Result) :-
   option(pretty(Pretty), Opts),
   (
     Pretty = true,
@@ -113,8 +118,7 @@ success(Opts, Result) :-
   ;
     Pretty = false,
     writeln(Result)
-  ),
-  halt(0).
+  ).
 
 collect_stdin(Chars) :-
   repeat,
@@ -132,6 +136,24 @@ process(Opts, Chars) :-
   option(dcg(DCGBody), Opts),
   var(DCGBody),
 
+  option(ops(User_Ops), Opts),
+  option(nots(Nots), Opts),
+
+  iso_operators(ISO_Ops),
+  append(ISO_Ops, User_Ops, Ops),
+
+  !,
+  ( ast:prolog(ops(Ops, Nots), AST, Chars),
+    print_result(Opts, 0, Ops, Nots, AST, Chars),
+    false
+  ; halt(0) ).
+
+
+/*
+process(Opts, Chars) :-
+  option(dcg(DCGBody), Opts),
+  var(DCGBody),
+
   option(ops(Ops), Opts),
   option(nots(Nots), Opts),
 
@@ -139,26 +161,46 @@ process(Opts, Chars) :-
     ast:parse(term(Prec, ops(Ops,Nots), AST), Chars),
     print_result(Prec, Ops, Nots, AST, Chars)
   ).
+*/
 
-print_result(Prec, Ops, Nots, _AST, _Chars) :-
+print_result(Opts, _Prec, Ops, Nots, AST, _Chars) :-
   writeln('--------------------------------'), nl,
-  ansi_format([bold,fg(blue)], 'Precedence: ', []),
-  precedence_output(Prec, Prec_, _),
-  ansi_format([], '~w', [Prec_]),
-  nl, nl,
+%  ansi_format([bold,fg(blue)], 'Precedence: ', []),
+%  precedence_output(Prec, Prec_, _),
+%  ansi_format([], '~w', [Prec_]),
+%  nl, nl,
   ansi_format([bold, fg(green)], 'Operators:~n', []),
-  print_operators(Ops),
+  print_operators(Opts, Ops),
   nl,
   ansi_format([bold, fg(red)], 'Not Operators:~n', []),
-  print_operators(Nots),
-  nl.
+  print_operators(Opts, Nots),
+  nl,
+  ansi_format([bold, fg(blue)], 'Syntax Tree:~n', []),
+  write_result(Opts, AST),
+  nl,
+  !.
 
-print_operators([]) :-
+print_operators(_Opts, []) :-
   !,
   writeln('(none)').
-print_operators(Ops) :-
-  maplist(op_entry, Ops, Op_List),
+print_operators(Opts, Ops) :-
+  maplist_op_entry(Opts, Ops, Op_List),
   clitable(Op_List, [head(['Precedence', 'Type', 'Name'])]).
+
+maplist_op_entry(_Opts, Xs, []) :-
+  var(Xs),
+  !.
+maplist_op_entry(_Opts, [], []) :- !.
+maplist_op_entry(Opts, [X|Xs], Ys) :-
+  % do not show iso_operators
+  X = op(Prec, Spec, Name),
+  iso_operator(Prec, Spec, Name),
+  !,
+  maplist_op_entry(Opts, Xs, Ys).
+maplist_op_entry(Opts, [X|Xs], [Y|Ys]) :-
+  op_entry(X, Y),
+  maplist_op_entry(Opts, Xs, Ys).
+
 
 op_entry(op(Prec, Spec, Name), [Prec_, Spec_, Name_]) :-
   ( var(Name) -> Name_ = '*' ; Name_ = Name ),
@@ -176,4 +218,3 @@ precedence_output(Prec, Res, Name) :-
   format(atom(Res), '~d =< ~w =< ~d', [From, Name_, To]).
 
 precedence_output(_Prec, '*', _).
-
