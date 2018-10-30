@@ -5,20 +5,29 @@ is_priority(P) :-
   P #=< 1201.
 
 is_operator(Op, Table) :-
-  Op = op(Prec, Spec, Atom),
-  atom_concat(' ', Without_Space, Atom),
+  Op = op(Prec, Spec, Name),
+  atom_concat(' ', Without_Space, Name),
   !,
   is_operator(op(Prec, Spec, Without_Space), Table).
 
 is_operator(Op, ops(Ops, Nots)) :-
-  Op = op(Prec,_,_),
+  Op = op(Prec, Spec, Name),
   not_member(Op, Nots),
   memberchk(Op, Ops),
-  is_priority(Prec).
+  is_priority(Prec),
+  %% 6.3.4.3
+  %%   "There shall not be two Operators with the same class and name."
+  spec_class(Spec, Class),
+  \+((
+    Op2 = op(_, Spec2, Name),   % another operator
+    memberchk(Op2, Ops),        % with same name
+    spec_class(Spec2, Class),   % with same class
+    Spec \= Spec2               % but different spec
+  )).
 
 not_operator(Op, Table) :-
-  Op = op(Prec, Spec, Atom),
-  atom_concat(' ', Without_Space, Atom),
+  Op = op(Prec, Spec, Name),
+  atom_concat(' ', Without_Space, Name),
   !,
   not_operator(op(Prec, Spec, Without_Space), Table).
 
@@ -43,6 +52,14 @@ principal_functor(term(Spec, [_, op(Atom_Tree)]), Atom) :-
 principal_functor(term(Spec, [op(Atom_Tree), _]), Atom) :-
   member(Spec, [fy, fx]),
   atom_tree(Atom, Atom_Tree).
+
+spec_class( fx, prefix).
+spec_class( fy, prefix).
+spec_class(xfx, infix).
+spec_class(xfy, infix).
+spec_class(yfx, infix).
+spec_class(xf , postfix).
+spec_class(yf , postfix).
 
 atom_tree(Atom, Tree) :-
   remove_whitespaces(Tree, atom(Tree_Wo_Whitespace)),
