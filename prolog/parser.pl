@@ -4,28 +4,26 @@ is_priority(P) :-
   P #>= 0,
   P #=< 1201.
 
-is_operator(Atom, ops(Table, Nots)) :-
-  is_operator(Atom, ops(Table, Nots), _).
-
-is_operator(Atom, Ops, Op) :-
+is_operator(Op, Table) :-
+  Op = op(Prec, Spec, Atom),
   atom_concat(' ', Without_Space, Atom),
   !,
-  is_operator(Without_Space, Ops, Op).
+  is_operator(op(Prec, Spec, Without_Space), Table).
 
-is_operator(Atom, ops(Table, Nots), Op) :-
-  Op = op(P, _, Atom),
+is_operator(Op, ops(Ops, Nots)) :-
+  Op = op(Prec,_,_),
   not_member(Op, Nots),
-  memberchk(Op, Table),
-  is_priority(P).
+  memberchk(Op, Ops),
+  is_priority(Prec).
 
-not_operator(Atom, Ops) :-
+not_operator(Op, Table) :-
+  Op = op(Prec, Spec, Atom),
   atom_concat(' ', Without_Space, Atom),
   !,
-  not_operator(Without_Space, Ops).
+  not_operator(op(Prec, Spec, Without_Space), Table).
 
-not_operator(Atom, ops(Table, Nots)) :-
-  Op = op(_, _, Atom),
-  not_member(Op, Table),
+not_operator(Op, ops(Ops, Nots)) :-
+  not_member(Op, Ops),
   memberchk(Op, Nots).
 
 not_member(_, Ys) :-
@@ -123,12 +121,12 @@ is_whitespace(A) :-
 term(0, Ops, term(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
-  not_operator(Atom, Ops).
+  not_operator(op(_,_,Atom), Ops).
 
 term(1201, Ops, term(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
-  is_operator(Atom, Ops).
+  is_operator(op(_,_,Atom), Ops).
 
 atom ==>
     [ name(_) ].
@@ -167,7 +165,7 @@ arg_list(Ops) ==>
 arg(Ops, arg(Atom_Tree), In, Out) :-
     phrase(atom(Atom_Tree), In, Out)
   , atom_tree(Atom, Atom_Tree)
-  , is_operator(Atom, Ops).
+  , is_operator(op(_,_,Atom), Ops).
 
 arg(Ops, arg(Term_Tree), In, Out) :-
     phrase(term(P, Ops, Term_Tree), In, Out)
@@ -255,8 +253,7 @@ term(P, Ops, term(fx, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
 op(P, Spec, Ops, op(Atom_Tree), In, Out) :-
     phrase(atom(Atom_Tree), In, Out)
   , atom_tree(Atom, Atom_Tree)
-  , is_operator(Atom, Ops, Op)
-  , Op = op(P, Spec, _).
+  , is_operator(op(P, Spec, Atom), Ops).
 
 op(1000, xfy, _Ops) ==>
     [ comma(_) ].
