@@ -65,14 +65,14 @@ reply_error :-
 
 reply_by(Request, Tree) :-
    member(accept(Accept), Request),
-   member(media(text/'x-prolog',_,_,_), Accept),
-   !,
-   reply_tree(prolog, Tree).
-reply_by(Request, Tree) :-
-   member(accept(Accept), Request),
    member(media(application/json,_,_,_), Accept),
    !,
    reply_tree(json, Tree).
+reply_by(Request, Tree) :-
+   member(accept(Accept), Request),
+   member(media(text/'x-prolog',_,_,_), Accept),
+   !,
+   reply_tree(prolog, Tree).
 
 reply_tree(json, Tree) :-
    tree_to_dict(Tree, Dict),

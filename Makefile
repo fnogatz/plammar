@@ -42,4 +42,4 @@ cli:
 	@$(SWIPL) -g main -o $(CLI) -c cli.pl && chmod +x $(CLI)
 
 server:
-	@$(SWIPL) -s server/server.pl --quiet -g "server('127.0.0.1':8081)"
+	@$(SWIPL) -s server/server.pl --quiet -g "server('0.0.0.0':8081)"
