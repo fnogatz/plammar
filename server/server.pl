@@ -1,5 +1,6 @@
 :- use_module('prolog/ast').
 
+:- use_module(library(http/http_unix_daemon)).
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
 :- use_module(library(http/http_json)).
@@ -9,12 +10,6 @@
 :- set_setting(http:cors, [*]).
 
 :- set_prolog_flag(report_error,true).
-
-% Use threads to prevent the global save of all the
-%   dynamic predicates generated for the syntaxtree.
-:- use_module(library(thread_pool)).
-:- thread_pool_create(for_fresh_variables, 1000,
-   [ trail(100), global(100), local(100), c_stack(100), backlog(infinite) ]).
 
 :- http_handler(/, handle, [spawn(for_fresh_variables)]).
 

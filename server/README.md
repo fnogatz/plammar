@@ -7,7 +7,7 @@ Using the `server.pl` it is possible to create an HTTP server listening for POST
 The HTTP server can be started using the following command, which creates a local HTTP server on port 8081:
 
 ```bash
-swipl -s server.pl --quiet -g "server('127.0.0.1':8081)"
+swipl server/server.pl --port=8081
 ```
 
 The project's Makefile also provides a `make server` command.
