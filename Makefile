@@ -1,4 +1,4 @@
-.PHONY: all test clean
+.PHONY: all test clean server
 
 version := $(shell swipl -q -s pack -g 'version(V),writeln(V)' -t halt)
 
@@ -40,3 +40,6 @@ test.cli:
 
 cli:
 	@$(SWIPL) -g main -o $(CLI) -c cli.pl && chmod +x $(CLI)
+
+server:
+	@$(SWIPL) -s server/server.pl --quiet -g "server('127.0.0.1':8081)"
