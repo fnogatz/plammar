@@ -1,4 +1,4 @@
-:- module(lexer, []).
+:- module(parser, []).
 
 is_priority(P) :-
   P #>= 0,
