@@ -96,19 +96,19 @@ remove_whitespaces([X|Xs], [X_|Xs_]) :-
 
 /* 6.3.1.1 Numbers */
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     [ integer(_) ].
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     [ float_number(_) ].
 
 /* 6.3.1.2 Negative numbers */
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     negative_sign_name
   , [ integer(_) ].
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     negative_sign_name
   , [ float_number(_) ].
 
@@ -145,34 +145,34 @@ term(1201, Ops, term(Atom_Tree), In, Out) :-
   atom_tree(Atom, Atom_Tree),
   is_operator(op(_,_,Atom), Ops).
 
-atom ==>
+atom -->
     [ name(_) ].
 
-atom ==>
+atom -->
     [ open_list(_) ]
   , [ close_list(_) ].
 
-atom ==>
+atom -->
     [ open_curly(_) ]
   , [ close_curly(_) ].
 
 /* 6.3.2 Variables */
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     [ variable(_) ].
 
 /* 6.3.3 Compund terms - functional notation */
 
-term(0, Ops) ==>
+term(0, Ops) -->
     atom
   , [ open_ct(_) ]
   , arg_list(Ops)
   , [ close_(_) ].
 
-arg_list(Ops) ==>
+arg_list(Ops) -->
     arg(Ops).
 
-arg_list(Ops) ==>
+arg_list(Ops) -->
     arg(Ops)
   , [ comma(_) ]
   , arg_list(Ops).
@@ -197,12 +197,12 @@ arg(Ops, arg(Term_Tree), In, Out) :-
 %% `term` and `lterm` to avoid trivial
 %% non-termination because of left-recursion
 
-term(0, Ops) ==>
+term(0, Ops) -->
     [ open_(_) ]
   , term(1201, Ops)
   , [ close_(_) ].
 
-term(0, Ops) ==>
+term(0, Ops) -->
     [ open_ct(_) ]
   , term(1201, Ops)
   , [ close_(_) ].
@@ -272,5 +272,5 @@ op(P, Spec, Ops, op(Atom_Tree), In, Out) :-
   , atom_tree(Atom, Atom_Tree)
   , is_operator(op(P, Spec, Atom), Ops).
 
-op(1000, xfy, _Ops) ==>
+op(1000, xfy, _Ops) -->
     [ comma(_) ].

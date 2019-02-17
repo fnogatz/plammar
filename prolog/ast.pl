@@ -96,7 +96,7 @@ token(Tree, In, Rest) :-
     append(Some_More_Elements, Shorter_Rest, Rest)
   )).
 
-:- use_module(library(edcgs_expand)).
+:- use_module(library(dcg4pt/expand)).
 
 /*
   *(DCGBody, Tree, In, Out) <-

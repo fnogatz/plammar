@@ -47,7 +47,7 @@ not_member(X, [Y|Ys]) :-
 
 %% prolog//0 is the entry point for the library's
 %%   interfaces.
-prolog ==>
+prolog -->
     read_term_.
 
 
@@ -55,40 +55,40 @@ prolog ==>
 
 /* 6.2.1 Prolog text */
 
-prolog_text ==>
+prolog_text -->
     p_text.
 
-p_text ==>
+p_text -->
     directive_term
   , p_text.
 
-p_text ==>
+p_text -->
     clause_term
   , p_text.
 
-p_text ==>
+p_text -->
     [].
 
 /* 6.2.1.1 Directives */
 
-directive_term ==>
+directive_term -->
     term
   , end.
 %% TODO: Condition "The principal functor of dt is (:-)/1"
 
-directive ==>
+directive -->
     directive_term.
 
 /* 6.2.1.2 Clauses */
 
-clause_term ==>
+clause_term -->
     term
   , end.
 %% TODO: Condition "The principal functor of c is not (:-)/1"
 
 /* 6.2.2 Prolog data */
 
-read_term_ ==>
+read_term_ -->
     term
   , end.
 
@@ -99,22 +99,22 @@ read_term_ ==>
 
 /* 6.3.1.1 Numbers */
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     integer
   , !.
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     float_number
   , !.
 
 /* 6.3.1.2 Negative numbers */
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     negative_sign_char
   , integer
   , !.
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     negative_sign_char
   , float_number
   , !.
@@ -138,35 +138,35 @@ term(1201, Ops, term(Atom_Tree), In, Out) :-
   , atom_chars(Atom, In)
   , is_operator(Atom, Ops).
 */
-atom ==>
+atom -->
     name.
 
-atom ==>
+atom -->
     open_list
   , close_list.
 
-atom ==>
+atom -->
     open_curly
   , close_curly.
 
 /* 6.3.2 Variables */
 
-term(0, _Ops) ==>
+term(0, _Ops) -->
     variable
   , !.
 
 /* 6.3.3 Compund terms - functional notation */
 /*
-term(0, Ops) ==>
+term(0, Ops) -->
     atom
   , open_ct
   , arg_list(Ops)
   , close_.
 */
-arg_list(Ops) ==>
+arg_list(Ops) -->
     arg_(Ops).
 
-arg_list(Ops) ==>
+arg_list(Ops) -->
     arg_(Ops)
   , comma
   , arg_list.
@@ -219,7 +219,7 @@ writeln(ok-2),
   , term(P_Tree, Ops, Term_Tree, In, Out).
 
 % term = open, term, close
-term(0, Ops) ==>
+term(0, Ops) -->
     open_
   , { is_priority(P) }
   , term(P, Ops)
@@ -227,7 +227,7 @@ term(0, Ops) ==>
   , !.
 
 % term = open ct, term, close
-term(0, Ops) ==>
+term(0, Ops) -->
     open_ct
   , { is_priority(P) }
   , term(P, Ops)
@@ -281,6 +281,6 @@ op(P, Spec, Ops, op(Atom_Tree), In, Out) :-
   , is_operator(Atom, Ops, Op)
   , Op = op(P, Spec, _).
 
-op(1000, xfy, _Ops) ==>
+op(1000, xfy, _Ops) -->
     comma.
 
