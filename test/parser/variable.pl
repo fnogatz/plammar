@@ -1,4 +1,4 @@
-named_variable('Var'):
+named_variable:
   named_variable(
     [ capital_letter_char('V'),
       alphanumeric_char(
@@ -9,23 +9,22 @@ named_variable('Var'):
         alpha_char(
           letter_char(
             small_letter_char(r))))
-    ]).
+    ])
+  <=> "Var".
 
-named_variable('smallletter'):
-  fail.
+named_variable! "smallletter".
 
-named_variable('Var_with_underscores'):
-  true.
+named_variable: "Var_with_underscores".
 
-named_variable('Var_with_numbers_1'):
-  true.
+named_variable: "Var_with_numbers_1".
 
-anonymous_variable('_'):
+anonymous_variable:
   anonymous_variable(
       variable_indicator_char(
-        underscore_char('_'))).
+        underscore_char('_')))
+  <=> "_".
 
-named_variable('_var'):
+named_variable:
   named_variable(
     [ variable_indicator_char(
         underscore_char('_')),
@@ -41,13 +40,11 @@ named_variable('_var'):
         alpha_char(
           letter_char(
             small_letter_char(r))))
-    ]).
+    ])
+  <=> "_var".
 
-variable('_var'):
-  true.
+variable: "_var".
 
-variable('V'):
-  true.
+variable: "V".
 
-variable('Var'):
-  true.
+variable: "Var".

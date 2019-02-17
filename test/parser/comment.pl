@@ -1,14 +1,11 @@
-single_line_comment('% c\n'):
-  true.
+single_line_comment: "% c\n".
 
 % missing ending newline
-single_line_comment('% c'):
-  false.
+single_line_comment! "% c".
 
-single_line_comment('% a % b\n'):
-  true.
+single_line_comment: "% a % b\n".
 
-bracketed_comment('/* cs */'):
+bracketed_comment:
   bracketed_comment(
     [ comment_open(
         [ comment_1_char(/),
@@ -35,8 +32,8 @@ bracketed_comment('/* cs */'):
       comment_close(
         [ comment_2_char(*),
           comment_1_char(/)
-        ]) ]).
+        ]) ])
+  <=> "/* cs */".
 
 % multiline comment
-bracketed_comment('/* \n ...newlines... \n */'):
-  true.
+bracketed_comment: "/* \n ...newlines... \n */".

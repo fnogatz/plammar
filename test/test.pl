@@ -1,13 +1,17 @@
 :- asserta(user:file_search_path(library, prolog)).
 :- use_module(library(ast)).
 
+:- op(800, xfx, <=>).
+:- op(800, xfx, !).
+
 /* Dynamic test generation */
 
-:- dynamic test_definition/3.
+:- dynamic test_definition/4.
 :- dynamic path/2.
 
-term_expansion((Input: Result), test_definition(Body, In, Result)) :-
-  Input =.. [Body, In].
+term_expansion(DCGBody: PT <=> In, test_definition(pos, DCGBody, In, PT)).
+term_expansion(DCGBody: In, test_definition(pos, DCGBody, In, _)).
+term_expansion(DCGBody! In, test_definition(neg, DCGBody, In, _)).
 
 term_expansion(run_tests, Tests) :-
   set_test_paths,
@@ -24,12 +28,8 @@ term_expansion(run_tests, Tests) :-
     Nested_Test_Definitions
   ),
   flatten(Nested_Test_Definitions, Test_Definitions),
-  maplist(define_tap_test, Test_Definitions, Tests),
-  maplist(get_tap_test_name, Test_Definitions, Tap_Test_Names),
-  forall(
-    member(Tap_Test_Name, Tap_Test_Names),
-    tap:register_test(Tap_Test_Name)
-  ).
+  maplist(define_tap_tests, Test_Definitions, Testss),
+  flatten(Testss, Tests).
 
 set_test_paths :-
   working_directory(CWD, CWD),
@@ -43,19 +43,64 @@ get_test_definitions(Identifier, Test_Filename, Sub_Tests) :-
   absolute_file_name(Test_Filename, Absolute_Filename, [relative_to(Path)]),
   load_files(Absolute_Filename, [module(Identifier)]),
   findall(
-    test_definition(Absolute_Filename, Body, In, Result),
-    retract(test_definition(Body, In, Result)),
+    test_definition(Absolute_Filename, Type, Body, In, Result),
+    retract(test_definition(Type, Body, In, Result)),
     Sub_Tests
   ).
 
-define_tap_test(Test_Definition, Tap_Test) :-
-  get_tap_test_name(Test_Definition, Tap_Test_Name),
-  get_tap_test_run(Test_Definition, Test_Run),
-  Test = (
-    once(Test_Run),
-    !
+heads(Symbol, DCGBody, In, Head1, Head2) :-
+  In = [First|_], integer(First), !,
+  format(atom(Head1), '~w ~w> "~s"', [DCGBody, Symbol, In]),
+  format(atom(Head2), '~w ~w< "~s"', [DCGBody, Symbol, In]).
+heads(Symbol, DCGBody, In, Head1, Head2) :-
+  format(atom(Head1), '~w ~w> ~p', [DCGBody, Symbol, In]),
+  format(atom(Head2), '~w ~w< ~p', [DCGBody, Symbol, In]).
+
+% succeeding ("positive") test
+define_tap_tests(Test_Definition, Tests) :-
+  Test_Definition = test_definition(_Filename, pos, DCGBody, In, PT),
+  heads('', DCGBody, In, Head1, Head2),
+  % build first test: from input to parse tree
+  string_chars(In, Chars),
+  Test1 = (
+    Head1 :-
+      ast:tree(DCGBody, Chars, PT1), !,
+      PT1 = PT  % check for correct parse tree
   ),
-  Tap_Test = (Tap_Test_Name :- Test).
+  tap:register_test(Head1),
+  % build second test: from parse tree to input
+  (nonvar(PT) ->
+    Test2 = (
+      Head2 :-
+        ast:tree(DCGBody, In2, PT), !,
+        In2 = Chars
+    ),
+    tap:register_test(Head2),
+    Tests = [Test1, Test2]
+  ; Tests = [Test1]
+  ).
+
+% failing ("negative") test
+define_tap_tests(Test_Definition, Tests) :-
+  Test_Definition = test_definition(_Filename, neg, DCGBody, In, PT),
+  heads('!', DCGBody, In, Head1, Head2),
+  % build first test: from input to parse tree
+  string_chars(In, Chars),
+  Test1 = (
+    Head1 :-
+      \+ ast:tree(DCGBody, Chars, _PT1), !
+  ),
+  tap:register_test(Head1),
+  % build second test: from parse tree to input
+  (nonvar(PT) ->
+    Test2 = (
+      Head2 :-
+        \+ ast:tree(DCGBody, _In2, PT), !
+    ),
+    tap:register_test(Head2),
+    Tests = [Test1, Test2]
+  ; Tests = [Test1]
+  ).
 
 remove(_, [], []).
 remove(Elem, [Elem|Xs], Rs) :-
@@ -76,41 +121,6 @@ canonical_test_input(In, Canonical) :-
   string_chars(In, Chars),
   replace('\n', ['\\', 'n'], Chars, Chars_N),
   string_chars(Canonical, Chars_N).
-
-get_tap_test_name(test_definition(_Filename, Body, In, Result), Name) :-
-  is_failing(Result),
-  canonical_test_input(In, In_C),
-  format(atom(Name), '[~w -] ~w', [Body, In_C]).
-
-get_tap_test_name(test_definition(_Filename, Body, In, Result), Name) :-
-  \+is_failing(Result),
-  canonical_test_input(In, In_C),
-  format(atom(Name), '[~w +] ~w', [Body, In_C]).
-
-get_tap_test_run(test_definition(_Filename, Body, In, Result), Run) :-
-  is_failing(Result),
-  % test must fail
-  Run = (
-    string_chars(In, Chars),
-    !,
-    \+ast:tree(Body, Chars, _)
-  ).
-
-get_tap_test_run(test_definition(_Filename, Body, In, true), Run) :-
-  % test must succeed regardless the actual result
-  Run = (
-    string_chars(In, Chars),
-    ast:tree(Body, Chars, _)
-  ).
-
-get_tap_test_run(test_definition(_Filename, Body, In, Result), Run) :-
-  \+is_failing(Result),
-  Result \= true,
-  % test must succeed with given result
-  Run = (
-    string_chars(In, Chars),
-    ast:tree(Body, Chars, Result)
-  ).
 
 is_failing(fail).
 is_failing(false).
