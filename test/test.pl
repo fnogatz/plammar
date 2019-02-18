@@ -12,7 +12,7 @@ term_expansion(DCGBody: PT <=> In, test_definition(pos, DCGBody, In, PT)).
 term_expansion(DCGBody: In, test_definition(pos, DCGBody, In, _)).
 term_expansion(DCGBody! In, test_definition(neg, DCGBody, In, _)).
 
-term_expansion(run_tests, Tests) :-
+term_expansion(run(parser), Tests) :-
   set_test_paths,
   path(test/parser, TestParser_Path),
   directory_files(TestParser_Path, Test_Filenames),
@@ -130,7 +130,7 @@ is_failing(no).
 % define tests below
 :- use_module(library(tap)).
 
-run_tests. % replaced via term expansion
+run(parser). % replaced via term expansion
 
 '".." is just a single token' :-
   findall(

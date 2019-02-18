@@ -4,18 +4,23 @@
     parse/2,
     parse/3,
     prolog/3,
-    prolog/4
+    prolog/4,
+    prolog_tokens/2
   ]).
 
 :- reexport(iso).
+:- use_module(library(plammar/util)).
 
 :- use_module(library(clpfd)).
 
-warning(Format, Arguments) :-
-  print_message(warning, format(Format, Arguments)).
+prolog_tokens(string(String), Tokens) :-
+  !,
+  string_chars(String, Chars),
+  phrase(plammar:term(term(Tokens)), Chars, []).
 
-warning(Msg) :-
-  warning(Msg, []).
+prolog_tokens(_, _) :-
+  !,
+  warning('Use one of input formats string').
 
 pp(A) :-
   print_term(A, [indent_arguments(0)]).
