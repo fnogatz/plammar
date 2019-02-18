@@ -125,30 +125,6 @@ define_tap_tests(Test_Definition, Tests) :-
   ; Tests = [Test1]
   ).
 
-remove(_, [], []).
-remove(Elem, [Elem|Xs], Rs) :-
-  remove(Elem, Xs, Rs).
-remove(Elem, [X|Xs], [X|Rs]) :-
-  Elem \= X,
-  remove(Elem, Xs, Rs).
-
-replace(_, _, [], []).
-replace(Elem, Subst, [Elem|Xs], Res) :-
-  replace(Elem, Subst, Xs, Rs),
-  append(Subst, Rs, Res).
-replace(Elem, Subst, [X|Xs], [X|Rs]) :-
-  Elem \= X,
-  replace(Elem, Subst, Xs, Rs).
-
-canonical_test_input(In, Canonical) :-
-  string_chars(In, Chars),
-  replace('\n', ['\\', 'n'], Chars, Chars_N),
-  string_chars(Canonical, Chars_N).
-
-is_failing(fail).
-is_failing(false).
-is_failing(no).
-
 /* End of dynamic test generation */
 
 % define tests below
