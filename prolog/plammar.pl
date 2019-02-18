@@ -146,5 +146,5 @@ token(Tree, In, Rest) :-
 ?(DCGBody, Tree, In, Out) :-
   sequence('?', DCGBody, Tree, In, Out).
 
-:- load_files('lexer.pl', [module(plammar)]).
+:- load_files('plammar/dcg_token.pl', [module(plammar)]).
 :- load_files('parser.pl', [module(plammar)]).
