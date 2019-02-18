@@ -11,6 +11,12 @@
 
 :- use_module(library(clpfd)).
 
+warning(Format, Arguments) :-
+  print_message(warning, format(Format, Arguments)).
+
+warning(Msg) :-
+  warning(Msg, []).
+
 pp(A) :-
   print_term(A, [indent_arguments(0)]).
 
@@ -89,12 +95,20 @@ parse(DCGBody, In, Out) :-
 %%   characters forms a valid token as specified by the above
 %%   Syntax." (6.4)
 token(Tree, In, Rest) :-
+  \+ var(In), !,
   token_(token_(Tree), In, Rest),
   Some_More_Elements = [_|_], % at least one element
   \+((
     token_(_, In, Shorter_Rest),
     append(Some_More_Elements, Shorter_Rest, Rest)
   )).
+token(Tree, In, Rest) :-
+  \+ var(Tree), !,
+  token_(token_(Tree), In, Rest).
+token(Tree, In, Rest) :-
+  var(Tree), var(In), !,
+  warning('Parse tree AND input unbound; this might not work as expected!'),
+  token_(token_(Tree), In, Rest).
 
 :- use_module(library(dcg4pt/expand)).
 

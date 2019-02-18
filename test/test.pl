@@ -131,5 +131,14 @@ is_failing(no).
 % define tests below
 :- use_module(library(tap)).
 
- % replaced via term expansion
-run_tests.
+run_tests. % replaced via term expansion
+
+'".." is just a single token' :-
+  findall(
+    Tokens,
+    phrase(ast:term(term(Tokens)), ['.','.'], []),
+    Solutions
+  ),
+  length(Solutions, 1),
+  [FirstSolution] = Solutions,
+  [_SingleToken] = FirstSolution.
