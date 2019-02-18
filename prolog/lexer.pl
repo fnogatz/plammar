@@ -191,24 +191,24 @@ single_quoted_character -->         % 6.4.2.1
 single_quoted_character -->         % 6.4.2.1
     back_quote_char.                % 6.5.5
 
-double_quoted_char -->              % 6.4.2.1
+double_quoted_character -->         % 6.4.2.1
     non_quote_char.                 % 6.4.2.1
-double_quoted_char -->              % 6.4.2.1
+double_quoted_character -->         % 6.4.2.1
     single_quote_char.              % 6.5.5
-double_quoted_char -->              % 6.4.2.1
+double_quoted_character -->         % 6.4.2.1
     double_quote_char               % 6.5.5
   , double_quote_char.              % 6.5.5
-double_quoted_char -->              % 6.4.2.1
+double_quoted_character -->         % 6.4.2.1
     back_quote_char.                % 6.5.5
 
 
-back_quoted_char -->                % 6.4.2.1
+back_quoted_character -->           % 6.4.2.1
     non_quote_char.                 % 6.4.2.1
-back_quoted_char -->                % 6.4.2.1
+back_quoted_character -->           % 6.4.2.1
     single_quote_char.              % 6.5.5
-back_quoted_char -->                % 6.4.2.1
+back_quoted_character -->           % 6.4.2.1
     double_quote_char.              % 6.5.5
-back_quoted_char -->                % 6.4.2.1
+back_quoted_character -->           % 6.4.2.1
     back_quote_char                 % 6.5.5
   , back_quote_char.                % 6.5.5
 
