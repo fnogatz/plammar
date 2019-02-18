@@ -3,6 +3,8 @@
 :- op(800, xfx, <=>).
 :- op(800, xfx, !).
 
+:- load_files('predicates/prolog_tokens.pl').
+
 /* Dynamic test generation */
 
 :- dynamic test_definition/4.
@@ -12,7 +14,16 @@ term_expansion(DCGBody: PT <=> In, test_definition(pos, DCGBody, In, PT)).
 term_expansion(DCGBody: In, test_definition(pos, DCGBody, In, _)).
 term_expansion(DCGBody! In, test_definition(neg, DCGBody, In, _)).
 
-term_expansion(run(parser), Tests) :-
+
+term_expansion(run(prolog_tokens/2), Tests) :-
+   findall(
+      eq(A,B),
+      '<=>'(A,B),
+      Eqs
+   ),
+   maplist(define_predicate_test(prolog_tokens), Eqs, Tests).
+
+term_expansion(run(tokenizer), Tests) :-
   set_test_paths,
   path(test/parser, TestParser_Path),
   directory_files(TestParser_Path, Test_Filenames),
@@ -29,6 +40,19 @@ term_expansion(run(parser), Tests) :-
   flatten(Nested_Test_Definitions, Test_Definitions),
   maplist(define_tap_tests, Test_Definitions, Testss),
   flatten(Testss, Tests).
+
+define_predicate_test(Predicate, eq(A,B), Test) :-
+  format(atom(Head), '~w: ~w', [Predicate, A]),
+  Test = (
+    Head :-
+      call(Predicate, A, B1),
+      B1 = B,
+      !,
+      call(Predicate, A1, B),
+      A1 = A,
+      !
+  ),
+  tap:register_test(Head).
 
 set_test_paths :-
   working_directory(CWD, CWD),
@@ -130,7 +154,7 @@ is_failing(no).
 % define tests below
 :- use_module(library(tap)).
 
-run(parser). % replaced via term expansion
+run(tokenizer). % replaced via term expansion
 
 '".." is just a single token' :-
   findall(
@@ -141,3 +165,5 @@ run(parser). % replaced via term expansion
   length(Solutions, 1),
   [FirstSolution] = Solutions,
   [_SingleToken] = FirstSolution.
+
+run(prolog_tokens/2).

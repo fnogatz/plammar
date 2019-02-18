@@ -14,13 +14,24 @@
 :- use_module(library(clpfd)).
 
 prolog_tokens(string(String), Tokens) :-
+  \+ var(String),
   !,
   string_chars(String, Chars),
   phrase(plammar:term(term(Tokens)), Chars, []).
-
+prolog_tokens(string(String), Tokens) :-
+  \+ var(Tokens),
+  !,
+  phrase(plammar:term(term(Tokens)), Chars, []),
+  string_chars(String, Chars).
+prolog_tokens(string(String), Tokens) :-
+  var(String), var(Tokens),
+  !,
+  warning('Either string or tokens must be given.'),
+  fail.
 prolog_tokens(_, _) :-
   !,
   warning('Use one of input formats string').
+
 
 pp(A) :-
   print_term(A, [indent_arguments(0)]).
