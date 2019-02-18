@@ -66,7 +66,7 @@ prolog_parsetree(chars(Chars), p_text(P_Text_List), Options) :-
   option(ops(Ops), Options, _),
   iso_operators(Iso_Ops),
   list_open(Iso_Ops, Ops),
-  p_text(ops(Ops, Nops), p_text(P_Text_List), Chars, []).
+  p_text(ops(Ops, _Nops), p_text(P_Text_List), Chars, []).
 
 prolog_parsetree(_, _, _Options) :-
   !,
