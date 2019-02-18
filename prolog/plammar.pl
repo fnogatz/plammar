@@ -1,4 +1,4 @@
-:- module(ast, [
+:- module(plammar, [
     tree/3,
     tree/4,
     parse/2,
@@ -46,7 +46,7 @@ prolog(Ops, Tree, In) :-
 prolog(Ops, p_text(P_Text_List_With_Ws), In, Out) :-
   p_text(Ops, p_text(P_Text_List), In, Rest),
   % there might be trailing white space
-  phrase(?(ast:layout_text_sequence, Layout_Tree), Rest, Out),
+  phrase(?(plammar:layout_text_sequence, Layout_Tree), Rest, Out),
   (  Layout_Tree = []
   -> P_Text_List_With_Ws = P_Text_List
   ;  append(P_Text_List, Layout_Tree, P_Text_List_With_Ws) ).
@@ -63,7 +63,7 @@ parse_prolog_term(Ops, Tree, In, Out) :-
   append(First, ['.'|Out], In),
   phrase(term(Token_Tree), First, FirstRest),
   % FirstRest might be `?layout_text_sequence` (6.4)
-  phrase(?(ast:layout_text_sequence, Layout_Tree), FirstRest, []),
+  phrase(?(plammar:layout_text_sequence, Layout_Tree), FirstRest, []),
   Token_Tree = term(Tokens),
   phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
   % Check whether the principal functor is (:-)/1 or not
@@ -141,5 +141,5 @@ token(Tree, In, Rest) :-
 ?(DCGBody, Tree, In, Out) :-
   sequence('?', DCGBody, Tree, In, Out).
 
-:- load_files('lexer.pl', [module(ast)]).
-:- load_files('parser.pl', [module(ast)]).
+:- load_files('lexer.pl', [module(plammar)]).
+:- load_files('parser.pl', [module(plammar)]).

@@ -90,7 +90,7 @@ remove_whitespaces([X|Xs], [X_|Xs_]) :-
 
 /* 6.3 TERMS */
 
-:- discontiguous ast:term/5.
+:- discontiguous plammar:term/5.
 
 /* 6.3.1 Atomic terms */
 

@@ -1,6 +1,5 @@
 :- consult('pack.pl').
-:- use_module('prolog/ast').
-
+:- use_module(library(plammar)).
 :- use_module(library(clitable)).
 
 opts_spec([

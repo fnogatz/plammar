@@ -6,8 +6,8 @@
 
 
 :- discontiguous
-  ast:term/5,
-  ast:lterm/5.
+  plammar:term/5,
+  plammar:lterm/5.
 
 :- use_module(library(clpfd)).
 

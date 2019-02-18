@@ -1,5 +1,4 @@
-:- asserta(user:file_search_path(library, prolog)).
-:- use_module(library(ast)).
+:- use_module(library(plammar)).
 
 :- op(800, xfx, <=>).
 :- op(800, xfx, !).
@@ -64,7 +63,7 @@ define_tap_tests(Test_Definition, Tests) :-
   string_chars(In, Chars),
   Test1 = (
     Head1 :-
-      ast:tree(DCGBody, Chars, PT1), !,
+      plammar:tree(DCGBody, Chars, PT1), !,
       PT1 = PT  % check for correct parse tree
   ),
   tap:register_test(Head1),
@@ -72,7 +71,7 @@ define_tap_tests(Test_Definition, Tests) :-
   (nonvar(PT) ->
     Test2 = (
       Head2 :-
-        ast:tree(DCGBody, In2, PT), !,
+        plammar:tree(DCGBody, In2, PT), !,
         In2 = Chars
     ),
     tap:register_test(Head2),
@@ -88,14 +87,14 @@ define_tap_tests(Test_Definition, Tests) :-
   string_chars(In, Chars),
   Test1 = (
     Head1 :-
-      \+ ast:tree(DCGBody, Chars, _PT1), !
+      \+ plammar:tree(DCGBody, Chars, _PT1), !
   ),
   tap:register_test(Head1),
   % build second test: from parse tree to input
   (nonvar(PT) ->
     Test2 = (
       Head2 :-
-        \+ ast:tree(DCGBody, _In2, PT), !
+        \+ plammar:tree(DCGBody, _In2, PT), !
     ),
     tap:register_test(Head2),
     Tests = [Test1, Test2]
@@ -136,7 +135,7 @@ run_tests. % replaced via term expansion
 '".." is just a single token' :-
   findall(
     Tokens,
-    phrase(ast:term(term(Tokens)), ['.','.'], []),
+    phrase(plammar:term(term(Tokens)), ['.','.'], []),
     Solutions
   ),
   length(Solutions, 1),
