@@ -5,10 +5,12 @@
     parse/3,
     prolog/3,
     prolog/4,
-    prolog_tokens/2
+    prolog_tokens/2,
+    prolog_parsetree/2,
+    prolog_parsetree/3
   ]).
 
-:- reexport(iso).
+:- reexport(library(plammar/iso_operators)).
 :- use_module(library(plammar/util)).
 
 :- use_module(library(clpfd)).
@@ -28,9 +30,56 @@ prolog_tokens(string(String), Tokens) :-
   !,
   warning('Either string or tokens must be given.'),
   fail.
+
+prolog_tokens(chars(Chars), Tokens) :-
+  phrase(plammar:term(term(Tokens)), Chars, []).
+
 prolog_tokens(_, _) :-
   !,
-  warning('Use one of input formats string').
+  setof(
+    Type,
+    [Selector,Argument,Body,A]^(
+      clause(prolog_tokens(Selector,A), Body),
+      \+ var(Selector),
+      Selector =.. [Type, Argument]
+    ),
+    Types 
+  ),
+  warning('Use one of input formats string ~w', Types).
+
+prolog_parsetree(A, B) :-
+  prolog_parsetree(A, B, []).
+
+prolog_parsetree(string(String), PT, Options) :-
+  \+ var(String),
+  !,
+  string_chars(String, Chars),
+  prolog_parsetree(chars(Chars), PT, Options).
+prolog_parsetree(string(String), PT, Options) :-
+  \+ var(PT),
+  !,
+  prolog_parsetree(chars(Chars), PT, Options),
+  string_chars(String, Chars).
+
+prolog_parsetree(chars(Chars), p_text(P_Text_List), Options) :-
+  !,
+  option(ops(Ops), Options, _),
+  iso_operators(Iso_Ops),
+  list_open(Iso_Ops, Ops),
+  p_text(ops(Ops, Nops), p_text(P_Text_List), Chars, []).
+
+prolog_parsetree(_, _, _Options) :-
+  !,
+  setof(
+    Type,
+    [Selector,Argument,Body,A,B]^(
+      clause(prolog_parsetree(Selector,A,B), Body),
+      \+ var(Selector),
+      Selector =.. [Type, Argument]
+    ),
+    Types 
+  ),
+  warning('Use one of input formats ~w', [Types]).
 
 
 pp(A) :-
