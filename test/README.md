@@ -15,21 +15,26 @@ This produces a TAP compatible output like the following:
 ```
 TAP version 13
 1..4
-ok 1 - [integer_token +] 123
-ok 2 - [integer_token -] 1.2
-ok 3 - [float_number_token +] 1.2
-ok 4 - [float_number_token -] 1. 2
+ok 1 - integer_token < "123"
+ok 2 - integer_token > "123"
+ok 3 - integer_token < "00123"
+ok 4 - integer_token !< "12 34"
 ```
 
-The identifier given in the square brackets references the tested DCG Body, the following identifies the called input. `+` in the square brackets denotes positive tests, `-` denotes input that should fail.
+The identifier given first references the tested DCG Body (e.g., `integer_token`), the string the called input. `>` denotes that from a given parse tree the correct input is created, and `<` the other way around. `!>` and `!<` denote tests designed to fail, e.g., `"12 34"` is no valid integer token.
 
 ## Define Tests
 
-Each file in the `parser` directory specifies some tests. There, new tests can be specified in the following form:
+Each file in the `parser` directory specifies some tests. For simple input/output tests, we provide a term expansion to specify the tests in the following form:
 
 ```prolog
-dcg(Input):
-  Output.
+DCGBody: ParseTree <=> String.
 ```
 
-To define failing tests, i.e. to define inputs that should be recognized as no valid instances of the given DCG body, simply use `fail` as `Output`. It also possible to use `true` as `Output` if the actual return value does not matter.
+Tests which do not check the parse tree can be specified in a shorter form:
+
+```prolog
+DCGBody: String.
+```
+
+To define failing tests, i.e. to define inputs that should be recognized as no valid instances of the given DCG body, simply use `!` instead of `:`.
