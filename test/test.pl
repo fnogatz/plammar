@@ -50,11 +50,11 @@ get_test_definitions(Identifier, Test_Filename, Sub_Tests) :-
 
 heads(Symbol, DCGBody, In, Head1, Head2) :-
   In = [First|_], integer(First), !,
-  format(atom(Head1), '~w ~w> "~s"', [DCGBody, Symbol, In]),
-  format(atom(Head2), '~w ~w< "~s"', [DCGBody, Symbol, In]).
+  format(atom(Head1), '~w ~w< "~s"', [DCGBody, Symbol, In]),
+  format(atom(Head2), '~w ~w> "~s"', [DCGBody, Symbol, In]).
 heads(Symbol, DCGBody, In, Head1, Head2) :-
-  format(atom(Head1), '~w ~w> ~p', [DCGBody, Symbol, In]),
-  format(atom(Head2), '~w ~w< ~p', [DCGBody, Symbol, In]).
+  format(atom(Head1), '~w ~w< ~p', [DCGBody, Symbol, In]),
+  format(atom(Head2), '~w ~w> ~p', [DCGBody, Symbol, In]).
 
 % succeeding ("positive") test
 define_tap_tests(Test_Definition, Tests) :-
