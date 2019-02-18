@@ -1,4 +1,4 @@
-:- module(iso, [
+:- module(plammar_iso_operators, [
       iso_operator/3,
       iso_operators/1
    ]).
