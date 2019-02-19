@@ -12,6 +12,7 @@
 
 :- reexport(library(plammar/iso_operators)).
 :- use_module(library(plammar/util)).
+:- use_module(library(plammar/options)).
 
 :- use_module(library(clpfd)).
 
@@ -61,12 +62,10 @@ prolog_parsetree(string(String), PT, Options) :-
   prolog_parsetree(chars(Chars), PT, Options),
   string_chars(String, Chars).
 
-prolog_parsetree(chars(Chars), p_text(P_Text_List), Options) :-
+prolog_parsetree(chars(Chars), PT, User_Options) :-
   !,
-  option(ops(Ops), Options, _),
-  iso_operators(Iso_Ops),
-  list_open(Iso_Ops, Ops),
-  p_text(ops(Ops, _Nops), p_text(P_Text_List), Chars, []).
+  normalise_options(prolog_parsetree, User_Options, Options),
+  prolog_parsetree_(chars(Chars), PT, Options).
 
 prolog_parsetree(_, _, _Options) :-
   !,
@@ -81,6 +80,10 @@ prolog_parsetree(_, _, _Options) :-
   ),
   warning('Use one of input formats ~w', [Types]).
 
+prolog_parsetree_(chars(Chars), PT, Options) :-
+  !,
+  option(operators(Ops), Options),
+  p_text(ops(Ops, _Nops), PT, Chars, []).
 
 pp(A) :-
   print_term(A, [indent_arguments(0)]).
