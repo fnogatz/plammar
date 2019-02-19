@@ -72,11 +72,7 @@ set_test_paths :-
   absolute_file_name('./test', Test_Path, [relative_to(CWD), file_type(directory)]),
   assert(path(test, Test_Path)),
   absolute_file_name('./test/parser', TestParser_Path, [relative_to(CWD), file_type(directory)]),
-  assert(path(test/parser, TestParser_Path)),
-  absolute_file_name('./test/prolog', TestProlog_Path, [relative_to(CWD), file_type(directory)]),
-  assert(path(test/prolog/pos, TestProlog_Path)),
-  absolute_file_name('./test/prolog_invalid', TestPrologInvalid_Path, [relative_to(CWD), file_type(directory)]),
-  assert(path(test/prolog/neg, TestPrologInvalid_Path)).
+  assert(path(test/parser, TestParser_Path)).
 
 get_test_definitions(Identifier, Test_Filename, Sub_Tests) :-
   path(test/parser, Path),
@@ -88,36 +84,6 @@ get_test_definitions(Identifier, Test_Filename, Sub_Tests) :-
     Sub_Tests
   ).
 
-get_prolog_test_definitions(pos, Identifier, Test_Filename, Sub_Tests) :-
-  path(test/prolog/pos, Path),
-  absolute_file_name(Test_Filename, Absolute_Filename, [relative_to(Path)]),
-  open(Absolute_Filename, read, Stream),
-  read_string(Stream, _Length, String),
-  close(Stream),
-  format(atom(Head1), '[~w.pl] read in Prolog', [Identifier]),
-  Test1 = (
-    Head1 :-
-      plammar:prolog_parsetree(string(String), _PT),
-      !
-  ),
-  Sub_Tests = [ Test1 ],
-  tap:register_test(Head1).
-
-get_prolog_test_definitions(neg, Identifier, Test_Filename, Sub_Tests) :-
-  path(test/prolog/neg, Path),
-  absolute_file_name(Test_Filename, Absolute_Filename, [relative_to(Path)]),
-  open(Absolute_Filename, read, Stream),
-  read_string(Stream, _Length, String),
-  close(Stream),
-  format(atom(Head1), '[!~w.pl] read in Prolog', [Identifier]),
-  Test1 = (
-    Head1 :-
-      \+ plammar:prolog_parsetree(string(String), _PT)
-  ),
-  Sub_Tests = [ Test1 ],
-  tap:register_test(Head1).
-
-
 heads(Symbol, DCGBody, In, Head1, Head2) :-
   In = [First|_], integer(First), !,
   format(atom(Head1), '~w ~w< "~s"', [DCGBody, Symbol, In]),
@@ -128,13 +94,14 @@ heads(Symbol, DCGBody, In, Head1, Head2) :-
 
 % succeeding ("positive") test
 define_tap_tests(Test_Definition, Tests) :-
-  Test_Definition = test_definition(_Filename, pos, DCGBody, In, PT),
+  Test_Definition = test_definition(_Filename, pos, DCGGoal, In, PT),
+  DCGGoal =.. [DCGBody|_DCGArguments],
   heads('', DCGBody, In, Head1, Head2),
   % build first test: from input to parse tree
   string_chars(In, Chars),
   Test1 = (
     Head1 :-
-      plammar:tree(DCGBody, Chars, PT1), !,
+      plammar:tree(DCGGoal, Chars, PT1), !,
       PT1 = PT  % check for correct parse tree
   ),
   tap:register_test(Head1),
@@ -142,7 +109,7 @@ define_tap_tests(Test_Definition, Tests) :-
   (nonvar(PT) ->
     Test2 = (
       Head2 :-
-        plammar:tree(DCGBody, In2, PT), !,
+        plammar:tree(DCGGoal, In2, PT), !,
         In2 = Chars
     ),
     tap:register_test(Head2),
@@ -152,7 +119,8 @@ define_tap_tests(Test_Definition, Tests) :-
 
 % failing ("negative") test
 define_tap_tests(Test_Definition, Tests) :-
-  Test_Definition = test_definition(_Filename, neg, DCGBody, In, PT),
+  Test_Definition = test_definition(_Filename, neg, DCGGoal, In, PT),
+  DCGGoal =.. [DCGBody|_DCGArguments],
   heads('!', DCGBody, In, Head1, Head2),
   % build first test: from input to parse tree
   string_chars(In, Chars),
@@ -192,6 +160,3 @@ run(tokenizer). % replaced via term expansion
   [_SingleToken] = FirstSolution.
 
 run(prolog_tokens/2).
-
-run(prolog, pos).
-run(prolog, neg).
