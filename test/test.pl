@@ -140,12 +140,20 @@ define_tap_tests(Test_Definition, Tests) :-
   ; Tests = [Test1]
   ).
 
+prolog_parsetrees(In, PTs, Options) :-
+  findall(
+    PT,
+    prolog_parsetree(In, PT, Options),
+    PTs
+  ).
+
 /* End of dynamic test generation */
 
 :- set_test_paths.
 
-% define tests below
 :- use_module(library(tap)).
+
+% tests are defined below
 
 run(tokenizer). % replaced via term expansion
 
@@ -159,4 +167,8 @@ run(tokenizer). % replaced via term expansion
   [FirstSolution] = Solutions,
   [_SingleToken] = FirstSolution.
 
-run(prolog_tokens/2).
+%% Prolog predicates
+
+run(prolog_tokens/2). % replaced via term expansion
+
+:- load_files('predicates/prolog_parsetree.pl').
