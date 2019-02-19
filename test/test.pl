@@ -14,7 +14,6 @@ term_expansion(DCGBody: PT <=> In, test_definition(pos, DCGBody, In, PT)).
 term_expansion(DCGBody: In, test_definition(pos, DCGBody, In, _)).
 term_expansion(DCGBody! In, test_definition(neg, DCGBody, In, _)).
 
-
 term_expansion(run(prolog_tokens/2), Tests) :-
    findall(
       eq(A,B),
@@ -24,7 +23,6 @@ term_expansion(run(prolog_tokens/2), Tests) :-
    maplist(define_predicate_test(prolog_tokens), Eqs, Tests).
 
 term_expansion(run(tokenizer), Tests) :-
-  set_test_paths,
   path(test/parser, TestParser_Path),
   directory_files(TestParser_Path, Test_Filenames),
   findall(
@@ -40,6 +38,21 @@ term_expansion(run(tokenizer), Tests) :-
   flatten(Nested_Test_Definitions, Test_Definitions),
   maplist(define_tap_tests, Test_Definitions, Testss),
   flatten(Testss, Tests).
+
+term_expansion(run(prolog, Type), Tests) :-
+  path(test/prolog/Type, TestProlog_Path),
+  directory_files(TestProlog_Path, Test_Filenames),
+  findall(
+    Test_Definitions,
+    (
+      member(Test_Filename, Test_Filenames),
+      \+member(Test_Filename, [., ..]),
+      file_name_extension(Identifier, pl, Test_Filename),
+      get_prolog_test_definitions(Type, Identifier, Test_Filename, Test_Definitions)
+    ),
+    Nested_Test_Definitions
+  ),
+  flatten(Nested_Test_Definitions, Tests).
 
 define_predicate_test(Predicate, eq(A,B), Test) :-
   format(atom(Head), '~w: ~w', [Predicate, A]),
@@ -59,7 +72,11 @@ set_test_paths :-
   absolute_file_name('./test', Test_Path, [relative_to(CWD), file_type(directory)]),
   assert(path(test, Test_Path)),
   absolute_file_name('./test/parser', TestParser_Path, [relative_to(CWD), file_type(directory)]),
-  assert(path(test/parser, TestParser_Path)).
+  assert(path(test/parser, TestParser_Path)),
+  absolute_file_name('./test/prolog', TestProlog_Path, [relative_to(CWD), file_type(directory)]),
+  assert(path(test/prolog/pos, TestProlog_Path)),
+  absolute_file_name('./test/prolog_invalid', TestPrologInvalid_Path, [relative_to(CWD), file_type(directory)]),
+  assert(path(test/prolog/neg, TestPrologInvalid_Path)).
 
 get_test_definitions(Identifier, Test_Filename, Sub_Tests) :-
   path(test/parser, Path),
@@ -70,6 +87,36 @@ get_test_definitions(Identifier, Test_Filename, Sub_Tests) :-
     retract(test_definition(Type, Body, In, Result)),
     Sub_Tests
   ).
+
+get_prolog_test_definitions(pos, Identifier, Test_Filename, Sub_Tests) :-
+  path(test/prolog/pos, Path),
+  absolute_file_name(Test_Filename, Absolute_Filename, [relative_to(Path)]),
+  open(Absolute_Filename, read, Stream),
+  read_string(Stream, _Length, String),
+  close(Stream),
+  format(atom(Head1), '[~w.pl] read in Prolog', [Identifier]),
+  Test1 = (
+    Head1 :-
+      plammar:prolog_parsetree(string(String), _PT),
+      !
+  ),
+  Sub_Tests = [ Test1 ],
+  tap:register_test(Head1).
+
+get_prolog_test_definitions(neg, Identifier, Test_Filename, Sub_Tests) :-
+  path(test/prolog/neg, Path),
+  absolute_file_name(Test_Filename, Absolute_Filename, [relative_to(Path)]),
+  open(Absolute_Filename, read, Stream),
+  read_string(Stream, _Length, String),
+  close(Stream),
+  format(atom(Head1), '[!~w.pl] read in Prolog', [Identifier]),
+  Test1 = (
+    Head1 :-
+      \+ plammar:prolog_parsetree(string(String), _PT)
+  ),
+  Sub_Tests = [ Test1 ],
+  tap:register_test(Head1).
+
 
 heads(Symbol, DCGBody, In, Head1, Head2) :-
   In = [First|_], integer(First), !,
@@ -127,6 +174,8 @@ define_tap_tests(Test_Definition, Tests) :-
 
 /* End of dynamic test generation */
 
+:- set_test_paths.
+
 % define tests below
 :- use_module(library(tap)).
 
@@ -143,3 +192,6 @@ run(tokenizer). % replaced via term expansion
   [_SingleToken] = FirstSolution.
 
 run(prolog_tokens/2).
+
+run(prolog, pos).
+run(prolog, neg).
