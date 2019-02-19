@@ -126,8 +126,26 @@ p_text(Ops, p_text([Clause_Tree|Rec]), In, Out) :-
   parse_prolog_term(Ops, Clause_Tree, In, Rest),
   p_text(Ops, p_text(Rec), Rest, Out).
 
+parse_prolog_term(Ops, Tree, In, Out) :-
+  \+ var(Tree),
+  !,
+  Tree =.. [_Tree_Name, [Term_Tree, End_Tree_With_Layout]],
+  % first handle End_Tree_With_Layout
+  End_Tree_List = [end_token(end_char('.'))],
+  ( End_Tree_With_Layout = end(End_Tree_List) ->
+    Layout_Tree = []
+  ; End_Tree_With_Layout = end([Layout_Tree0|End_Tree_List]),
+    Layout_Tree0 = [Layout_Tree] ),
+  phrase(?(plammar:layout_text_sequence, Layout_Tree), FirstRest, []),
+  % next handle everything in front of end(...)
+  phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
+  Token_Tree = term(Tokens),
+  phrase(term(Token_Tree), First, FirstRest),
+  append(First, ['.'|Out], In).
 
 parse_prolog_term(Ops, Tree, In, Out) :-
+  \+ var(In),
+  !,
   append(First, ['.'|Out], In),
   phrase(term(Token_Tree), First, FirstRest),
   % FirstRest might be `?layout_text_sequence` (6.4)
