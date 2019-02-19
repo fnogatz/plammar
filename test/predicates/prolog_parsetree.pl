@@ -56,7 +56,6 @@
 
 %% Part II: parse tree given, string unbound
 
-/*
 'Get "a." from parse tree' :-
   PT = p_text([clause_term([term(atom(name([name_token(letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])]),
   findall(
@@ -64,5 +63,4 @@
     prolog_parsetree(string(String), PT),
     Strings
   ),
-  writeln(Strings).
-*/
+  Strings = ["a."].
