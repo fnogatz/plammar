@@ -54,6 +54,30 @@ term_expansion(run(prolog, Type), Tests) :-
   ),
   flatten(Nested_Test_Definitions, Tests).
 
+term_expansion(prolog(String), Tests) :-
+  term_expansion(prolog(String, []), Tests).
+term_expansion(prolog(String, Options), Tests) :-
+  format(atom(Head), '"~w" is valid Prolog (str->pt->str)', [String]),
+  Tests = [ Test ],
+  Test = (
+    Head :-
+      findall(
+        PT,
+        prolog_parsetree(string(String), PT, Options),
+        PTs
+      ), !,
+      PTs = [SinglePT], % just a single result
+      findall(
+        Str,
+        prolog_parsetree(string(Str), SinglePT, Options),
+        Strs
+      ), !,
+      Strs = [SingleString], % just a single result,
+      SingleString = String
+  ),
+  tap:register_test(Head).
+
+
 define_predicate_test(Predicate, eq(A,B), Test) :-
   format(atom(Head), '~w: ~w', [Predicate, A]),
   Test = (

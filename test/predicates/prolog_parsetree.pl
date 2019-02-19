@@ -64,3 +64,9 @@
     Strings
   ),
   Strings = ["a."].
+
+%% Part III: automatic deterministic conversion string->parsetree->string
+
+prolog("a.").
+prolog("a. b.").
+prolog("a(1).").
