@@ -109,6 +109,15 @@ prolog("a( 1 , 2 ).").
 
 prolog("a :- b.").
 
+% Comments
+
+prolog("a. % linecomment\nb.").
+prolog("a.% linecomment\nb.").
+prolog("a.%a%b%c\nb.").
+prolog("a./**/\nb.").
+prolog("a./* this is a comment */\nb.").
+prolog("a./*/**/\nb."). % no nesting of comments
+
 % Sec. 6.3.5, Compound terms - list notation
 prolog("list([]).").
 prolog("list([X]).").
