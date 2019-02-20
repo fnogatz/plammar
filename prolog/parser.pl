@@ -330,7 +330,7 @@ items(Ops) -->
 items(Ops) -->
     arg(Ops).
 
-/* 6.3.7 Compound terms - curly bracketed term */
+/* 6.3.6 Compound terms - curly bracketed term */
 
 % {}(l)
 term(0, Ops) -->
@@ -338,3 +338,8 @@ term(0, Ops) -->
   , term(P, Ops)
   , [ close_curly(_) ]
   , { P #=< 1201 }.
+
+/* 6.3.7 Terms - double quoted list notation */
+
+term(0, _Ops) -->
+    [ double_quoted_list(_) ].

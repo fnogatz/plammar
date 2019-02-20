@@ -124,6 +124,11 @@ prolog("curly({a}).").
 prolog("curly({a,1}).").
 prolog("curly( { b , 2 } ).").
 
+% Sec. 6.3.7, Terms - double quoted list notation
+prolog("a(\"\").").
+prolog("a(\"s\").").
+prolog("a(\"string with blanks\").").
+
 %%% III.b): Operators
 
 prolog("a b c.", [ operators([ op(600, xfx, b) ]) ]).
