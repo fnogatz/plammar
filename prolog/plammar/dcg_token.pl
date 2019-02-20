@@ -53,8 +53,7 @@ open_ -->                           % 6.4
   , open_token.                     % 6.4.8
 
 open_ct -->                         % 6.4
-    ?layout_text_sequence           % 6.4
-  , open_token.                     % 6.4.8
+    open_token.                     % 6.4.8
 
 close_ -->                          % 6.4
     ?layout_text_sequence           % 6.4
