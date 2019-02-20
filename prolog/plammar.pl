@@ -147,6 +147,9 @@ parse_prolog_term(Ops, Tree, In, Out) :-
   \+ var(In),
   !,
   append(First, ['.'|Out], In),
+  %% TODO: The next step is very inefficient,
+  %%   see e.g.
+  %writeln(FirstRest),
   phrase(term(Token_Tree), First, FirstRest),
   % FirstRest might be `?layout_text_sequence` (6.4)
   phrase(?(plammar:layout_text_sequence, Layout_Tree), FirstRest, []),
