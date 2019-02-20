@@ -304,3 +304,26 @@ op(P, Spec, Ops, op(Atom_Tree), In, Out) :-
 
 op(1000, xfy, _Ops) -->
     [ comma(_) ].
+
+/* 6.3.5 Compund terms - list notation */
+
+term(0, Ops) -->
+    [ open_list(_) ]
+  , items(Ops)
+  , [ close_list(_) ].
+
+% .(h,l)
+items(Ops) -->
+    arg(Ops)
+  , [ comma(_) ]
+  , items(Ops).
+
+% .(h,t)
+items(Ops) -->
+    arg(Ops)
+  , [ ht_sep(_) ]
+  , arg(Ops).
+
+% .(t, [])
+items(Ops) -->
+    arg(Ops).

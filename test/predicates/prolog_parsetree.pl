@@ -69,6 +69,7 @@
 
 prolog("a.").
 prolog("a. b.").
+
 prolog("a(b).").
 prolog("a(1).").
 prolog("a(1.2).").
@@ -76,4 +77,12 @@ prolog("a(X).").
 prolog("a(_).").
 prolog("a(1,2).").
 prolog("a( 1 , 2 ).").
+
 prolog("a :- b.").
+
+prolog("list([]).").
+prolog("list([X]).").
+prolog("list([a,1]).").
+
+prolog("member(X,[X|_]).").
+prolog("member(X,[_|Xs]) :- member(X,Xs).").

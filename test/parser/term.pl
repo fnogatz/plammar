@@ -51,3 +51,4 @@ term: "a(1/*test*/). b.".
 term: "a(/*test*/1). b.".
 term: "a/*test*/(1). b.".
 term: "/*test*/a(1). b.".
+term: "[a]".
