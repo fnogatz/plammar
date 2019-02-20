@@ -107,6 +107,10 @@ prolog("a(_).").
 prolog("a(1,2).").
 prolog("a( 1 , 2 ).").
 
+prolog(":- a.").
+prolog(":- a, b.").
+prolog(":- [load].").
+
 prolog("a :- b.").
 
 % Comments
