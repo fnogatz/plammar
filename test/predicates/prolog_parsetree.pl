@@ -156,3 +156,29 @@ prolog("1 xfx (2 xfx 3).", [ operators([ op(600, xfx, xfx) ]) ]).
 invalid("fx fx 1.", [ operators([ op(600, fx, fx) ]) ]).
 invalid("1 xf xf.", [ operators([ op(600, xf, xf) ]) ]).
 invalid("1 xfx 2 xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
+
+%% Part IV: handling of options
+
+'Explicit statement of pre-defined ISO operators is allowed' :-
+  Options = [
+    operators([ op(1200, xfx, ':-') ]),
+    iso_operators(yes)
+  ],
+  prolog_parsetree(string("a."), _, Options), !.
+
+% Sec. 6.3.4.3: There shall not be two operators with the same class and name
+'Disallow re-defining ISO operator with different precedence' :-
+  Options = [
+    % :-/2 is already pre-defined as ISO operator with precedence of 1200
+    operators([ op(1100, xfx, ':-') ]),
+    iso_operators(yes)
+  ],
+  \+ prolog_parsetree(string("a."), _, Options).
+
+% Sec. 6.3.4.3: There shall not be two operators with the same class and name
+'No two operators with the same class and name' :-
+  Options = [
+    operators([ op(800, xfx, xfx), op(1000, xfx, xfx) ]),
+    iso_operators(no)
+  ],
+  \+ prolog_parsetree(string("a."), _, Options), !.
