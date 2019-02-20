@@ -125,3 +125,8 @@ prolog("fx (fx 1).", [ operators([ op(600, fx, fx) ]) ]).
 prolog("(1 xf) xf.", [ operators([ op(600, xf, xf) ]) ]).
 prolog("(1 xfx 2) xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
 prolog("1 xfx (2 xfx 3).", [ operators([ op(600, xfx, xfx) ]) ]).
+
+% Sec. 6.3, Table 5, invalid terms
+invalid("fx fx 1.", [ operators([ op(600, fx, fx) ]) ]).
+invalid("1 xf xf.", [ operators([ op(600, xf, xf) ]) ]).
+invalid("1 xfx 2 xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).

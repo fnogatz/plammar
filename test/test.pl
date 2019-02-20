@@ -77,6 +77,22 @@ term_expansion(prolog(String, Options), Tests) :-
   ),
   tap:register_test(Head).
 
+term_expansion(invalid(String), Tests) :-
+  term_expansion(invalid(String, []), Tests).
+term_expansion(invalid(String, Options), Tests) :-
+  format(atom(Head), '"~w" is no valid Prolog (str->pt)', [String]),
+  Tests = [ Test ],
+  Test = (
+    Head :-
+      findall(
+        PT,
+        prolog_parsetree(string(String), PT, Options),
+        PTs
+      ), !,
+      PTs = []
+  ),
+  tap:register_test(Head).
+
 
 define_predicate_test(Predicate, eq(A,B), Test) :-
   format(atom(Head), '~w: ~w', [Predicate, A]),
