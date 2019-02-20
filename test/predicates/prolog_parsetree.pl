@@ -59,7 +59,7 @@
   prolog_parsetrees(string("f :- a."), PTs, Options),
   length(PTs, 1).
 
-/*
+
 '"f :- a." is valid for f being an operator fy@1100' :-
   Options = [ operators([ op(1100,fy,f) ]) ],
   prolog_parsetrees(string("f :- a."), PTs, Options),
@@ -79,7 +79,7 @@
   Options = [ operators([ op(1200,fx,f) ]) ],
   prolog_parsetrees(string("f :- a."), PTs, Options),
   length(PTs, 0).
-*/
+
 
 %% Part II: parse tree given, string unbound
 

@@ -140,10 +140,10 @@ term(0, Ops, term(Atom_Tree), In, Out) :-
   atom_tree(Atom, Atom_Tree),
   not_operator(op(_,_,Atom), Ops).
 
-term(1201, Ops, term(Atom_Tree), In, Out) :-
+term(P, Ops, term(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
-  is_operator(op(_,_,Atom), Ops).
+  is_operator(op(P,_,Atom), Ops).
 
 atom -->
     [ name(_) ].
