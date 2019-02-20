@@ -307,7 +307,7 @@ op(P, Spec, Ops, op(Atom_Tree), In, Out) :-
 op(1000, xfy, _Ops) -->
     [ comma(_) ].
 
-/* 6.3.5 Compund terms - list notation */
+/* 6.3.5 Compound terms - list notation */
 
 term(0, Ops) -->
     [ open_list(_) ]
@@ -329,3 +329,12 @@ items(Ops) -->
 % .(t, [])
 items(Ops) -->
     arg(Ops).
+
+/* 6.3.7 Compound terms - curly bracketed term */
+
+% {}(l)
+term(0, Ops) -->
+    [ open_curly(_) ]
+  , term(P, Ops)
+  , [ close_curly(_) ]
+  , { P #=< 1201 }.

@@ -109,12 +109,20 @@ prolog("a( 1 , 2 ).").
 
 prolog("a :- b.").
 
+% Sec. 6.3.5, Compound terms - list notation
 prolog("list([]).").
 prolog("list([X]).").
 prolog("list([a,1]).").
+prolog("list( [ b , 2 ] ).").
 
 prolog("member(X,[X|_]).").
 prolog("member(X,[_|Xs]) :- member(X,Xs).").
+
+% Sec. 6.3.6, Compound terms - curly bracketed term
+prolog("curly({}).").
+prolog("curly({a}).").
+prolog("curly({a,1}).").
+prolog("curly( { b , 2 } ).").
 
 %%% III.b): Operators
 
