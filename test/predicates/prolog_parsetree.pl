@@ -69,5 +69,11 @@
 
 prolog("a.").
 prolog("a. b.").
+prolog("a(b).").
 prolog("a(1).").
+prolog("a(1.2).").
+prolog("a(X).").
+prolog("a(_).").
+prolog("a(1,2).").
+prolog("a( 1 , 2 ).").
 prolog("a :- b.").
