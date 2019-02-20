@@ -1,4 +1,4 @@
-:- use_module('prolog/ast').
+:- use_module(library(plammar)).
 
 :- use_module(library(http/http_unix_daemon)).
 :- use_module(library(http/thread_httpd)).
@@ -27,13 +27,16 @@ handle(post, Request) :-
    http_read_data(Request, Data, []),
    % format(user_output, "Data is: ~p~n", [Data]),
    atom_chars(Data, Chars),
+   Options = [
+      infer_operators(no)
+   ],
    (
       % format(user_output, "Data is: ~p~n", [string_tree(Data,'Tree')]),
       % with_output_to(string(S), string_tree(Data, Tree)),
       % format(user_output, "Output is: ~p~n", [S])
       catch(
-         call_with_time_limit(0.5, (
-            ast:prolog(ops(_Ops, _Nots), AST, Chars)
+         call_with_time_limit(1.0, (
+            prolog_parsetree(chars(Chars), AST, Options)
          )),
          _Catcher,
          reply_error
