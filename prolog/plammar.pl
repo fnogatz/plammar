@@ -82,8 +82,7 @@ prolog_parsetree(_, _, _) :-
 
 prolog_parsetree_(chars(Chars), PT, Options) :-
   !,
-  option(operators(Ops), Options),
-  p_text(ops(Ops, _Nops), PT, Chars, []).
+  p_text(Options, PT, Chars, []).
 
 pp(A) :-
   print_term(A, [indent_arguments(0)]).
@@ -103,16 +102,16 @@ tree_from_file(Body, Filename, Tree) :-
   tree(Body, Chars, Tree).
 
 
-prolog(Ops, Tree, In) :-
+prolog(Opts, Tree, In) :-
   string_chars(In, Chars),
   !,
-  prolog(Ops, Tree, Chars, []).
+  prolog(Opts, Tree, Chars, []).
 
-prolog(Ops, Tree, In) :-
-  prolog(Ops, Tree, In, []).
+prolog(Opts, Tree, In) :-
+  prolog(Opts, Tree, In, []).
 
-prolog(Ops, p_text(P_Text_List_With_Ws), In, Out) :-
-  p_text(Ops, p_text(P_Text_List), In, Rest),
+prolog(Opts, p_text(P_Text_List_With_Ws), In, Out) :-
+  p_text(Opts, p_text(P_Text_List), In, Rest),
   % there might be trailing white space
   phrase(?(plammar:layout_text_sequence, Layout_Tree), Rest, Out),
   (  Layout_Tree = []
@@ -120,13 +119,13 @@ prolog(Ops, p_text(P_Text_List_With_Ws), In, Out) :-
   ;  append(P_Text_List, Layout_Tree, P_Text_List_With_Ws) ).
 
 
-p_text(_Ops, p_text([]), In, In).
+p_text(_Opts, p_text([]), In, In).
 
-p_text(Ops, p_text([Clause_Tree|Rec]), In, Out) :-
-  parse_prolog_term(Ops, Clause_Tree, In, Rest),
-  p_text(Ops, p_text(Rec), Rest, Out).
+p_text(Opts, p_text([Clause_Tree|Rec]), In, Out) :-
+  parse_prolog_term(Opts, Clause_Tree, In, Rest),
+  p_text(Opts, p_text(Rec), Rest, Out).
 
-parse_prolog_term(Ops, Tree, In, Out) :-
+parse_prolog_term(Opts, Tree, In, Out) :-
   \+ var(Tree),
   !,
   Tree =.. [_Tree_Name, [Term_Tree, End_Tree_With_Layout]],
@@ -138,12 +137,12 @@ parse_prolog_term(Ops, Tree, In, Out) :-
     Layout_Tree0 = [Layout_Tree] ),
   phrase(?(plammar:layout_text_sequence, Layout_Tree), FirstRest, []),
   % next handle everything in front of end(...)
-  phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
+  phrase(term(_Prec, Opts, Term_Tree), Tokens, []),
   Token_Tree = term(Tokens),
   phrase(term(Token_Tree), First, FirstRest),
   append(First, ['.'|Out], In).
 
-parse_prolog_term(Ops, Tree, In, Out) :-
+parse_prolog_term(Opts, Tree, In, Out) :-
   \+ var(In),
   !,
   append(First, ['.'|Out], In),
@@ -154,7 +153,7 @@ parse_prolog_term(Ops, Tree, In, Out) :-
   % FirstRest might be `?layout_text_sequence` (6.4)
   phrase(?(plammar:layout_text_sequence, Layout_Tree), FirstRest, []),
   Token_Tree = term(Tokens),
-  phrase(term(_Prec, Ops, Term_Tree), Tokens, []),
+  phrase(term(_Prec, Opts, Term_Tree), Tokens, []),
   % Check whether the principal functor is (:-)/1 or not
   principal_functor(Term_Tree, Principal_Functor),
   (  Principal_Functor = (:-)

@@ -4,36 +4,22 @@ is_priority(P) :-
   P #>= 0,
   P #=< 1201.
 
-is_operator(Op, Table) :-
+is_operator(Op0, Options) :-
+  Op0 = op(Prec, Spec, Name0),
+  % remove leading space if present
+  ( atom_concat(' ', Name, Name0) ; Name = Name0 ), !,
   Op = op(Prec, Spec, Name),
-  atom_concat(' ', Without_Space, Name),
-  !,
-  is_operator(op(Prec, Spec, Without_Space), Table).
-
-is_operator(Op, ops(Ops, Nots)) :-
-  Op = op(Prec, Spec, Name),
-  not_member(Op, Nots),
-  memberchk(Op, Ops),
   is_priority(Prec),
-  %% 6.3.4.3
-  %%   "There shall not be two Operators with the same class and name."
-  spec_class(Spec, Class),
-  \+((
-    Op2 = op(_, Spec2, Name),   % another operator
-    memberchk(Op2, Ops),        % with same name
-    spec_class(Spec2, Class),   % with same class
-    Spec \= Spec2               % but different spec
-  )).
+  option(operators(Operators), Options),
+  member(Op, Operators).
 
-not_operator(Op, Table) :-
+not_operator(Op0, Options) :-
+  Op0 = op(Prec, Spec, Name0),
+  % remove leading space if present
+  ( atom_concat(' ', Name, Name0) ; Name = Name0 ), !,
   Op = op(Prec, Spec, Name),
-  atom_concat(' ', Without_Space, Name),
-  !,
-  not_operator(op(Prec, Spec, Without_Space), Table).
-
-not_operator(Op, ops(Ops, Nots)) :-
-  not_member(Op, Ops),
-  memberchk(Op, Nots).
+  option(operators(Operators), Options),
+  \+ member(Op, Operators).
 
 not_member(_, Ys) :-
   var(Ys), !.
@@ -96,19 +82,19 @@ remove_whitespaces([X|Xs], [X_|Xs_]) :-
 
 /* 6.3.1.1 Numbers */
 
-term(0, _Ops) -->
+term(0, _Opts) -->
     [ integer(_) ].
 
-term(0, _Ops) -->
+term(0, _Opts) -->
     [ float_number(_) ].
 
 /* 6.3.1.2 Negative numbers */
 
-term(0, _Ops) -->
+term(0, _Opts) -->
     negative_sign_name
   , [ integer(_) ].
 
-term(0, _Ops) -->
+term(0, _Opts) -->
     negative_sign_name
   , [ float_number(_) ].
 
@@ -135,15 +121,15 @@ is_whitespace(A) :-
 
 /* 6.3.1.3 Atoms */
 
-term(0, Ops, term(Atom_Tree), In, Out) :-
+term(0, Opts, term(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
-  not_operator(op(_,_,Atom), Ops).
+  not_operator(op(_,_,Atom), Opts).
 
-term(P, Ops, term(Atom_Tree), In, Out) :-
+term(P, Opts, term(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
-  is_operator(op(P,_,Atom), Ops).
+  is_operator(op(P,_,Atom), Opts).
 
 atom -->
     [ name(_) ].
@@ -158,34 +144,34 @@ atom -->
 
 /* 6.3.2 Variables */
 
-term(0, _Ops) -->
+term(0, _Opts) -->
     [ variable(_) ].
 
 /* 6.3.3 Compund terms - functional notation */
 
-term(0, Ops) -->
+term(0, Opts) -->
     atom
   , [ open_ct(_) ]
-  , arg_list(Ops)
+  , arg_list(Opts)
   , [ close_(_) ].
 
-arg_list(Ops) -->
-    arg(Ops).
+arg_list(Opts) -->
+    arg(Opts).
 
-arg_list(Ops) -->
-    arg(Ops)
+arg_list(Opts) -->
+    arg(Opts)
   , [ comma(_) ]
-  , arg_list(Ops).
+  , arg_list(Opts).
 
 /* 6.3.3.1 Arguments */
 
-arg(Ops, arg(Atom_Tree), In, Out) :-
+arg(Opts, arg(Atom_Tree), In, Out) :-
     phrase(atom(Atom_Tree), In, Out)
   , atom_tree(Atom, Atom_Tree)
-  , is_operator(op(_,_,Atom), Ops).
+  , is_operator(op(_,_,Atom), Opts).
 
-arg(Ops, arg(Term_Tree), In, Out) :-
-    phrase(term(P, Ops, Term_Tree), In, Out)
+arg(Opts, arg(Term_Tree), In, Out) :-
+    phrase(term(P, Opts, Term_Tree), In, Out)
   , is_priority(P)
   , P #=< 999.
 
@@ -197,30 +183,30 @@ arg(Ops, arg(Term_Tree), In, Out) :-
 %% `term` and `lterm` to avoid trivial
 %% non-termination because of left-recursion
 
-term(0, Ops) -->
+term(0, Opts) -->
     [ open_(_) ]
-  , term(P, Ops)
+  , term(P, Opts)
   , [ close_(_) ]
   , { P #=< 1201 }.
 
-term(0, Ops) -->
+term(0, Opts) -->
     [ open_ct(_) ]
-  , term(P, Ops)
+  , term(P, Opts)
   , [ close_(_) ]
   , { P #=< 1201 }.
 
 /* 6.3.4.2 Operators as functors */
 
 % term = term, op, term (xfx)
-term(P, Ops, term(xfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+term(P, Opts, term(xfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #< P
   , P_Term2 #< P
     % define instructions
   , I0 = append(Term_Part, Out, In)
   , I1 = append(Term1, [Op|Term2], Term_Part)
-  , I2 = phrase(op(P, xfx, Ops, Op_Tree), [Op])
-  , I3 = phrase(term(P_Term1, Ops, Term1_Tree), Term1)
-  , I4 = phrase(term(P_Term2, Ops, Term2_Tree), Term2)
+  , I2 = phrase(op(P, xfx, Opts, Op_Tree), [Op])
+  , I3 = phrase(term(P_Term1, Opts, Term1_Tree), Term1)
+  , I4 = phrase(term(P_Term2, Opts, Term2_Tree), Term2)
     % call instructions in best order
   , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
     ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
@@ -228,15 +214,15 @@ term(P, Ops, term(xfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
   , call(Instructions).
 
 % term = term, op, term (yfx)
-term(P, Ops, term(yfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+term(P, Opts, term(yfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #=< P
   , P_Term2 #< P
     % define instructions
   , I0 = append(Term_Part, Out, In)
   , I1 = append(Term1, [Op|Term2], Term_Part)
-  , I2 = phrase(op(P, yfx, Ops, Op_Tree), [Op])
-  , I3 = phrase(term(P_Term1, Ops, Term1_Tree), Term1)
-  , I4 = phrase(term(P_Term2, Ops, Term2_Tree), Term2)
+  , I2 = phrase(op(P, yfx, Opts, Op_Tree), [Op])
+  , I3 = phrase(term(P_Term1, Opts, Term1_Tree), Term1)
+  , I4 = phrase(term(P_Term2, Opts, Term2_Tree), Term2)
     % call instructions in best order
   , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
     ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
@@ -244,15 +230,15 @@ term(P, Ops, term(yfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
   , call(Instructions).
 
 % term = term, op, term (xfy)
-term(P, Ops, term(xfy, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
+term(P, Opts, term(xfy, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #< P
   , P_Term2 #=< P
     % define instructions
   , I0 = append(Term_Part, Out, In)
   , I1 = append(Term1, [Op|Term2], Term_Part)
-  , I2 = phrase(op(P, xfy, Ops, Op_Tree), [Op])
-  , I3 = phrase(term(P_Term1, Ops, Term1_Tree), Term1)
-  , I4 = phrase(term(P_Term2, Ops, Term2_Tree), Term2)
+  , I2 = phrase(op(P, xfy, Opts, Op_Tree), [Op])
+  , I3 = phrase(term(P_Term1, Opts, Term1_Tree), Term1)
+  , I4 = phrase(term(P_Term2, Opts, Term2_Tree), Term2)
     % call instructions in best order
   , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
     ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
@@ -260,12 +246,12 @@ term(P, Ops, term(xfy, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
   , call(Instructions).
 
 % term = term, op (yf)
-term(P, Ops, term(yf, [Term_Tree, Op_Tree]), In, Out) :-
+term(P, Opts, term(yf, [Term_Tree, Op_Tree]), In, Out) :-
     P_Term #=< P
     % define instructions
   , I0 = append(Term_Part, [Op | Out], In)
-  , I1 = phrase(op(P, yf, Ops, Op_Tree), [Op])
-  , I2 = phrase(term(P_Term, Ops, Term_Tree), Term_Part)
+  , I1 = phrase(op(P, yf, Opts, Op_Tree), [Op])
+  , I2 = phrase(term(P_Term, Opts, Term_Tree), Term_Part)
     % call instructions in best order
   , ( \+ var(In) -> Instructions = (I0, I1, I2)
     ; \+ var(Term_Tree) -> Instructions = (I2, I1, I0)
@@ -273,12 +259,12 @@ term(P, Ops, term(yf, [Term_Tree, Op_Tree]), In, Out) :-
   , call(Instructions).
 
 % term = term, op (xf)
-term(P, Ops, term(xf, [Term_Tree, Op_Tree]), In, Out) :-
+term(P, Opts, term(xf, [Term_Tree, Op_Tree]), In, Out) :-
     P_Term #< P
     % define instructions
   , I0 = append(Term_Part, [Op | Out], In)
-  , I1 = phrase(op(P, xf, Ops, Op_Tree), [Op])
-  , I2 = phrase(term(P_Term, Ops, Term_Tree), Term_Part)
+  , I1 = phrase(op(P, xf, Opts, Op_Tree), [Op])
+  , I2 = phrase(term(P_Term, Opts, Term_Tree), Term_Part)
     % call instructions in best order
   , ( \+ var(In) -> Instructions = (I0, I1, I2)
     ; \+ var(Term_Tree) -> Instructions = (I2, I1, I0)
@@ -286,60 +272,60 @@ term(P, Ops, term(xf, [Term_Tree, Op_Tree]), In, Out) :-
   , call(Instructions).
 
 % term = op, term (fy)
-term(P, Ops, term(fy, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
+term(P, Opts, term(fy, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
     P_Term #=< P
-  , phrase(op(P, fy, Ops, Op_Tree), [Op])
-  , phrase(term(P_Term, Ops, Term_Tree), Rest, Out).
+  , phrase(op(P, fy, Opts, Op_Tree), [Op])
+  , phrase(term(P_Term, Opts, Term_Tree), Rest, Out).
 
 % term = op, term (fx)
-term(P, Ops, term(fx, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
+term(P, Opts, term(fx, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
     P_Term #< P
-  , phrase(op(P, fx, Ops, Op_Tree), [Op])
-  , phrase(term(P_Term, Ops, Term_Tree), Rest, Out).
+  , phrase(op(P, fx, Opts, Op_Tree), [Op])
+  , phrase(term(P_Term, Opts, Term_Tree), Rest, Out).
 
 /* 6.3.4.3 Operators */
 
-op(P, Spec, Ops, op(Atom_Tree), In, Out) :-
+op(P, Spec, Opts, op(Atom_Tree), In, Out) :-
     phrase(atom(Atom_Tree), In, Out)
   , atom_tree(Atom, Atom_Tree)
-  , is_operator(op(P, Spec, Atom), Ops).
+  , is_operator(op(P, Spec, Atom), Opts).
 
-op(1000, xfy, _Ops) -->
+op(1000, xfy, _Opts) -->
     [ comma(_) ].
 
 /* 6.3.5 Compound terms - list notation */
 
-term(0, Ops) -->
+term(0, Opts) -->
     [ open_list(_) ]
-  , items(Ops)
+  , items(Opts)
   , [ close_list(_) ].
 
 % .(h,l)
-items(Ops) -->
-    arg(Ops)
+items(Opts) -->
+    arg(Opts)
   , [ comma(_) ]
-  , items(Ops).
+  , items(Opts).
 
 % .(h,t)
-items(Ops) -->
-    arg(Ops)
+items(Opts) -->
+    arg(Opts)
   , [ ht_sep(_) ]
-  , arg(Ops).
+  , arg(Opts).
 
 % .(t, [])
-items(Ops) -->
-    arg(Ops).
+items(Opts) -->
+    arg(Opts).
 
 /* 6.3.6 Compound terms - curly bracketed term */
 
 % {}(l)
-term(0, Ops) -->
+term(0, Opts) -->
     [ open_curly(_) ]
-  , term(P, Ops)
+  , term(P, Opts)
   , [ close_curly(_) ]
   , { P #=< 1201 }.
 
 /* 6.3.7 Terms - double quoted list notation */
 
-term(0, _Ops) -->
+term(0, _Opts) -->
     [ double_quoted_list(_) ].
