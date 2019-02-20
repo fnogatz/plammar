@@ -24,4 +24,4 @@
 'Can not merge-in a list with self-conflicting operators' :-
   Old = [],
   New = [op(400,fx,a), op(600,fx,a)],
-  \+ merge_operators(Old, New, Merged0), !.
+  \+ merge_operators(Old, New, _), !.
