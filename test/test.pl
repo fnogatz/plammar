@@ -57,7 +57,7 @@ term_expansion(run(prolog, Type), Tests) :-
 term_expansion(prolog(String), Tests) :-
   term_expansion(prolog(String, []), Tests).
 term_expansion(prolog(String, Options), Tests) :-
-  format(atom(Head), '"~w" is valid Prolog (str->pt->str)', [String]),
+  format(atom(Head), '~p is valid Prolog (str->pt->str)', [String]),
   Tests = [ Test ],
   Test = (
     Head :-
@@ -80,7 +80,7 @@ term_expansion(prolog(String, Options), Tests) :-
 term_expansion(invalid(String), Tests) :-
   term_expansion(invalid(String, []), Tests).
 term_expansion(invalid(String, Options), Tests) :-
-  format(atom(Head), '"~w" is no valid Prolog (str->pt)', [String]),
+  format(atom(Head), '~p is no valid Prolog (str->pt)', [String]),
   Tests = [ Test ],
   Test = (
     Head :-
