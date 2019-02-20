@@ -182,3 +182,43 @@ invalid("1 xfx 2 xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
     iso_operators(no)
   ],
   \+ prolog_parsetree(string("a."), _, Options), !.
+
+%% Part V: infer operator definitions
+
+'"a b." invalid for infer_operators(no)' :-
+  Options = [ iso_operators(no), infer_operators(no) ],
+  \+ prolog_parsetree(string("a b."), _, Options).
+
+'"a b." valid for infer_operators(yes)' :-
+  Options = [ iso_operators(no), infer_operators(yes) ],
+  prolog_parsetrees(string("a b."), PTs, Options),
+  length(PTs, PTs_Count),
+  % with the current implementation, it is 8, because of:
+  % a@yf, b not an operator
+  % a@yf, b any operator type
+  % a@xf, b not an operator
+  % a@xf, b any operator type
+  % ... and the same the other way around
+  PTs_Count >= 8.
+
+'"a b." valid for infer_operators(Ops)' :-
+  findall(
+    Ops,
+    prolog_parsetree(
+      string("a b."),
+      PT,
+      [ iso_operators(no), infer_operators(Ops) ]
+    ),
+    Inferred_Ops
+  ),
+  Expected = [
+    [op(_,yf,b)],
+    [op(_,yf,b), op(_,_,a)],
+    [op(_,xf,b)],
+    [op(_,xf,b), op(_,_,a)],
+    [op(_,fy,a)],
+    [op(_,fy,a), op(_,_,b)],
+    [op(_,fx,a)],
+    [op(_,fx,a), op(_,_,b)]
+  ],
+  permutation(Inferred_Ops, Expected), !.

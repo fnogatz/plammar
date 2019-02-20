@@ -11,7 +11,13 @@ is_operator(Op0, Options) :-
   Op = op(Prec, Spec, Name),
   is_priority(Prec),
   option(operators(Operators), Options),
-  member(Op, Operators).
+  option(infer_operators(Inferred_Ops), Options),
+  ( member(Op, Operators)
+  ; Inferred_Ops == no,
+    !, false
+  ; option(infer_operators(Inferred_Ops), Options),
+    memberchk(Op, Inferred_Ops)
+  ).
 
 not_operator(Op0, Options) :-
   Op0 = op(Prec, Spec, Name0),
@@ -19,7 +25,11 @@ not_operator(Op0, Options) :-
   ( atom_concat(' ', Name, Name0) ; Name = Name0 ), !,
   Op = op(Prec, Spec, Name),
   option(operators(Operators), Options),
-  \+ member(Op, Operators).
+  \+ member(Op, Operators),
+  ( option(infer_operators(no), Options)
+  ; option(infer_operators(Inferred_Ops), Options),
+    not_member(Op, Inferred_Ops)
+  ).
 
 not_member(_, Ys) :-
   var(Ys), !.

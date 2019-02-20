@@ -65,7 +65,8 @@ prolog_parsetree(string(String), PT, Options) :-
 prolog_parsetree(chars(Chars), PT, User_Options) :-
   !,
   normalise_options(prolog_parsetree, User_Options, Options),
-  prolog_parsetree_(chars(Chars), PT, Options).
+  prolog_parsetree_(chars(Chars), PT, Options),
+  revise_options(prolog_parsetree, Options).
 
 prolog_parsetree(_, _, _) :-
   !,
