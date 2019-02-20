@@ -191,6 +191,10 @@ prolog_parsetrees(In, PTs, Options) :-
 
 :- set_test_paths.
 
+% Message hook to not print warnings
+message_hook(_,warning,_) :-
+  true. % just ignore
+
 :- use_module(library(tap)).
 
 % tests are defined below
