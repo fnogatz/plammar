@@ -70,3 +70,4 @@
 prolog("a.").
 prolog("a. b.").
 prolog("a(1).").
+prolog("a :- b.").

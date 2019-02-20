@@ -213,45 +213,75 @@ term(0, Ops) -->
 term(P, Ops, term(xfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #< P
   , P_Term2 #< P
-  , append(Term_Part, Out, In)
-  , append(Term1, [Op|Term2], Term_Part)
-  , phrase(op(P, xfx, Ops, Op_Tree), [Op])
-  , phrase(term(P_Term1, Ops, Term1_Tree), Term1)
-  , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
+    % define instructions
+  , I0 = append(Term_Part, Out, In)
+  , I1 = append(Term1, [Op|Term2], Term_Part)
+  , I2 = phrase(op(P, xfx, Ops, Op_Tree), [Op])
+  , I3 = phrase(term(P_Term1, Ops, Term1_Tree), Term1)
+  , I4 = phrase(term(P_Term2, Ops, Term2_Tree), Term2)
+    % call instructions in best order
+  , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
+    ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
+    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
+  , call(Instructions).
 
 % term = term, op, term (yfx)
 term(P, Ops, term(yfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #=< P
   , P_Term2 #< P
-  , append(Term_Part, Out, In)
-  , append(Term1, [Op|Term2], Term_Part)
-  , phrase(op(P, yfx, Ops, Op_Tree), [Op])
-  , phrase(term(P_Term1, Ops, Term1_Tree), Term1)
-  , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
+    % define instructions
+  , I0 = append(Term_Part, Out, In)
+  , I1 = append(Term1, [Op|Term2], Term_Part)
+  , I2 = phrase(op(P, yfx, Ops, Op_Tree), [Op])
+  , I3 = phrase(term(P_Term1, Ops, Term1_Tree), Term1)
+  , I4 = phrase(term(P_Term2, Ops, Term2_Tree), Term2)
+    % call instructions in best order
+  , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
+    ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
+    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
+  , call(Instructions).
 
 % term = term, op, term (xfy)
 term(P, Ops, term(xfy, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #< P
   , P_Term2 #=< P
-  , append(Term_Part, Out, In)
-  , append(Term1, [Op|Term2], Term_Part)
-  , phrase(op(P, xfy, Ops, Op_Tree), [Op])
-  , phrase(term(P_Term1, Ops, Term1_Tree), Term1)
-  , phrase(term(P_Term2, Ops, Term2_Tree), Term2).
+    % define instructions
+  , I0 = append(Term_Part, Out, In)
+  , I1 = append(Term1, [Op|Term2], Term_Part)
+  , I2 = phrase(op(P, xfy, Ops, Op_Tree), [Op])
+  , I3 = phrase(term(P_Term1, Ops, Term1_Tree), Term1)
+  , I4 = phrase(term(P_Term2, Ops, Term2_Tree), Term2)
+    % call instructions in best order
+  , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
+    ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
+    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
+  , call(Instructions).
 
 % term = term, op (yf)
 term(P, Ops, term(yf, [Term_Tree, Op_Tree]), In, Out) :-
     P_Term #=< P
-  , append(Term_Part, [Op | Out], In)
-  , phrase(op(P, yf, Ops, Op_Tree), [Op])
-  , phrase(term(P_Term, Ops, Term_Tree), Term_Part).
+    % define instructions
+  , I0 = append(Term_Part, [Op | Out], In)
+  , I1 = phrase(op(P, yf, Ops, Op_Tree), [Op])
+  , I2 = phrase(term(P_Term, Ops, Term_Tree), Term_Part)
+    % call instructions in best order
+  , ( \+ var(In) -> Instructions = (I0, I1, I2)
+    ; \+ var(Term_Tree) -> Instructions = (I2, I1, I0)
+    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
+  , call(Instructions).
 
 % term = term, op (xf)
 term(P, Ops, term(xf, [Term_Tree, Op_Tree]), In, Out) :-
     P_Term #< P
-  , append(Term_Part, [Op | Out], In)
-  , phrase(op(P, xf, Ops, Op_Tree), [Op])
-  , phrase(term(P_Term, Ops, Term_Tree), Term_Part).
+    % define instructions
+  , I0 = append(Term_Part, [Op | Out], In)
+  , I1 = phrase(op(P, xf, Ops, Op_Tree), [Op])
+  , I2 = phrase(term(P_Term, Ops, Term_Tree), Term_Part)
+    % call instructions in best order
+  , ( \+ var(In) -> Instructions = (I0, I1, I2)
+    ; \+ var(Term_Tree) -> Instructions = (I2, I1, I0)
+    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
+  , call(Instructions).
 
 % term = op, term (fy)
 term(P, Ops, term(fy, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
