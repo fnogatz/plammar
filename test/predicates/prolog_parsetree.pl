@@ -94,6 +94,8 @@
 
 %% Part III: automatic deterministic conversion string->parsetree->string
 
+%%% III.a): Example Prolog programs
+
 prolog("a.").
 prolog("a. b.").
 
@@ -113,3 +115,13 @@ prolog("list([a,1]).").
 
 prolog("member(X,[X|_]).").
 prolog("member(X,[_|Xs]) :- member(X,Xs).").
+
+%%% III.b): Operators
+
+prolog("a b c.", [ operators([ op(600, xfx, b) ]) ]).
+
+% Sec. 6.3, Table 5, valid terms
+prolog("fx (fx 1).", [ operators([ op(600, fx, fx) ]) ]).
+prolog("(1 xf) xf.", [ operators([ op(600, xf, xf) ]) ]).
+prolog("(1 xfx 2) xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
+prolog("1 xfx (2 xfx 3).", [ operators([ op(600, xfx, xfx) ]) ]).

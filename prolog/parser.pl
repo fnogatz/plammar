@@ -199,13 +199,15 @@ arg(Ops, arg(Term_Tree), In, Out) :-
 
 term(0, Ops) -->
     [ open_(_) ]
-  , term(1201, Ops)
-  , [ close_(_) ].
+  , term(P, Ops)
+  , [ close_(_) ]
+  , { P #=< 1201 }.
 
 term(0, Ops) -->
     [ open_ct(_) ]
-  , term(1201, Ops)
-  , [ close_(_) ].
+  , term(P, Ops)
+  , [ close_(_) ]
+  , { P #=< 1201 }.
 
 /* 6.3.4.2 Operators as functors */
 
