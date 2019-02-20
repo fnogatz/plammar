@@ -2,6 +2,8 @@
     merge_operators/3
   ]).
 
+:- use_module(library(plammar/util)).
+
 merge_operators(Old, [], Old).
 merge_operators(Old, [OpN|Ops], Merged) :-
   OpN = op(PrecN, Spec, Name),
@@ -12,6 +14,7 @@ merge_operators(Old, [OpN|Ops], Merged) :-
     merge_operators(Old, Ops, Merged)
   ; 
     !,
+    warning('Conflicting operators: ~p, ~p', [OpN, OpO]),
     false
   ), !.
 merge_operators(Old, [Op|Ops], Merged) :-
