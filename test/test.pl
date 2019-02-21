@@ -187,6 +187,13 @@ prolog_parsetrees(In, PTs, Options) :-
     PTs
   ).
 
+prolog_asts(In, ASTs, Options) :-
+  findall(
+    AST,
+    prolog_ast(In, AST, Options),
+    ASTs
+  ).
+
 /* End of dynamic test generation */
 
 :- set_test_paths.
@@ -217,3 +224,4 @@ run(prolog_tokens/2). % replaced via term expansion
 
 :- load_files('predicates/prolog_parsetree.pl').
 :- load_files('predicates/operators.pl').
+:- load_files('predicates/prolog_ast.pl').
