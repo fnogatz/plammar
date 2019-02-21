@@ -1,5 +1,5 @@
 float_number_token:
-  float_number_token(
+  float_number_token('1.2',
     [ integer_constant(
         [ decimal_digit_char('1') ]),
       fraction(
@@ -14,7 +14,7 @@ float_number_token! "1. 2".
 float_number_token! "1.2.3".
 
 float_number_token:
-  float_number_token(
+  float_number_token('1.2e3',
     [ integer_constant(
         [ decimal_digit_char('1') ]
       ),

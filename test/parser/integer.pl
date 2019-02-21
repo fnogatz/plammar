@@ -1,5 +1,5 @@
 integer_token:
-  integer_token(
+  integer_token('123',
     integer_constant(
       [ decimal_digit_char('1'),
         decimal_digit_char('2'),

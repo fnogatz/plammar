@@ -13,7 +13,7 @@
     PTs
   ),
   PTs = [
-    p_text([clause_term([term(atom(name([name_token(letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])])
+    p_text([clause_term([term(atom(name([name_token('a', letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])])
   ].
 
 '"a. b. c." has a single parse tree' :-
@@ -24,13 +24,17 @@
   ),
   PTs = [
     p_text([
-      clause_term([term(atom(name([name_token(letter_digit_token([small_letter_char(a)]))]))),
+      clause_term([term(atom(name([name_token('a', letter_digit_token([small_letter_char(a)]))]))),
         end([end_token(end_char(.))])]),
-      clause_term([term(atom(name([layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
-          name_token(letter_digit_token([small_letter_char(b)]))]))),
+      clause_term([
+        term(atom(name([
+          layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
+          name_token('b', letter_digit_token([small_letter_char(b)]))]))),
         end([end_token(end_char(.))])]),
-      clause_term([term(atom(name([layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
-          name_token(letter_digit_token([small_letter_char(c)]))]))),
+      clause_term([
+        term(atom(name([
+          layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
+          name_token('c', letter_digit_token([small_letter_char(c)]))]))),
         end([end_token(end_char(.))])])])
   ].
 
@@ -41,7 +45,15 @@
     PTs
   ),
   PTs = [
-    p_text([directive_term([term(xfx,[term(atom(name([name_token(letter_digit_token([small_letter_char(a)]))]))),op(atom(name([layout_text_sequence([layout_text(layout_char(space_char(' ')))]),name_token(graphic_token([graphic_token_char(graphic_char(':')),graphic_token_char(graphic_char('-'))]))]))),term(atom(name([layout_text_sequence([layout_text(layout_char(space_char(' ')))]),name_token(letter_digit_token([small_letter_char(b)]))])))]),end([end_token(end_char('.'))])])])
+    p_text([directive_term([term(xfx,[
+      term(atom(name([
+        name_token('a', letter_digit_token([small_letter_char(a)]))]))),
+      op(atom(name([
+        layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
+        name_token(':-', graphic_token([graphic_token_char(graphic_char(':')),graphic_token_char(graphic_char('-'))]))]))),
+      term(atom(name([
+        layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
+        name_token('b', letter_digit_token([small_letter_char(b)]))])))]),end([end_token(end_char('.'))])])])
   ].
 
 '"a :- b." cannot be parsed when ISO operators are not used'(fail) :-
@@ -84,7 +96,7 @@
 %% Part II: parse tree given, string unbound
 
 'Get "a." from parse tree' :-
-  PT = p_text([clause_term([term(atom(name([name_token(letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])]),
+  PT = p_text([clause_term([term(atom(name([name_token('a', letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])]),
   findall(
     String,
     prolog_parsetree(string(String), PT),

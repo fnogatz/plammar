@@ -134,7 +134,7 @@ comment_2_char -->                  % 6.4.1
 
 /* 6.4.2 Names */
 
-name_token -->                      % 6.4.2
+name token -->                      % 6.4.2
     letter_digit_token              % 6.4.2
   | graphic_token                   % 6.4.2
   | quoted_token                    % 6.4.2
@@ -276,7 +276,7 @@ symbolic_hexadecimal_char -->       % 6.4.2.1
 
 /* 6.4.3 Variables */
 
-variable_token -->                  % 6.4.3
+variable token -->                  % 6.4.3
     anonymous_variable              % 6.4.3
   | named_variable.                 % 6.4.3
 
@@ -297,7 +297,7 @@ variable_indicator_char -->         % 6.4.3
 
 /* 6.4.4 Integer numbers */
 
-integer_token -->                   % 6.4.3
+integer token -->                   % 6.4.3
     integer_constant                % 6.4.4
   | character_code_constant         % 6.4.4
   | binary_constant                 % 6.4.4
@@ -339,7 +339,7 @@ hexadecimal_constant_indicator -->  % 6.4.4
 
 /* 6.4.5 Floating point numbers */
 
-float_number_token -->              % 6.4.5
+float_number token -->              % 6.4.5
     integer_constant                % 6.4.4
   , fraction                        % 6.4.5
   , ?exponent.                      % 6.4.5
@@ -374,7 +374,7 @@ exponent_char -->                   % 6.4.5
 
 /* 6.4.6 Double quoted lists */
 
-double_quoted_list_token -->        % 6.4.6
+double_quoted_list token -->        % 6.4.6
     double_quote_char               % 6.5.5
   , *double_quoted_item             % 6.4.6
   , double_quote_char.              % 6.5.5

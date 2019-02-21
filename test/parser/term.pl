@@ -1,11 +1,11 @@
 term:
   term([
     name([
-      name_token(
+      name_token(a,
         letter_digit_token([
           small_letter_char(a)]))]),
     name([
-      name_token(
+      name_token('.',
         graphic_token([
           graphic_token_char(graphic_char('.'))]))]),
     name([
@@ -13,11 +13,11 @@ term:
         layout_text(
           layout_char(
             space_char(' ')))]),
-      name_token(
+      name_token(b,
         letter_digit_token([
           small_letter_char(b)]))]),
     name([
-      name_token(
+      name_token('.',
         graphic_token([
           graphic_token_char(
             graphic_char('.'))]))])])
@@ -26,7 +26,7 @@ term:
 term:
   term([
     name([
-      name_token(
+      name_token('..',
         graphic_token([
           graphic_token_char(
             graphic_char('.')),

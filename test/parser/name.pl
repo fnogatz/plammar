@@ -2,14 +2,14 @@
 
 name:
   name([
-    name_token(
+    name_token('a',
       letter_digit_token([
         small_letter_char(a) ]))])
   <=> "a".
 
 name:
   name([
-    name_token(
+    name_token('ab',
       letter_digit_token([
         small_letter_char(a),
         alphanumeric_char(
@@ -29,7 +29,7 @@ name! "0ab". % beginning with number
 
 name:
   name([
-    name_token(
+    name_token('<=>',
       graphic_token([
         graphic_token_char(graphic_char('<')),
         graphic_token_char(graphic_char('=')),
@@ -40,7 +40,7 @@ name:
 
 name:
   name([
-    name_token(
+    name_token('\'a\'',
       quoted_token([
         single_quote_char('\''),
         single_quoted_item(
@@ -56,11 +56,15 @@ name:
 
 name:
   name([
-    name_token(
+    name_token(';',
       semicolon_token(
         semicolon_char(';') ))])
   <=> ";".
 
 %% based on cut_token
 
-name: name([name_token(cut_token(cut_char(!)))]) <=> "!".
+name:
+  name([
+    name_token('!', 
+      cut_token(cut_char(!)))])
+  <=> "!".

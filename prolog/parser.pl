@@ -57,31 +57,12 @@ spec_class(yfx, infix).
 spec_class(xf , postfix).
 spec_class(yf , postfix).
 
-atom_tree(Atom, Tree) :-
-  remove_whitespaces(Tree, atom(Tree_Wo_Whitespace)),
-  atom_tree_(Atom, Tree_Wo_Whitespace).
+atom_tree(Atom, atom(name(L))) :-
+  ( L = [name_token(Atom, _)]
+  ; L = [_, name_token(Atom, _)] ).
 
-atom_tree_('[]', EmptyList) :-
-  EmptyList = [open_list([open_list_token(open_list_char('['))]),close_list([close_list_token(close_list_char(']'))])].
-atom_tree_('{}', EmptyCurly) :-
-  EmptyCurly = [open_curly([open_curly_token(open_curly_char('{'))]),close_curly([close_curly_token(close_curly_char('}'))])].
-atom_tree_(Atom, name(Name_Tree)) :-
-  phrase(name(name(Name_Tree)), Chars, []),
-  atom_chars(Atom, Chars).
-
-remove_whitespaces(Term, Term_) :-
-  \+is_list(Term),
-  Term =.. [F|TermL],
-  remove_whitespaces(TermL, TermL_),
-  Term_ =.. [F|TermL_].
-
-remove_whitespaces([], []).
-remove_whitespaces([layout_text_sequence(_)|Xs], Xs_) :-
-  !,
-  remove_whitespaces(Xs, Xs_).
-remove_whitespaces([X|Xs], [X_|Xs_]) :-
-  remove_whitespaces(X, X_),
-  remove_whitespaces(Xs, Xs_).
+atom_tree('[]', atom([open_list(_),close_list(_)])).
+atom_tree('{}', atom([open_curly(_),close_curly(_)])).
 
 
 /* 6.3 TERMS */

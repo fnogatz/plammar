@@ -1,6 +1,6 @@
 double_quoted_list:
   double_quoted_list([
-    double_quoted_list_token([
+    double_quoted_list_token('"a"', [
       double_quote_char('"'),
       double_quoted_item(
         double_quoted_character(

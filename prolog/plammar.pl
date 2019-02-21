@@ -14,6 +14,7 @@
 :- use_module(library(plammar/util)).
 :- use_module(library(plammar/options)).
 
+:- use_module(library(dcg4pt)).
 :- use_module(library(clpfd)).
 
 prolog_tokens(string(String), Tokens) :-
@@ -199,7 +200,34 @@ token(Tree, In, Rest) :-
   warning('Parse tree AND input unbound; this might not work as expected!'),
   token_(token_(Tree), In, Rest).
 
-:- use_module(library(dcg4pt/expand)).
+:- op(600, xf, token).
+:- discontiguous plammar:token/4.
+
+
+user:term_expansion(X1 token --> Y1, [Rule]) :-
+  atom_concat(X1, '_token', X1_token),
+  dcg4pt:dcg4pt_rule_to_dcg_rule(X1_token --> Y1, X2 --> Y2),
+  dcg_translate_rule(X2 --> Y2, Expanded_DCG_Rule),
+  Expanded_DCG_Rule = (
+    Expanded_DCG_Rule_Head :-
+      Expanded_DCG_Rule_Body
+  ),
+  Expanded_DCG_Rule_Head =.. [X1_token, Initial_Tree, In, Out],
+  Initial_Tree =.. [X1_token, Inner_Tree],
+  New_DCG_Rule_Head =.. [X1_token, New_Tree, In, Out],
+  New_Tree =.. [X1_token, Consumed, Inner_Tree],
+  Rule = (
+    New_DCG_Rule_Head :-
+      Expanded_DCG_Rule_Body,
+      ( var(Consumed) ->
+        append(Consumed_Chars, Out, In),
+        atom_chars(Consumed, Consumed_Chars)
+      ; true )
+  ).
+
+user:term_expansion(X1 --> Y1, [Rule]) :-
+  dcg4pt:dcg4pt_rule_to_dcg_rule(X1 --> Y1, X2 --> Y2),
+  dcg_translate_rule(X2 --> Y2, Rule).
 
 /*
   *(DCGBody, Tree, In, Out) <-
