@@ -130,9 +130,12 @@ prolog("a :- b.").
 prolog("a. % linecomment\nb.").
 prolog("a.% linecomment\nb.").
 prolog("a.%a%b%c\nb.").
-prolog("a./**/\nb.").
-prolog("a./* this is a comment */\nb.").
-prolog("a./*/**/\nb."). % no nesting of comments
+prolog("a. /**/\nb.").
+prolog("a. /* this is a comment */\nb.").
+prolog("a. /*/**/\nb."). % no nesting of comments
+% missing layout_char between end_token and next clause:
+invalid("a./**/\nb.").
+invalid("a./* this is a comment */\nb.").
 
 % Sec. 6.3.5, Compound terms - list notation
 prolog("list([]).").
