@@ -1,10 +1,6 @@
 :- module(plammar, [
     tree/3,
     tree/4,
-    parse/2,
-    parse/3,
-    prolog/3,
-    prolog/4,
     prolog_tokens/2,
     prolog_parsetree/2,
     prolog_parsetree/3
@@ -34,6 +30,7 @@ prolog_tokens(string(String), Tokens) :-
   fail.
 
 prolog_tokens(chars(Chars), Tokens) :-
+  !,
   phrase(plammar:term(term(Tokens)), Chars, []).
 
 prolog_tokens(_, _) :-
@@ -83,8 +80,12 @@ prolog_parsetree(_, _, _) :-
   warning('Use one of input formats ~w', [Types]).
 
 prolog_parsetree_(chars(Chars), PT, Options) :-
-  !,
-  p_text(Options, PT, Chars, []).
+  I0 = prolog_tokens(chars(Chars), Tokens),
+  I1 = prolog(Options, PT, Tokens, []),
+  ( \+ var(Chars) -> Instructions = (I0, !, I1)
+  ; Instructions = (I1, !, I0) ),
+  call(Instructions).
+
 
 pp(A) :-
   print_term(A, [indent_arguments(0)]).
@@ -102,82 +103,6 @@ tree_from_file(Body, Filename, Tree) :-
   read_file_to_codes(Filename, Codes, []),
   maplist(char_code, Chars, Codes),
   tree(Body, Chars, Tree).
-
-
-prolog(Opts, Tree, In) :-
-  string_chars(In, Chars),
-  !,
-  prolog(Opts, Tree, Chars, []).
-
-prolog(Opts, Tree, In) :-
-  prolog(Opts, Tree, In, []).
-
-prolog(Opts, p_text(P_Text_List_With_Ws), In, Out) :-
-  p_text(Opts, p_text(P_Text_List), In, Rest),
-  % there might be trailing white space
-  phrase(?(plammar:layout_text_sequence, Layout_Tree), Rest, Out),
-  (  Layout_Tree = []
-  -> P_Text_List_With_Ws = P_Text_List
-  ;  append(P_Text_List, Layout_Tree, P_Text_List_With_Ws) ).
-
-
-p_text(_Opts, p_text([]), In, In).
-
-p_text(Opts, p_text([Clause_Tree|Rec]), In, Out) :-
-  parse_prolog_term(Opts, Clause_Tree, In, Rest),
-  p_text(Opts, p_text(Rec), Rest, Out).
-
-parse_prolog_term(Opts, Tree, In, Out) :-
-  \+ var(Tree),
-  !,
-  Tree =.. [_Tree_Name, [Term_Tree, End_Tree_With_Layout]],
-  % first handle End_Tree_With_Layout
-  End_Tree_List = [end_token(end_char('.'))],
-  ( End_Tree_With_Layout = end(End_Tree_List) ->
-    Layout_Tree = []
-  ; End_Tree_With_Layout = end([Layout_Tree0|End_Tree_List]),
-    Layout_Tree0 = [Layout_Tree] ),
-  phrase(?(plammar:layout_text_sequence, Layout_Tree), FirstRest, []),
-  % next handle everything in front of end(...)
-  phrase(term(_Prec, Opts, Term_Tree), Tokens, []),
-  Token_Tree = term(Tokens),
-  phrase(term(Token_Tree), First, FirstRest),
-  append(First, ['.'|Out], In).
-
-parse_prolog_term(Opts, Tree, In, Out) :-
-  \+ var(In),
-  !,
-  append(First, ['.'|Out], In),
-  %% TODO: The next step is very inefficient,
-  %%   see e.g.
-  %writeln(FirstRest),
-  phrase(term(Token_Tree), First, FirstRest),
-  % FirstRest might be `?layout_text_sequence` (6.4)
-  phrase(?(plammar:layout_text_sequence, Layout_Tree), FirstRest, []),
-  Token_Tree = term(Tokens),
-  phrase(term(_Prec, Opts, Term_Tree), Tokens, []),
-  % Check whether the principal functor is (:-)/1 or not
-  principal_functor(Term_Tree, Principal_Functor),
-  (  Principal_Functor = (:-)
-  -> Tree_Name = directive_term
-  ;  Tree_Name = clause_term ),
-  % Build resulting parse tree
-  End_Tree_List = [end_token(end_char('.'))],
-  (  Layout_Tree = []
-  -> End_Tree_With_Layout = end(End_Tree_List)
-  ;  append(Layout_Tree, End_Tree_List, End_Tree_List_With_Layout),
-     End_Tree_With_Layout = end(End_Tree_List_With_Layout) ),
-  Tree =.. [Tree_Name, [Term_Tree, End_Tree_With_Layout]].
-
-
-parse(DCGBody, In) :-
-  string_chars(In, Chars),
-  parse(DCGBody, Chars, []).
-
-parse(DCGBody, In, Out) :-
-  phrase(term(Token_Tree), In, Out),
-  Token_Tree = term(Tokens),
-  phrase(DCGBody, Tokens, []).
 
 
 %% "A token shall not be followed by characters such that

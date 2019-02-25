@@ -65,6 +65,33 @@ atom_tree('[]', atom([open_list(_),close_list(_)])).
 atom_tree('{}', atom([open_curly(_),close_curly(_)])).
 
 
+/* 6.2 PROLOG TEXT AND DATA */
+
+prolog(Opts) -->
+    *p_text(Opts).
+
+p_text(Opts, PT, A, C) :-
+  \+ var(A), !,
+  P #=< 1201,
+  term(P, Opts, Term_Tree, A, B),
+  end_(End_Tree, B, C),
+  principal_functor(Term_Tree, Principal_Functor),
+  (  Principal_Functor = (:-)
+  -> Tree_Name = directive_term
+  ;  Tree_Name = clause_term ),
+  PT =.. [Tree_Name, [Term_Tree, End_Tree]].
+
+p_text(Opts, PT, A, C) :-
+  \+ var(PT), !,
+  PT =.. [_Tree_Name, [Term_Tree, End_Tree]],
+  term(P, Opts, Term_Tree, A, B),
+  end_(End_Tree, B, C),
+  P #=< 1201.
+
+end_(end([end_token(end_char('.'))]), [name([name_token('.', graphic_token([graphic_token_char(graphic_char('.'))]))])|B], B).
+end_(end([Layout_Text_Sequence,end_token(end_char('.'))]), [name([Layout_Text_Sequence,name_token('.', graphic_token([graphic_token_char(graphic_char('.'))]))])|B], B).
+
+
 /* 6.3 TERMS */
 
 :- discontiguous plammar:term/5.
