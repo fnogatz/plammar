@@ -13,7 +13,7 @@
     PTs
   ),
   PTs = [
-    p_text([clause_term([term(atom(name([name_token('a', letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])])
+    prolog([clause_term([term(atom(name([name_token('a', letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])])
   ].
 
 '"a. b. c." has a single parse tree' :-
@@ -23,7 +23,7 @@
     PTs
   ),
   PTs = [
-    p_text([
+    prolog([
       clause_term([term(atom(name([name_token('a', letter_digit_token([small_letter_char(a)]))]))),
         end([end_token(end_char(.))])]),
       clause_term([
@@ -45,7 +45,7 @@
     PTs
   ),
   PTs = [
-    p_text([directive_term([term(xfx,[
+    prolog([directive_term([term(xfx,[
       term(atom(name([
         name_token('a', letter_digit_token([small_letter_char(a)]))]))),
       op(atom(name([
@@ -96,7 +96,7 @@
 %% Part II: parse tree given, string unbound
 
 'Get "a." from parse tree' :-
-  PT = p_text([clause_term([term(atom(name([name_token('a', letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])]),
+  PT = prolog([clause_term([term(atom(name([name_token('a', letter_digit_token([small_letter_char(a)]))]))),end([end_token(end_char('.'))])])]),
   findall(
     String,
     prolog_parsetree(string(String), PT),
