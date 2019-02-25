@@ -47,7 +47,6 @@ pt_ast(Opts, name([layout_text_sequence(_PT_Layout), name_token(A,B)]), AST) :-
   pt_ast(Opts, name([name_token(A,B)]), AST),
   true. %% TODO: handle layout_text_sequence in _PT_Layout
 
-/*
 pt_ast(_, Q, Q) :-  !,
   Q =.. [Kind|_],
   setof(
@@ -60,4 +59,3 @@ pt_ast(_, Q, Q) :-  !,
     Types 
   ),
   warning('No pt_ast rule defined for ~w. Use one of ~w', [Kind, Types]).
-*/
