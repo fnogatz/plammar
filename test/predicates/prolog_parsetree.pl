@@ -45,15 +45,18 @@
     PTs
   ),
   PTs = [
-    prolog([directive_term([term(xfx,[
-      term(atom(name([
-        name_token('a', letter_digit_token([small_letter_char(a)]))]))),
-      op(atom(name([
-        layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
-        name_token(':-', graphic_token([graphic_token_char(graphic_char(':')),graphic_token_char(graphic_char('-'))]))]))),
-      term(atom(name([
-        layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
-        name_token('b', letter_digit_token([small_letter_char(b)]))])))]),end([end_token(end_char('.'))])])])
+    prolog([directive_term([
+      term(xfx,[
+        term(atom(name([
+          name_token('a', letter_digit_token([small_letter_char(a)]))]))),
+        op(atom(name([
+          layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
+          name_token(':-', graphic_token([graphic_token_char(graphic_char(':')),graphic_token_char(graphic_char('-'))]))]))),
+        term(atom(name([
+          layout_text_sequence([layout_text(layout_char(space_char(' ')))]),
+          name_token('b', letter_digit_token([small_letter_char(b)]))])))]),
+      end([end_token(end_char('.'))])])
+    ])
   ].
 
 '"a :- b." cannot be parsed when ISO operators are not used'(fail) :-
