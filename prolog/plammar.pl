@@ -6,7 +6,7 @@
     prolog_parsetree/3
   ]).
 
-:- reexport(library(plammar/iso_operators)).
+:- use_module(library(plammar/environments)).
 :- use_module(library(plammar/util)).
 :- use_module(library(plammar/options)).
 

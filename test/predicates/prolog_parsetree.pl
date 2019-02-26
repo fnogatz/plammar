@@ -60,7 +60,7 @@
   ].
 
 '"a :- b." cannot be parsed when ISO operators are not used'(fail) :-
-  prolog_parsetree(string("a :- b."), _PT, [ iso_operators(no) ]).
+  prolog_parsetree(string("a :- b."), _PT, [ targets([]) ]).
 
 '"a b c." can be parsed with the appropriate operator' :-
   % try all variants xfx, xfy, and yfx
@@ -184,35 +184,18 @@ invalid("1 xfx 2 xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
 'Explicit statement of pre-defined ISO operators is allowed' :-
   Options = [
     operators([ op(1200, xfx, ':-') ]),
-    iso_operators(yes)
+    targets([iso])
   ],
   prolog_parsetree(string("a."), _, Options), !.
-
-% Sec. 6.3.4.3: There shall not be two operators with the same class and name
-'Disallow re-defining ISO operator with different precedence' :-
-  Options = [
-    % :-/2 is already pre-defined as ISO operator with precedence of 1200
-    operators([ op(1100, xfx, ':-') ]),
-    iso_operators(yes)
-  ],
-  \+ prolog_parsetree(string("a."), _, Options).
-
-% Sec. 6.3.4.3: There shall not be two operators with the same class and name
-'No two operators with the same class and name' :-
-  Options = [
-    operators([ op(800, xfx, xfx), op(1000, xfx, xfx) ]),
-    iso_operators(no)
-  ],
-  \+ prolog_parsetree(string("a."), _, Options), !.
 
 %% Part V: infer operator definitions
 
 '"a b." invalid for infer_operators(no)' :-
-  Options = [ iso_operators(no), infer_operators(no) ],
+  Options = [ targets([]), infer_operators(no) ],
   \+ prolog_parsetree(string("a b."), _, Options).
 
 '"a b." valid for infer_operators(yes)' :-
-  Options = [ iso_operators(no), infer_operators(yes) ],
+  Options = [ targets([]), infer_operators(yes) ],
   prolog_parsetrees(string("a b."), PTs, Options),
   length(PTs, PTs_Count),
   % with the current implementation, it is 8, because of:
@@ -229,7 +212,7 @@ invalid("1 xfx 2 xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
     prolog_parsetree(
       string("a b."),
       PT,
-      [ iso_operators(no), infer_operators(Ops) ]
+      [ targets([]), infer_operators(Ops) ]
     ),
     Inferred_Ops
   ),

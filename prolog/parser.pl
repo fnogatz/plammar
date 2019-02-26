@@ -1,5 +1,8 @@
 :- module(parser, []).
 
+:- use_module(library(yall)).
+:- use_module(library(plammar/environments)).
+
 :- style_check(-singleton).
 
 is_priority(P) :-
@@ -12,12 +15,23 @@ is_operator(Op0, Options) :-
   ( atom_concat(' ', Name, Name0) ; Name = Name0 ), !,
   Op = op(Prec, Spec, Name),
   is_priority(Prec),
+  
+  % get relevant options
   option(operators(Operators), Options),
+  option(targets(Targets), Options),
   option(infer_operators(Inferred_Ops), Options),
-  ( member(Op, Operators)
-  ; Inferred_Ops == no,
-    !, false
-  ; option(infer_operators(Inferred_Ops), Options),
+  
+  ( % Option I: it is part of the operators(_) option
+    member(Op, Operators)
+  ; % Option II: it is part of the operators defined in the target
+    Targets = [Target], %% TODO: Support more than one target, e.g.
+                        %%   `targets([swi,gnu])`, to throw warnings
+                        %%   for operators that are not defined in
+                        %%   all target systems
+    target_ops(Target, Target_Ops),
+    member(Op, Target_Ops)
+  ; % Option III: operators should be inferred
+    Inferred_Ops \== no,
     memberchk(Op, Inferred_Ops)
   ).
 
@@ -26,12 +40,16 @@ not_operator(Op0, Options) :-
   % remove leading space if present
   ( atom_concat(' ', Name, Name0) ; Name = Name0 ), !,
   Op = op(Prec, Spec, Name),
+  
+  % get relevant options
   option(operators(Operators), Options),
+  option(targets(Targets), Options),
+  option(infer_operators(Inferred_Ops), Options),
+
+  % check that it can not be defined as an operator
   \+ member(Op, Operators),
-  ( option(infer_operators(no), Options)
-  ; option(infer_operators(Inferred_Ops), Options),
-    not_member(Op, Inferred_Ops)
-  ).
+  ( Inferred_Ops == no ; not_member(Op, Inferred_Ops) ).
+
 
 not_member(_, Ys) :-
   var(Ys), !.
