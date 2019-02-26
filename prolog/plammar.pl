@@ -29,6 +29,19 @@ prolog_tokens(string(String), Tokens) :-
   warning('Either string or tokens must be given.'),
   fail.
 
+prolog_tokens(file(File), Tokens) :-
+  \+ var(File),
+  !,
+  open(File, read, Stream),
+  prolog_tokens(stream(Stream), Tokens),
+  close(Stream).
+
+prolog_tokens(stream(Stream), Tokens) :-
+  \+ var(Stream),
+  !,
+  read_string(Stream, _Length, String),
+  prolog_tokens(string(String), Tokens).
+
 prolog_tokens(chars(Chars), Tokens) :-
   !,
   phrase(plammar:term(term(Tokens)), Chars, []).
@@ -59,6 +72,20 @@ prolog_parsetree(string(String), PT, Options) :-
   !,
   prolog_parsetree(chars(Chars), PT, Options),
   string_chars(String, Chars).
+
+prolog_parsetree(file(File), PT, Options) :-
+  \+ var(File),
+  !,
+  open(File, read, Stream),
+  prolog_parsetree(stream(Stream), PT, Options),
+  close(Stream).
+
+prolog_parsetree(stream(Stream), PT, Options) :-
+  \+ var(Stream),
+  !,
+  read_string(Stream, _Length, String),
+  prolog_parsetree(string(String), PT, Options).
+
 
 prolog_parsetree(chars(Chars), PT, User_Options) :-
   !,
