@@ -115,7 +115,7 @@ prolog_parsetree_(chars(Chars), PT, Options) :-
 
 
 pp(A) :-
-  print_term(A, [indent_arguments(0)]).
+  print_term(A, [indent_arguments(2),tab_width(0)]).
 
 tree(Body, In, Tree) :-
   tree(Body, In, Tree, []).

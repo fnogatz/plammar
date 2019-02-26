@@ -236,13 +236,77 @@ term_(0, Opts) -->
 
 /* 6.3.4.2 Operators as functors */
 
+:- op(300, xfx, '@').
+
+term(P, Opts, Res, A, Z) :-
+  \+ var(A),
+  term_(Term1_P, Opts, term_(Term1_Tree_), A, B),
+  lterm(Opts, term(Term1_Tree_)@Term1_P, Res@P, B, Z).
+
+lterm(Opts, Term_Tree@P, Term_Tree@P, A, A).
+
+lterm(Opts, Term1_Tree@Term1_P, Res@P, A, Z) :-
+  op(Op_P, Type, Opts, Op_Tree, A, B),
+  term(Term2_P, Opts, Term2_Tree, B, C),
+  spec_class(Type, infix),
+  lterm(Opts, term(Type, [Term1_Tree, Op_Tree, Term2_Tree])@Op_P, Res@P, C, Z),
+  prec_constraints(Type, Op_P, Term1_P, Term2_P).
+
+
+
+/*
+lterm(Term_Tree) :-
+  op(Op_P, Type, Opts, Op_Tree, A, B),
+  lterm(term(Type, [Term_Tree, Op_Tree, ?])).
+
+lterm(Term_Tree, Res) :-
+  op(Op_P, Type, Opts, Op_Tree, A, B),
+*/
+
+
+/*
+op_term(Opts, lterm(P, Term1_P, Term1_Tree), Res, A, A) :-
+  P #= Term1_P,
+  Res = Term1_Tree.
+
+op_term(Opts, lterm(P, Term1_P, Term1_Tree), Res, A, Z) :-
+  op(Op_P, Type, Opts, Op_Tree, A, B),
+  spec_class(Type, infix),
+  term(Term2_P, Opts, Term2_Tree, B, Z),
+  P #= Op_P,
+  prec_constraints(Type, Op_P, Term1_P, Term2_P),
+  Res = term(Type, [Term1_Tree, Op_Tree, Term2_Tree]).
+
+op_term(Opts, lterm(P, Term1_P, Term1_Tree), Res, A, Z) :-
+  op(Op_P, Type, Opts, Op_Tree, A, B),
+  spec_class(Type, infix),
+  term_(Term2_P, Opts, term_(Term2_Tree_), B, C),
+  prec_constraints(Type, Op_P, Term1_P, Term2_P),
+  New_LTerm = term(Type, [Term1_Tree, Op_Tree, term(Term2_Tree_)]),
+  op_term(Opts, lterm(P, Op_P, New_LTerm), Res, C, Z).
+*/
+
+/*
+op_term(Opts, lterm(P, Term1_P, Term1_Tree), Res, A, Z) :-
+  op(Op_P, Type, Opts, Op_Tree, A, B),
+  member(Type, [xfx, xfy, yfx]),
+  term_(Term2_P, Opts, term_(Term2_Tree), B, C),
+  op_term(Opts, lterm(P, Op_P, term(Type, [Term1_Tree, Op_Tree, term(Term2_Tree)])), Res, C, Z).
+*/
+
+/*
 term__(_Opts, nil, A, A).
 
 term__(Opts, Res, A, Z) :-
   op(P_Op, Type, Opts, Op_Tree, A, B),
   ( member(Type, [xfx, yfx, xfy]),
-    term(P_Term2, Opts, Term_Tree2, B, Z),
-    Res = infix(Type, P_Op, P_Term2, Op_Tree, Term_Tree2)
+    ( term(P_Term2, Opts, Term_Tree2, B, C),
+      Res = infix(Type, P_Op, P_Term2, Op_Tree, Term_Tree2),
+      C = Z
+    ; term__(Opts, PT_2, B, C),
+      Res = infix(yfx, 500, 0, Op_Tree, )
+      C = Z
+    )
   ; member(Type, [xf, yf]),
     B = Z,
     Res = postfix(Type, P_Op, Op_Tree)
@@ -254,17 +318,19 @@ term(P, Opts, Res, A, Z) :-
   term__(Opts, PT_Second, B, Z),
   Term_Tree1 =.. [term_|Term_Tree1_L],
   Term_Tree1_ =.. [term|Term_Tree1_L],
-  ( PT_Second = nil
-  -> Res = Term_Tree1_,
+  ( PT_Second = nil,
+    Res = Term_Tree1_,
     P = 0
-  ; PT_Second = infix(Type, P_Op, P_Term2, Op_Tree, Term_Tree2)
-  -> prec_constraints(Type, P_Op, P_Term1, P_Term2),
+  ; PT_Second = infix(Type, P_Op, P_Term2, Op_Tree, Term_Tree2),
+    prec_constraints(Type, P_Op, P_Term1, P_Term2),
     Res = term(Type, [Term_Tree1_, Op_Tree, Term_Tree2]),
     P = P_Op
   ; PT_Second = postfix(Type, P_Op, Op_Tree),
     Res = term(Type, [Term_Tree1_, Op_Tree]),
     P = P_Op
   ).
+*/
+/*
 term(0, Opts, Res, A, Z) :-
   \+ var(Res),
   ( Res = term(Inner),
@@ -284,7 +350,7 @@ term(P_Op, Opts, term(Type, [Op_Tree, Term_Tree]), A, Z) :-
   member(Type, [fx, fy]),
   term(P_Term, Opts, Term_Tree, B, Z),
   prec_constraints(Type, P_Op, P_Term).
-
+*/
 prec_constraints(xfx, P_Op, P_Term1, P_Term2) :-
   P_Term1 #< P_Op,
   P_Term2 #< P_Op.

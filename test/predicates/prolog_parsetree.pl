@@ -122,6 +122,8 @@ prolog("a(_).").
 prolog("a(1,2).").
 prolog("a( 1 , 2 ).").
 
+prolog("a(b(c)).").
+
 prolog("a(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).").
 
 prolog(":- a.").
@@ -166,7 +168,45 @@ prolog("a(\"string with blanks\").").
 
 %%% III.b): Operators
 
+'"a(1+1)." is correctly parsed' :-
+  prolog_parsetrees(string("a(1+1)."), PTs, []),
+  PTs = [
+    prolog([
+      clause_term([
+        term([
+          atom(name([name_token(a,letter_digit_token([small_letter_char(a)]))])),
+          open_ct(
+            open_token(open_char('('))),
+            arg_list(arg(term(yfx,[
+              term(integer([integer_token('1',integer_constant([decimal_digit_char('1')]))])),
+              op(atom(name([name_token(+,graphic_token([graphic_token_char(graphic_char(+))]))]))),
+              term(integer([integer_token('1',integer_constant([decimal_digit_char('1')]))]))]))),
+            close_([close_token(close_char(')'))])]),
+        end([end_token(end_char('.'))])
+      ])
+    ])
+  ].
+
+prolog("a((1+2)+3).").
+prolog("a(1+(2+3)).").
+
+% left-associative
+prolog("a(1+2+3).", [ targets([]), operators([ op(500,xfy,+) ]) ]).
+prolog("a(1+2+3+4).", [ targets([]), operators([ op(500,xfy,+) ]) ]).
+
+% right-associative
+prolog("a(2+4+6).", [ targets([]), operators([ op(500,yfx,+) ]) ]).
+
+/*
+:- op(200, xfx, b).
+:- op(300, xfx, a).
+:- op(400, xfx, c).
+test(1 a 2 b 3 c 4).
+*/
+
 prolog("a b c.", [ operators([ op(600, xfx, b) ]) ]).
+prolog("a b c.", [ operators([ op(600, yfx, b) ]) ]).
+prolog("a b c.", [ operators([ op(600, xfy, b) ]) ]).
 
 % Sec. 6.3, Table 5, valid terms
 prolog("fx (fx 1).", [ operators([ op(600, fx, fx) ]) ]).
@@ -178,6 +218,12 @@ prolog("1 xfx (2 xfx 3).", [ operators([ op(600, xfx, xfx) ]) ]).
 invalid("fx fx 1.", [ operators([ op(600, fx, fx) ]) ]).
 invalid("1 xf xf.", [ operators([ op(600, xf, xf) ]) ]).
 invalid("1 xfx 2 xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
+
+%%% III.c): Complex Example Prolog programs
+
+prolog("a :- b, d.", [ targets([swi]) ]).
+prolog("a :- b:c.", [ targets([swi]) ]).
+prolog("a :- b:c, d.", [ targets([swi]) ]).
 
 %% Part IV: handling of options
 
