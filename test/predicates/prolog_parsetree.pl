@@ -239,4 +239,4 @@ invalid("1 xfx 2 xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
     [op(_,fx,a)],
     [op(_,fx,a), op(_,_,b)]
   ],
-  permutation(Inferred_Ops, Expected), !.
+  permutation2(Inferred_Ops, Expected), !.

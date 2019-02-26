@@ -187,6 +187,12 @@ prolog_parsetrees(In, PTs, Options) :-
     PTs
   ).
 
+permutation2([], []).
+  permutation2(List, [First|Perm]) :-
+  select(First_, List, Rest),
+  permutation(First, First_),
+  permutation2(Rest, Perm).
+
 /* End of dynamic test generation */
 
 :- set_test_paths.
