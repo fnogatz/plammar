@@ -1,5 +1,7 @@
 :- module(parser, []).
 
+:- style_check(-singleton).
+
 is_priority(P) :-
   P #>= 0,
   P #=< 1201.
@@ -95,24 +97,25 @@ end_(end([Layout_Text_Sequence,end_token(end_char('.'))]), [name([Layout_Text_Se
 /* 6.3 TERMS */
 
 :- discontiguous plammar:term/5.
+:- discontiguous plammar:term_/5.
 
 /* 6.3.1 Atomic terms */
 
 /* 6.3.1.1 Numbers */
 
-term(0, _Opts) -->
+term_(0, _Opts) -->
     [ integer(_) ].
 
-term(0, _Opts) -->
+term_(0, _Opts) -->
     [ float_number(_) ].
 
 /* 6.3.1.2 Negative numbers */
 
-term(0, _Opts) -->
+term_(0, _Opts) -->
     negative_sign_name
   , [ integer(_) ].
 
-term(0, _Opts) -->
+term_(0, _Opts) -->
     negative_sign_name
   , [ float_number(_) ].
 
@@ -139,12 +142,12 @@ is_whitespace(A) :-
 
 /* 6.3.1.3 Atoms */
 
-term(0, Opts, term(Atom_Tree), In, Out) :-
+term_(0, Opts, term_(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
   not_operator(op(_,_,Atom), Opts).
 
-term(P, Opts, term(Atom_Tree), In, Out) :-
+term_(P, Opts, term_(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
   is_operator(op(P,_,Atom), Opts).
@@ -162,12 +165,12 @@ atom -->
 
 /* 6.3.2 Variables */
 
-term(0, _Opts) -->
+term_(0, _Opts) -->
     [ variable(_) ].
 
 /* 6.3.3 Compund terms - functional notation */
 
-term(0, Opts) -->
+term_(0, Opts) -->
     atom
   , [ open_ct(_) ]
   , arg_list(Opts)
@@ -201,13 +204,13 @@ arg(Opts, arg(Term_Tree), In, Out) :-
 %% `term` and `lterm` to avoid trivial
 %% non-termination because of left-recursion
 
-term(0, Opts) -->
+term_(0, Opts) -->
     [ open_(_) ]
   , term(P, Opts)
   , [ close_(_) ]
   , { P #=< 1201 }.
 
-term(0, Opts) -->
+term_(0, Opts) -->
     [ open_ct(_) ]
   , term(P, Opts)
   , [ close_(_) ]
@@ -215,6 +218,86 @@ term(0, Opts) -->
 
 /* 6.3.4.2 Operators as functors */
 
+term__(_Opts, nil, A, A).
+
+term__(Opts, Res, A, Z) :-
+  op(P_Op, Type, Opts, Op_Tree, A, B),
+  ( member(Type, [xfx, yfx, xfy]),
+    term(P_Term2, Opts, Term_Tree2, B, Z),
+    Res = infix(Type, P_Op, P_Term2, Op_Tree, Term_Tree2)
+  ; member(Type, [xf, yf]),
+    B = Z,
+    Res = postfix(Type, P_Op, Op_Tree)
+  ).
+
+term(P, Opts, Res, A, Z) :-
+  \+ var(A),
+  term_(P_Term1, Opts, Term_Tree1, A, B),
+  term__(Opts, PT_Second, B, Z),
+  Term_Tree1 =.. [term_|Term_Tree1_L],
+  Term_Tree1_ =.. [term|Term_Tree1_L],
+  ( PT_Second = nil
+  -> Res = Term_Tree1_,
+    P = 0
+  ; PT_Second = infix(Type, P_Op, P_Term2, Op_Tree, Term_Tree2)
+  -> prec_constraints(Type, P_Op, P_Term1, P_Term2),
+    Res = term(Type, [Term_Tree1_, Op_Tree, Term_Tree2]),
+    P = P_Op
+  ; PT_Second = postfix(Type, P_Op, Op_Tree),
+    Res = term(Type, [Term_Tree1_, Op_Tree]),
+    P = P_Op
+  ).
+term(0, Opts, Res, A, Z) :-
+  \+ var(Res),
+  ( Res = term(Inner),
+    term_(_, Opts, term_(Inner), A, Z)
+  ; Res = term(Type, [Term_Tree1, Op_Tree, Term_Tree2]),
+    term(P_Term1, Opts, Term_Tree1, A, B),
+    op(P_Op, Type, Opts, Op_Tree, B, C),
+    term(P_Term2, Opts, Term_Tree2, C, Z)
+  ; Res = term(Type, [Term_Tree, Op_Tree]),
+    member(Type, [xf, yf]),
+    term(P_Term, Opts, Term_Tree, A, B),
+    op(P_Op, Type, Opts, Op_Tree, B, Z)
+  ).
+
+term(P_Op, Opts, term(Type, [Op_Tree, Term_Tree]), A, Z) :-
+  op(P_Op, Type, Opts, Op_Tree, A, B),
+  member(Type, [fx, fy]),
+  term(P_Term, Opts, Term_Tree, B, Z),
+  prec_constraints(Type, P_Op, P_Term).
+
+prec_constraints(xfx, P_Op, P_Term1, P_Term2) :-
+  P_Term1 #< P_Op,
+  P_Term2 #< P_Op.
+prec_constraints(yfx, P_Op, P_Term1, P_Term2) :-
+  P_Term1 #=< P_Op,
+  P_Term2 #< P_Op.
+prec_constraints(xfy, P_Op, P_Term1, P_Term2) :-
+  P_Term1 #< P_Op,
+  P_Term2 #=< P_Op.
+prec_constraints(xf, P_Op, P_Term) :-
+  P_Term #< P_Op.
+prec_constraints(yf, P_Op, P_Term) :-
+  P_Term #=< P_Op.
+prec_constraints(fx, P_Op, P_Term) :-
+  P_Term #< P_Op.
+prec_constraints(fy, P_Op, P_Term) :-
+  P_Term #=< P_Op.
+
+
+/*
+term(P, Opts) -->
+    term_(P, Opts),
+    term__(P, Opts).
+
+term__(P, Opts) --> [].
+
+term__(P, Opts) -->
+    op(P, _Type, Opts),
+    term(P, Opts).
+*/
+/*
 % term = term, op, term (xfx)
 term(P, Opts, term(xfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
     P_Term1 #< P
@@ -300,7 +383,7 @@ term(P, Opts, term(fx, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
     P_Term #< P
   , phrase(op(P, fx, Opts, Op_Tree), [Op])
   , phrase(term(P_Term, Opts, Term_Tree), Rest, Out).
-
+*/
 /* 6.3.4.3 Operators */
 
 op(P, Spec, Opts, op(Atom_Tree), In, Out) :-
@@ -313,7 +396,7 @@ op(1000, xfy, _Opts) -->
 
 /* 6.3.5 Compound terms - list notation */
 
-term(0, Opts) -->
+term_(0, Opts) -->
     [ open_list(_) ]
   , items(Opts)
   , [ close_list(_) ].
@@ -337,7 +420,7 @@ items(Opts) -->
 /* 6.3.6 Compound terms - curly bracketed term */
 
 % {}(l)
-term(0, Opts) -->
+term_(0, Opts) -->
     [ open_curly(_) ]
   , term(P, Opts)
   , [ close_curly(_) ]
@@ -345,5 +428,5 @@ term(0, Opts) -->
 
 /* 6.3.7 Terms - double quoted list notation */
 
-term(0, _Opts) -->
+term_(0, _Opts) -->
     [ double_quoted_list(_) ].
