@@ -122,6 +122,8 @@ prolog("a(_).").
 prolog("a(1,2).").
 prolog("a( 1 , 2 ).").
 
+prolog("a(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).").
+
 prolog(":- a.").
 prolog(":- a, b.").
 prolog(":- [load].").
@@ -148,6 +150,8 @@ prolog("list( [ b , 2 ] ).").
 
 prolog("member(X,[X|_]).").
 prolog("member(X,[_|Xs]) :- member(X,Xs).").
+
+prolog("list([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]).").
 
 % Sec. 6.3.6, Compound terms - curly bracketed term
 prolog("curly({}).").
