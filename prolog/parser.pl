@@ -194,6 +194,7 @@ term_(0, Opts) -->
   , arg_list(Opts)
   , [ close_(_) ].
 
+/*
 arg_list(Opts) -->
     arg(Opts).
 
@@ -201,6 +202,25 @@ arg_list(Opts) -->
     arg(Opts)
   , [ comma(_) ]
   , arg_list(Opts).
+*/
+
+%% Optimised version:
+arg_list(Opts, arg_list(Inner), A, Z) :-
+  \+ var(A),
+  arg(Opts, Arg, A, B),
+  ( B = Z,
+    Inner = Arg
+  ; B = [comma(Comma)|C],
+    arg_list(Opts, Arg_List, C, Z),
+    Inner = [ Arg, comma(Comma), Arg_List ]
+  ).
+arg_list(Opts, arg_list(arg(Arg)), A, Z) :-
+  \+ var(Arg),
+  arg(Opts, arg(Arg), A, Z).
+arg_list(Opts, arg_list([Arg, Comma, Arg_List]), A, Z) :-
+  \+ var(Arg),
+  arg(Opts, Arg, A, [Comma|B]),
+  arg_list(Opts, Arg_List, B, Z).
 
 /* 6.3.3.1 Arguments */
 
