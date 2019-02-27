@@ -28,6 +28,7 @@ handle(post, Request) :-
    % format(user_output, "Data is: ~p~n", [Data]),
    atom_chars(Data, Chars),
    Options = [
+      targets([swi]),
       infer_operators(no)
    ],
    (
