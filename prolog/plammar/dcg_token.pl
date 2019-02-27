@@ -12,6 +12,57 @@ read_term_  -->                     % 6.4
     term                            % 6.4
   , end.                            % 6.4
 
+% Optimised version to avoid backtracking of
+%   layout_text_sequence.
+token_(token_(Tree), A, Z) :-
+  ( \+ var(A) ->
+    ( layout_text_sequence(LTS_Tree, A, B),
+      Inner = [LTS_Tree, Token_Tree]
+    ; A = B,
+      Inner = [Token_Tree] )
+  ; % otherwise ->
+    Tree =.. [_, Inner],
+    ( Inner = [LTS_Tree, Token_Tree] ->
+      layout_text_sequence(LTS_Tree, A, B)
+    ; Inner = open_token(_) ->
+      Inner = Token_Tree,
+      A = B
+    ; Inner = [Token_Tree] ->
+      A = B)
+  ),
+  ( name_token(Token_Tree, B, Z),
+    Tree = name(Inner)
+  ; variable_token(Token_Tree, B, Z),
+    Tree = variable(Inner)
+  ; integer_token(Token_Tree, B, Z),
+    Tree = integer(Inner)
+  ; float_number_token(Token_Tree, B, Z),
+    Tree = float_number(Inner)
+  ; double_quoted_list_token(Token_Tree, B, Z),
+    Tree = double_quoted_list(Inner)
+  ; close_token(Token_Tree, B, Z),
+    Tree = close_(Inner)
+  ; open_list_token(Token_Tree, B, Z),
+    Tree = open_list(Inner)
+  ; close_list_token(Token_Tree, B, Z),
+    Tree = close_list(Inner)
+  ; open_curly_token(Token_Tree, B, Z),
+    Tree = open_curly(Inner)
+  ; close_curly_token(Token_Tree, B, Z),
+    Tree = close_curly(Inner)
+  ; head_tail_separator_token(Token_Tree, B, Z),
+    Tree = ht_sep(Inner)
+  ; comma_token(Token_Tree, B, Z),
+    Tree = comma(Inner)
+  ; open_token(Token_Tree, B, Z),
+    ( Inner = [LTS_Tree, Token_Tree] ->
+      Tree = open_(Inner)
+    ; % otherwise ->
+      Tree = open_ct(Token_Tree)
+    )
+  ).
+
+/*
 token_ -->                          % 6.4
     name                            % 6.4
   | variable                        % 6.4
@@ -82,6 +133,7 @@ ht_sep -->                          % 6.4
 comma -->                           % 6.4
     ?layout_text_sequence           % 6.4
   , comma_token.                    % 6.4.8
+*/
 
 end -->                             % 6.4
     ?layout_text_sequence           % 6.4
