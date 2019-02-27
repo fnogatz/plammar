@@ -20,4 +20,4 @@ integer_token! "a".
 
 integer_token! "1.2".
 
-integer: "123".
+integer_token: "123".

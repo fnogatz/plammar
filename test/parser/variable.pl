@@ -43,8 +43,8 @@ named_variable:
     ])
   <=> "_var".
 
-variable: "_var".
+variable_token: "_var".
 
-variable: "V".
+variable_token: "V".
 
-variable: "Var".
+variable_token: "Var".

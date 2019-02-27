@@ -36,4 +36,4 @@ float_number_token: "1.2e+3".
 
 float_number_token: "1.2e-3".
 
-float_number: "1.23".
+float_number_token: "1.23".
