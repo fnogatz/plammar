@@ -93,6 +93,12 @@ prolog_parsetree(chars(Chars), PT, User_Options) :-
   prolog_parsetree_(chars(Chars), PT, Options),
   revise_options(prolog_parsetree, Options).
 
+prolog_parsetree(tokens(Tokens), PT, User_Options) :-
+  !,
+  normalise_options(prolog_parsetree, User_Options, Options),
+  prolog(Options, PT, Tokens, []).
+
+
 prolog_parsetree(_, _, _) :-
   !,
   setof(
