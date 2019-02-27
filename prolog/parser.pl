@@ -193,7 +193,6 @@ term_(0, Opts) -->
   , [ open_ct(_) ]
   , arg_list(Opts)
   , [ close_(_) ].
-
 /*
 arg_list(Opts) -->
     arg(Opts).
@@ -263,12 +262,13 @@ term(P, Opts, Res, A, Z) :-
   term_(Term1_P, Opts, term_(Term1_Tree_), A, B),
   lterm(Opts, term(Term1_Tree_)@Term1_P, Res@P, B, Z).
 
-term(P_Op, Opts, term(Type, [Op_Tree, Term_Tree]), A, Z) :-
-  op(P_Op, Type, Opts, Op_Tree, A, B),
+term(P, Opts, Res, A, Z) :-
+  \+ var(A),
+  op(Op_P, Type, Opts, Op_Tree, A, B),
   spec_class(Type, prefix),
-  term(P_Term, Opts, Term_Tree, B, Z),
-  prec_constraints(Type, P_Op, P_Term).
-
+  term(P_Term, Opts, Term_Tree, B, C),
+  lterm(Opts, term(Type, [Op_Tree, Term_Tree])@Op_P, Res@P, C, Z),
+  prec_constraints(Type, Op_P, P_Term).
 
 lterm(Opts, Term_Tree@P, Term_Tree@P, A, A).
 
@@ -282,84 +282,6 @@ lterm(Opts, Term1_Tree@Term1_P, Res@P, A, Z) :-
     lterm(Opts, term(Type, [Term1_Tree, Op_Tree])@Op_P, Res@P, B, Z),
     prec_constraints(Type, Op_P, Term1_P) ).
 
-
-/*
-lterm(Term_Tree) :-
-  op(Op_P, Type, Opts, Op_Tree, A, B),
-  lterm(term(Type, [Term_Tree, Op_Tree, ?])).
-
-lterm(Term_Tree, Res) :-
-  op(Op_P, Type, Opts, Op_Tree, A, B),
-*/
-
-
-/*
-op_term(Opts, lterm(P, Term1_P, Term1_Tree), Res, A, A) :-
-  P #= Term1_P,
-  Res = Term1_Tree.
-
-op_term(Opts, lterm(P, Term1_P, Term1_Tree), Res, A, Z) :-
-  op(Op_P, Type, Opts, Op_Tree, A, B),
-  spec_class(Type, infix),
-  term(Term2_P, Opts, Term2_Tree, B, Z),
-  P #= Op_P,
-  prec_constraints(Type, Op_P, Term1_P, Term2_P),
-  Res = term(Type, [Term1_Tree, Op_Tree, Term2_Tree]).
-
-op_term(Opts, lterm(P, Term1_P, Term1_Tree), Res, A, Z) :-
-  op(Op_P, Type, Opts, Op_Tree, A, B),
-  spec_class(Type, infix),
-  term_(Term2_P, Opts, term_(Term2_Tree_), B, C),
-  prec_constraints(Type, Op_P, Term1_P, Term2_P),
-  New_LTerm = term(Type, [Term1_Tree, Op_Tree, term(Term2_Tree_)]),
-  op_term(Opts, lterm(P, Op_P, New_LTerm), Res, C, Z).
-*/
-
-/*
-op_term(Opts, lterm(P, Term1_P, Term1_Tree), Res, A, Z) :-
-  op(Op_P, Type, Opts, Op_Tree, A, B),
-  member(Type, [xfx, xfy, yfx]),
-  term_(Term2_P, Opts, term_(Term2_Tree), B, C),
-  op_term(Opts, lterm(P, Op_P, term(Type, [Term1_Tree, Op_Tree, term(Term2_Tree)])), Res, C, Z).
-*/
-
-/*
-term__(_Opts, nil, A, A).
-
-term__(Opts, Res, A, Z) :-
-  op(P_Op, Type, Opts, Op_Tree, A, B),
-  ( member(Type, [xfx, yfx, xfy]),
-    ( term(P_Term2, Opts, Term_Tree2, B, C),
-      Res = infix(Type, P_Op, P_Term2, Op_Tree, Term_Tree2),
-      C = Z
-    ; term__(Opts, PT_2, B, C),
-      Res = infix(yfx, 500, 0, Op_Tree, )
-      C = Z
-    )
-  ; member(Type, [xf, yf]),
-    B = Z,
-    Res = postfix(Type, P_Op, Op_Tree)
-  ).
-
-term(P, Opts, Res, A, Z) :-
-  \+ var(A),
-  term_(P_Term1, Opts, Term_Tree1, A, B),
-  term__(Opts, PT_Second, B, Z),
-  Term_Tree1 =.. [term_|Term_Tree1_L],
-  Term_Tree1_ =.. [term|Term_Tree1_L],
-  ( PT_Second = nil,
-    Res = Term_Tree1_,
-    P = 0
-  ; PT_Second = infix(Type, P_Op, P_Term2, Op_Tree, Term_Tree2),
-    prec_constraints(Type, P_Op, P_Term1, P_Term2),
-    Res = term(Type, [Term_Tree1_, Op_Tree, Term_Tree2]),
-    P = P_Op
-  ; PT_Second = postfix(Type, P_Op, Op_Tree),
-    Res = term(Type, [Term_Tree1_, Op_Tree]),
-    P = P_Op
-  ).
-*/
-
 term(0, Opts, Res, A, Z) :-
   \+ var(Res),
   ( Res = term(Inner),
@@ -372,6 +294,10 @@ term(0, Opts, Res, A, Z) :-
     member(Type, [xf, yf]),
     term(P_Term, Opts, Term_Tree, A, B),
     op(P_Op, Type, Opts, Op_Tree, B, Z)
+  ; Res = term(Type, [Op_Tree, Term_Tree]),
+    member(Type, [fx, fy]),
+    op(P_Op, Type, Opts, Op_Tree, A, B),
+    term(P_Term, Opts, Term_Tree, B, Z)
   ).
 
 prec_constraints(xfx, P_Op, P_Term1, P_Term2) :-
@@ -392,105 +318,6 @@ prec_constraints(fx, P_Op, P_Term) :-
 prec_constraints(fy, P_Op, P_Term) :-
   P_Term #=< P_Op.
 
-
-/*
-term(P, Opts) -->
-    term_(P, Opts),
-    term__(P, Opts).
-
-term__(P, Opts) --> [].
-
-term__(P, Opts) -->
-    op(P, _Type, Opts),
-    term(P, Opts).
-*/
-/*
-% term = term, op, term (xfx)
-term(P, Opts, term(xfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
-    P_Term1 #< P
-  , P_Term2 #< P
-    % define instructions
-  , I0 = append(Term_Part, Out, In)
-  , I1 = append(Term1, [Op|Term2], Term_Part)
-  , I2 = phrase(op(P, xfx, Opts, Op_Tree), [Op])
-  , I3 = phrase(term(P_Term1, Opts, Term1_Tree), Term1)
-  , I4 = phrase(term(P_Term2, Opts, Term2_Tree), Term2)
-    % call instructions in best order
-  , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
-    ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
-    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
-  , call(Instructions).
-
-% term = term, op, term (yfx)
-term(P, Opts, term(yfx, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
-    P_Term1 #=< P
-  , P_Term2 #< P
-    % define instructions
-  , I0 = append(Term_Part, Out, In)
-  , I1 = append(Term1, [Op|Term2], Term_Part)
-  , I2 = phrase(op(P, yfx, Opts, Op_Tree), [Op])
-  , I3 = phrase(term(P_Term1, Opts, Term1_Tree), Term1)
-  , I4 = phrase(term(P_Term2, Opts, Term2_Tree), Term2)
-    % call instructions in best order
-  , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
-    ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
-    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
-  , call(Instructions).
-
-% term = term, op, term (xfy)
-term(P, Opts, term(xfy, [Term1_Tree, Op_Tree, Term2_Tree]), In, Out) :-
-    P_Term1 #< P
-  , P_Term2 #=< P
-    % define instructions
-  , I0 = append(Term_Part, Out, In)
-  , I1 = append(Term1, [Op|Term2], Term_Part)
-  , I2 = phrase(op(P, xfy, Opts, Op_Tree), [Op])
-  , I3 = phrase(term(P_Term1, Opts, Term1_Tree), Term1)
-  , I4 = phrase(term(P_Term2, Opts, Term2_Tree), Term2)
-    % call instructions in best order
-  , ( \+ var(In) -> Instructions = (I0, I1, I2, I3, I4)
-    ; \+ var(Term1_Tree) -> Instructions = (I3, I2, I4, I1, I0)
-    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
-  , call(Instructions).
-
-% term = term, op (yf)
-term(P, Opts, term(yf, [Term_Tree, Op_Tree]), In, Out) :-
-    P_Term #=< P
-    % define instructions
-  , I0 = append(Term_Part, [Op | Out], In)
-  , I1 = phrase(op(P, yf, Opts, Op_Tree), [Op])
-  , I2 = phrase(term(P_Term, Opts, Term_Tree), Term_Part)
-    % call instructions in best order
-  , ( \+ var(In) -> Instructions = (I0, I1, I2)
-    ; \+ var(Term_Tree) -> Instructions = (I2, I1, I0)
-    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
-  , call(Instructions).
-
-% term = term, op (xf)
-term(P, Opts, term(xf, [Term_Tree, Op_Tree]), In, Out) :-
-    P_Term #< P
-    % define instructions
-  , I0 = append(Term_Part, [Op | Out], In)
-  , I1 = phrase(op(P, xf, Opts, Op_Tree), [Op])
-  , I2 = phrase(term(P_Term, Opts, Term_Tree), Term_Part)
-    % call instructions in best order
-  , ( \+ var(In) -> Instructions = (I0, I1, I2)
-    ; \+ var(Term_Tree) -> Instructions = (I2, I1, I0)
-    ; print_message(warning, format('Error while handling 6.3.4.2.')) )
-  , call(Instructions).
-
-% term = op, term (fy)
-term(P, Opts, term(fy, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
-    P_Term #=< P
-  , phrase(op(P, fy, Opts, Op_Tree), [Op])
-  , phrase(term(P_Term, Opts, Term_Tree), Rest, Out).
-
-% term = op, term (fx)
-term(P, Opts, term(fx, [Op_Tree, Term_Tree]), [Op|Rest], Out) :-
-    P_Term #< P
-  , phrase(op(P, fx, Opts, Op_Tree), [Op])
-  , phrase(term(P_Term, Opts, Term_Tree), Rest, Out).
-*/
 /* 6.3.4.3 Operators */
 
 op(P, Spec, Opts, op(Atom_Tree), In, Out) :-
