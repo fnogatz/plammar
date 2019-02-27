@@ -104,6 +104,16 @@ tree_to_dict(Tree, Dict) :-
       type: Name
    }.put(InnerName, InnerDict).
 tree_to_dict(Tree, Dict) :-
+   Tree =.. [Name, Token, Inner],
+   compound(Inner),
+   !,
+   tree_to_dict(Inner, InnerDict),
+   InnerName = InnerDict.type,
+   Dict = _{
+      type: Name,
+      token: Token
+   }.put(InnerName, InnerDict).
+tree_to_dict(Tree, Dict) :-
    Tree =.. [Name, Inner],
    atomic(Inner),
    !,
