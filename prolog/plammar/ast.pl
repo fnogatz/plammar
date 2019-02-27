@@ -30,12 +30,15 @@ parsetree_ast(PT, AST) :-
 parsetree_ast(PT, AST, Options) :-
   pt_ast(Options, PT, AST).
 
-pt_ast(Opts, p_text(PT_List), p_text(AST_List)) :-
+pt_ast(Opts, prolog(PT_List), prolog(AST_List)) :-
   maplist(pt_ast(Opts), PT_List, AST_List).
 
 pt_ast(Opts, clause_term([term(PT_Term), end(_PT_End)]), clause_term(term(AST_Term))) :-
-  pt_ast(Opts, PT_Term, AST_Term),
+  pt_ast(Opts, term(PT_Term), term(AST_Term)),
   true. %% TODO: handle layout_text_sequence in PT_End
+
+pt_ast(Opts, term(atom(PT_Atom)), term(atom(AST_Atom))) :-
+  pt_ast(Opts, atom(PT_Atom), atom(AST_Atom)).
 
 pt_ast(Opts, atom(name(PT_Name)), atom(name(AST_Name))) :-
   pt_ast(Opts, name(PT_Name), name(AST_Name)).
@@ -58,4 +61,4 @@ pt_ast(_, Q, Q) :-  !,
     ),
     Types 
   ),
-  warning('No pt_ast rule defined for ~w. Use one of ~w', [Kind, Types]).
+  warning('No pt_ast rule defined for ~w. Use one of ~w. Complete call was:~n~w.', [Kind, Types, Q]).

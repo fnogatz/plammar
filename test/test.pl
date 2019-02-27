@@ -230,4 +230,4 @@ run(prolog_tokens/2). % replaced via term expansion
 
 :- load_files('predicates/prolog_parsetree.pl').
 :- load_files('predicates/operators.pl').
-:- load_files('predicates/prolog_ast.pl').
+% :- load_files('predicates/prolog_ast.pl').
