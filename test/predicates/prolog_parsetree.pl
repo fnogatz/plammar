@@ -124,7 +124,7 @@ prolog("a( 1 , 2 ).").
 
 prolog("a(b(c)).").
 
-prolog("a(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15).").
+prolog("a(1,2,3,4,5,6,7,8,9,10).").
 
 prolog(":- a.").
 prolog(":- a, b.").
@@ -153,7 +153,7 @@ prolog("list( [ b , 2 ] ).").
 prolog("member(X,[X|_]).").
 prolog("member(X,[_|Xs]) :- member(X,Xs).").
 
-prolog("list([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]).").
+prolog("list([1,2,3,4,5,6,7,8,9,10]).").
 
 % Sec. 6.3.6, Compound terms - curly bracketed term
 prolog("curly({}).").
@@ -197,12 +197,8 @@ prolog("a(1+2+3+4).", [ targets([]), operators([ op(500,xfy,+) ]) ]).
 % right-associative
 prolog("a(2+4+6).", [ targets([]), operators([ op(500,yfx,+) ]) ]).
 
-/*
-:- op(200, xfx, b).
-:- op(300, xfx, a).
-:- op(400, xfx, c).
-test(1 a 2 b 3 c 4).
-*/
+% mixed
+prolog("p(1 a 2 b 3 c 4).", [ operators([ op(200, xfx, b), op(300, xfx, a), op(400, xfx, c) ]) ]).
 
 prolog("a b c.", [ operators([ op(600, xfx, b) ]) ]).
 prolog("a b c.", [ operators([ op(600, yfx, b) ]) ]).
