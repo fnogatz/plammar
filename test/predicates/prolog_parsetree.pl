@@ -221,6 +221,11 @@ prolog("a :- b, d.", [ targets([swi]) ]).
 prolog("a :- b:c.", [ targets([swi]) ]).
 prolog("a :- b:c, d.", [ targets([swi]) ]).
 
+prolog("a :- fx q, c.", [ operators([ op(600, fx, fx) ]) ]).
+prolog("a :- fy q, c.", [ operators([ op(600, fy, fy) ]) ]).
+prolog("a :- q xf, c.", [ operators([ op(600, xf, xf) ]) ]).
+prolog("a :- q yf, c.", [ operators([ op(600, yf, yf) ]) ]).
+
 %% Part IV: handling of options
 
 'Explicit statement of pre-defined ISO operators is allowed' :-
