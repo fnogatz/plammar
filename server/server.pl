@@ -105,16 +105,6 @@ tree_to_dict(Tree, Dict) :-
       type: Name
    }.put(InnerName, InnerDict).
 tree_to_dict(Tree, Dict) :-
-   Tree =.. [Name, Token, Inner],
-   compound(Inner),
-   !,
-   tree_to_dict(Inner, InnerDict),
-   InnerName = InnerDict.type,
-   Dict = _{
-      type: Name,
-      token: Token
-   }.put(InnerName, InnerDict).
-tree_to_dict(Tree, Dict) :-
    Tree =.. [Name, Inner],
    atomic(Inner),
    !,
@@ -129,6 +119,16 @@ tree_to_dict(term(Op,List), Dict) :-
       type: term,
       op: Op,
       elements: ListDict
+   }.
+tree_to_dict(Token, Dict) :-
+   Token =.. [Token_Name, Token_Atom, Inner],
+   atom_concat(_, '_token', Token_Name),
+   !,
+   tree_to_dict(Inner, InnerDict),
+   Dict = _{
+      type: term,
+      token: Token_Atom,
+      value: InnerDict
    }.
 
 add_types_to_tree(List, Typed) :-
