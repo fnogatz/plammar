@@ -235,6 +235,23 @@ prolog("a :- q yf, c.", [ operators([ op(600, yf, yf) ]) ]).
   ],
   prolog_parsetree(string("a."), _, Options), !.
 
+'"A :- B." is valid for var_prefix(true)' :-
+  Options = [
+    var_prefix(true)
+  ],
+  prolog_parsetrees(string("A :- B."), PTs, Options),
+  !,
+  PTs = [ _SingleResult ].
+
+'"A B." is valid for var_prefix(true) and A as prefix operator' :-
+  Options = [
+    var_prefix(true),
+    operators([ op(300, fx, 'A') ])
+  ],
+  prolog_parsetrees(string("A B."), PTs, Options),
+  !,
+  PTs = [ _SingleResult ].
+
 %% Part V: infer operator definitions
 
 '"a b." invalid for infer_operators(no)' :-

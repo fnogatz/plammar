@@ -5,40 +5,40 @@
 
 /* 6.4 TOKENS */
 
-term -->                            % 6.4
-    *token.                         % 6.4
+term(Opts) -->                      % 6.4
+    *token(Opts).                   % 6.4
 
-read_term_  -->                     % 6.4
-    term                            % 6.4
-  , end.                            % 6.4
+read_term_(Opts) -->                % 6.4
+    term(Opts)                      % 6.4
+  , end(Opts).                      % 6.4
 
 % Optimised version to avoid backtracking of
 %   layout_text_sequence.
-token_(token_(Tree), A, Z) :-
+token_(Opts, token_(Tree), A, Z) :-
   ( \+ var(A) ->
-    ( layout_text_sequence(LTS_Tree, A, B),
+    ( layout_text_sequence(Opts, LTS_Tree, A, B),
       Inner = [LTS_Tree, Token_Tree]
     ; A = B,
       Inner = [Token_Tree] )
   ; % otherwise ->
     Tree =.. [_, Inner],
     ( Inner = [LTS_Tree, Token_Tree] ->
-      layout_text_sequence(LTS_Tree, A, B)
+      layout_text_sequence(Opts, LTS_Tree, A, B)
     ; Inner = open_token(_) ->
       Inner = Token_Tree,
       A = B
     ; Inner = [Token_Tree] ->
       A = B)
   ),
-  ( name_token(Token_Tree, B, Z),
+  ( name_token(Opts, Token_Tree, B, Z),
     Tree = name(Inner)
-  ; variable_token(Token_Tree, B, Z),
+  ; variable_token(Opts, Token_Tree, B, Z),
     Tree = variable(Inner)
-  ; integer_token(Token_Tree, B, Z),
+  ; integer_token(Opts, Token_Tree, B, Z),
     Tree = integer(Inner)
-  ; float_number_token(Token_Tree, B, Z),
+  ; float_number_token(Opts, Token_Tree, B, Z),
     Tree = float_number(Inner)
-  ; double_quoted_list_token(Token_Tree, B, Z),
+  ; double_quoted_list_token(Opts, Token_Tree, B, Z),
     Tree = double_quoted_list(Inner)
   ; close_token(Token_Tree, B, Z),
     Tree = close_(Inner)
@@ -135,32 +135,32 @@ comma -->                           % 6.4
   , comma_token.                    % 6.4.8
 */
 
-end -->                             % 6.4
-    ?layout_text_sequence           % 6.4
+end(Opts) -->                       % 6.4
+    ?layout_text_sequence(Opts)     % 6.4
   , end_token.                      % 6.4.8
 
 /* 6.4.1 Layout text */
 
-layout_text_sequence -->            % 6.4.1
-    layout_text                     % 6.4.1
-  , *layout_text.                   % 6.4.1
+layout_text_sequence(Opts) -->      % 6.4.1
+    layout_text(Opts)               % 6.4.1
+  , *layout_text(Opts).             % 6.4.1
 
-layout_text -->                     % 6.4.1
+layout_text(Opts) -->               % 6.4.1
     layout_char                     % 6.5.4
-  | comment.                        % 6.4.1
+  | comment(Opts).                  % 6.4.1
 
-comment -->                         % 6.4.1
-    single_line_comment             % 6.4.1
-  | bracketed_comment.              % 6.4.1
+comment(Opts) -->                   % 6.4.1
+    single_line_comment(Opts)       % 6.4.1
+  | bracketed_comment(Opts).        % 6.4.1
 
-single_line_comment -->             % 6.4.1
+single_line_comment(_Opts) -->      % 6.4.1
     end_line_comment_char           % 6.5.3
   , comment_text                    % 6.4.1
   , new_line_char.                  % 6.5.4
     %% TODO: "The comment text of a Single line
     %%   comment shall not contain a new line char."
 
-bracketed_comment -->               % 6.4.1
+bracketed_comment(_Opts) -->        % 6.4.1
     comment_open                    % 6.4.1
   , comment_text                    % 6.4.1
   , comment_close.                  % 6.4.1
@@ -186,16 +186,25 @@ comment_2_char -->                  % 6.4.1
 
 /* 6.4.2 Names */
 
-name token -->                      % 6.4.2
-    letter_digit_token              % 6.4.2
+name token Opts -->                 % 6.4.2
+    letter_digit_token(Opts)        % 6.4.2
   | graphic_token                   % 6.4.2
   | quoted_token                    % 6.4.2
   | semicolon_token                 % 6.4.2
   | cut_token.                      % 6.4.2
 
-letter_digit_token -->              % 6.4.2
+/*
+letter_digit_token(_Opts) -->       % 6.4.2
     small_letter_char               % 6.5.2
   , *alphanumeric_char.             % 6.5.2
+*/
+letter_digit_token(Opts, letter_digit_token(Tree), A, Z) :-
+  Tree=[Char_Tree|Alphanumeric_Char_List],
+  ( small_letter_char(Char_Tree, A, B)
+  ; option(var_prefix(Var_Prefix), Opts),
+    yes(Var_Prefix),
+    capital_letter_char(Char_Tree, A, B) ),
+  call_sequence_ground(sequence(*, alphanumeric_char, E), E, [], Alphanumeric_Char_List, B, Z).
 
 graphic_token -->                   % 6.4.2
     graphic_token_char              % 6.4.2
@@ -328,20 +337,30 @@ symbolic_hexadecimal_char -->       % 6.4.2.1
 
 /* 6.4.3 Variables */
 
-variable token -->                  % 6.4.3
-    anonymous_variable              % 6.4.3
-  | named_variable.                 % 6.4.3
+variable token Opts -->             % 6.4.3
+    anonymous_variable(Opts)        % 6.4.3
+  | named_variable(Opts).           % 6.4.3
 
-anonymous_variable -->              % 6.4.3
+anonymous_variable(_Opts) -->       % 6.4.3
     variable_indicator_char.        % 6.4.3
 
-named_variable -->                  % 6.4.3
+named_variable(_Opts) -->           % 6.4.3
     variable_indicator_char         % 6.4.3
   , alphanumeric_char               % 6.5.2
   , *alphanumeric_char.             % 6.5.2
-named_variable -->                  % 6.4.3
+/*
+named_variable(_Opts) -->           % 6.4.3
     capital_letter_char             % 6.5.2
   , *alphanumeric_char.             % 6.5.2
+*/
+
+%% handle var_prefix option
+named_variable(Opts, named_variable(Tree), A, Z) :-
+  option(var_prefix(Var_Prefix), Opts),
+  no(Var_Prefix),
+  Tree=[Capital_Letter_Tree|Sequence_List],
+  capital_letter_char(Capital_Letter_Tree, A, B),
+  call_sequence_ground(sequence(*, alphanumeric_char, T), T, [], Sequence_List, B, Z).
 
 variable_indicator_char -->         % 6.4.3
     underscore_char.                % 6.5.2
@@ -349,7 +368,7 @@ variable_indicator_char -->         % 6.4.3
 
 /* 6.4.4 Integer numbers */
 
-integer token -->                   % 6.4.3
+integer token _Opts -->             % 6.4.3
     integer_constant                % 6.4.4
   | character_code_constant         % 6.4.4
   | binary_constant                 % 6.4.4
@@ -391,7 +410,7 @@ hexadecimal_constant_indicator -->  % 6.4.4
 
 /* 6.4.5 Floating point numbers */
 
-float_number token -->              % 6.4.5
+float_number token _Opts -->        % 6.4.5
     integer_constant                % 6.4.4
   , fraction                        % 6.4.5
   , ?exponent.                      % 6.4.5
@@ -426,7 +445,7 @@ exponent_char -->                   % 6.4.5
 
 /* 6.4.6 Double quoted lists */
 
-double_quoted_list token -->        % 6.4.6
+double_quoted_list token _Opts -->  % 6.4.6
     double_quote_char               % 6.5.5
   , *double_quoted_item             % 6.4.6
   , double_quote_char.              % 6.5.5

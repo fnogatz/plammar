@@ -1,10 +1,17 @@
 :- module(plammar_options, [
+    normalise_options/2,
     normalise_options/3,
     revise_options/2
   ]).
 
 :- use_module(library(plammar/operators)).
 :- use_module(library(plammar/util)).
+
+normalise_options(User_Options, Options) :-
+  O1 = User_Options,
+  normalise_options(prolog_tokens, O1, O2),
+  normalise_options(prolog_parsetree, O2, O3),
+  Options = O3.
 
 normalise_options(prolog_tokens, User_Options, Options) :-
   default_options(prolog_tokens, Default_Options),

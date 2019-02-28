@@ -1,4 +1,5 @@
 :- use_module(library(plammar)).
+:- use_module(library(plammar/options)).
 
 :- op(800, xfx, <=>).
 :- op(800, xfx, !).
@@ -12,7 +13,7 @@
 
 term_expansion(DCGBody: PT <=> In, test_definition(pos, DCGBody, In, PT)).
 term_expansion(DCGBody: In, test_definition(pos, DCGBody, In, _)).
-term_expansion(DCGBody! In, test_definition(neg, DCGBody, In, _)).
+term_expansion(DCGBody ! In, test_definition(neg, DCGBody, In, _)).
 
 term_expansion(run(prolog_tokens/2), Tests) :-
    findall(
@@ -134,8 +135,11 @@ heads(Symbol, DCGBody, In, Head1, Head2) :-
 
 % succeeding ("positive") test
 define_tap_tests(Test_Definition, Tests) :-
-  Test_Definition = test_definition(_Filename, pos, DCGGoal, In, PT),
-  DCGGoal =.. [DCGBody|_DCGArguments],
+  Test_Definition = test_definition(_Filename, pos, DCGBody_with_Args, In, PT),
+  ( compound(DCGBody_with_Args) -> DCGBody_with_Args =.. [DCGBody, User_Options]
+  ; DCGBody = DCGBody_with_Args, User_Options = []),
+  normalise_options(User_Options, Options),
+  DCGGoal =.. [DCGBody, Options],
   heads('', DCGBody, In, Head1, Head2),
   % build first test: from input to parse tree
   string_chars(In, Chars),
@@ -159,21 +163,24 @@ define_tap_tests(Test_Definition, Tests) :-
 
 % failing ("negative") test
 define_tap_tests(Test_Definition, Tests) :-
-  Test_Definition = test_definition(_Filename, neg, DCGGoal, In, PT),
-  DCGGoal =.. [DCGBody|_DCGArguments],
+  Test_Definition = test_definition(_Filename, neg, DCGBody_with_Args, In, PT),
+  ( compound(DCGBody_with_Args) -> DCGBody_with_Args =.. [DCGBody, User_Options]
+  ; DCGBody = DCGBody_with_Args, User_Options = []),
+  normalise_options(User_Options, Options),
+  DCGGoal =.. [DCGBody, Options],
   heads('!', DCGBody, In, Head1, Head2),
   % build first test: from input to parse tree
   string_chars(In, Chars),
   Test1 = (
     Head1 :-
-      \+ plammar:tree(DCGBody, Chars, _PT1), !
+      \+ plammar:tree(DCGGoal, Chars, _PT1), !
   ),
   tap:register_test(Head1),
   % build second test: from parse tree to input
   (nonvar(PT) ->
     Test2 = (
       Head2 :-
-        \+ plammar:tree(DCGBody, _In2, PT), !
+        \+ plammar:tree(DCGGoal, _In2, PT), !
     ),
     tap:register_test(Head2),
     Tests = [Test1, Test2]
@@ -215,9 +222,10 @@ message_hook(_,warning,_) :-
 run(tokenizer). % replaced via term expansion
 
 '".." is just a single token' :-
+  Options = [],
   findall(
     Tokens,
-    phrase(plammar:term(term(Tokens)), ['.','.'], []),
+    phrase(plammar:term(Options, term(Tokens)), ['.','.'], []),
     Solutions
   ),
   length(Solutions, 1),

@@ -43,8 +43,16 @@ named_variable:
     ])
   <=> "_var".
 
-variable_token: "_var".
+variable_token: "_var1".
 
+variable_token([var_prefix(no)]): "_var2".
+variable_token([var_prefix(yes)]): "_var3".
+
+% single capital letter
 variable_token: "V".
 
-variable_token: "Var".
+variable_token: "Var1".
+variable_token([var_prefix(no)]): "Var2".
+
+% not allowed for var_prefix(yes)
+variable_token([var_prefix(yes)])! "Var3".

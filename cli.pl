@@ -125,8 +125,10 @@ collect_stdin(Chars) :-
   maplist(char_code, Chars, Codes).
 
 process(Opts, Chars) :-
-  option(dcg(DCGBody), Opts),
-  \+var(DCGBody),
+  option(dcg(DCG), Opts),
+  \+var(DCG),
+  plammar:normalise_options([], Options),
+  DCGBody =.. [DCG, Options],
   ( ast:tree(DCGBody, Chars, Tree) ->
     success(Opts, Tree)
   ; no_success ).

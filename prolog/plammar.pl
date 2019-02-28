@@ -57,8 +57,8 @@ prolog_tokens(_, _, _) :-
   ),
   warning('Use one of input formats string ~w', Types).
 
-prolog_tokens_(chars(Chars), Tokens, _Options) :-
-  phrase(plammar:term(term(Tokens)), Chars, []).
+prolog_tokens_(chars(Chars), Tokens, Options) :-
+  phrase(plammar:term(Options, term(Tokens)), Chars, []).
 
 prolog_parsetree(A, B) :-
   prolog_parsetree(A, B, []).
@@ -144,37 +144,37 @@ tree_from_file(Body, Filename, Tree) :-
 %%   concatenating the characters of the token with these
 %%   characters forms a valid token as specified by the above
 %%   Syntax." (6.4)
-token(Tree, In, Rest) :-
+token(Opts, Tree, In, Rest) :-
   \+ var(In), !,
-  token_(token_(Tree), In, Rest),
+  token_(Opts, token_(Tree), In, Rest),
   Some_More_Elements = [_|_], % at least one element
   \+((
-    token_(_, In, Shorter_Rest),
+    token_(Opts, _, In, Shorter_Rest),
     append(Some_More_Elements, Shorter_Rest, Rest)
   )).
-token(Tree, In, Rest) :-
+token(Opts, Tree, In, Rest) :-
   \+ var(Tree), !,
-  token_(token_(Tree), In, Rest).
-token(Tree, In, Rest) :-
+  token_(Opts, token_(Tree), In, Rest).
+token(_Opts, Tree, In, Rest) :-
   var(Tree), var(In), !,
   warning('Parse tree AND input unbound; this might not work as expected!'),
   token_(token_(Tree), In, Rest).
 
-:- op(600, xf, token).
+:- op(600, xfx, token).
 :- discontiguous plammar:token/4.
 
-
-user:term_expansion(X1 token --> Y1, [Rule]) :-
+user:term_expansion(X1 token Opts --> Y1, [Rule]) :-
   atom_concat(X1, '_token', X1_token),
-  dcg4pt:dcg4pt_rule_to_dcg_rule(X1_token --> Y1, X2 --> Y2),
+  X1_token_with_Opts =.. [X1_token, Opts],
+  dcg4pt:dcg4pt_rule_to_dcg_rule(X1_token_with_Opts --> Y1, X2 --> Y2),
   dcg_translate_rule(X2 --> Y2, Expanded_DCG_Rule),
   Expanded_DCG_Rule = (
     Expanded_DCG_Rule_Head :-
       Expanded_DCG_Rule_Body
   ),
-  Expanded_DCG_Rule_Head =.. [X1_token, Initial_Tree, In, Out],
+  Expanded_DCG_Rule_Head =.. [X1_token, Opts, Initial_Tree, In, Out],
   Initial_Tree =.. [X1_token, Inner_Tree],
-  New_DCG_Rule_Head =.. [X1_token, New_Tree, In, Out],
+  New_DCG_Rule_Head =.. [X1_token, Opts, New_Tree, In, Out],
   New_Tree =.. [X1_token, Consumed, Inner_Tree],
   Rule = (
     New_DCG_Rule_Head :-
