@@ -8,12 +8,12 @@ name_token:
 
 name_token:
   name_token('ab',
-      letter_digit_token([
-        small_letter_char(a),
-        alphanumeric_char(
-          alpha_char(
-            letter_char(
-              small_letter_char(b) )))])
+    letter_digit_token([
+      small_letter_char(a),
+      alphanumeric_char(
+        alpha_char(
+          letter_char(
+            small_letter_char(b) )))]))
   <=> "ab".
 
 name_token: "abc".
