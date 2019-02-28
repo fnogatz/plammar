@@ -6,6 +6,11 @@
 :- use_module(library(plammar/operators)).
 :- use_module(library(plammar/util)).
 
+normalise_options(prolog_tokens, User_Options, Options) :-
+  default_options(prolog_tokens, Default_Options),
+  merge_options(User_Options, Default_Options, Options0),
+  Options = Options0.
+
 normalise_options(prolog_parsetree, User_Options, Options) :-
   default_options(prolog_parsetree, Default_Options),
   merge_options(User_Options, Default_Options, Options0),
@@ -17,6 +22,11 @@ normalise_options(prolog_parsetree, User_Options, Options) :-
   ),
   Options = Options1.
 
+default_options(prolog_tokens, Options) :-
+  Options = [
+    var_prefix(no)
+  ].
+
 default_options(prolog_parsetree, Options) :-
   Options = [
     operators([]),
@@ -24,10 +34,7 @@ default_options(prolog_parsetree, Options) :-
     infer_operators(no)
   ].
 
-default_options(prolog_tokens, Options) :-
-  Options = [
-    var_prefix(false)
-  ].
+revise_options(prolog_tokens, _).
 
 % take the open lists from option `infer_operators`
 %   and make them closed

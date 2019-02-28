@@ -2,6 +2,7 @@
     tree/3,
     tree/4,
     prolog_tokens/2,
+    prolog_tokens/3,
     prolog_parsetree/2,
     prolog_parsetree/3
   ]).
@@ -13,51 +14,51 @@
 :- use_module(library(dcg4pt)).
 :- use_module(library(clpfd)).
 
-prolog_tokens(string(String), Tokens) :-
-  \+ var(String),
-  !,
-  string_chars(String, Chars),
-  phrase(plammar:term(term(Tokens)), Chars, []).
-prolog_tokens(string(String), Tokens) :-
-  \+ var(Tokens),
-  !,
-  phrase(plammar:term(term(Tokens)), Chars, []),
-  string_chars(String, Chars).
-prolog_tokens(string(String), Tokens) :-
-  var(String), var(Tokens),
-  !,
-  warning('Either string or tokens must be given.'),
-  fail.
+prolog_tokens(A, B) :-
+  prolog_tokens(A, B, []).
 
-prolog_tokens(file(File), Tokens) :-
+prolog_tokens(string(String), Tokens, Options) :-
+  !,
+  I0 = string_chars(String, Chars),
+  I1 = prolog_tokens(chars(Chars), Tokens, Options),
+  ( \+ var(String) -> Instructions = (I0, I1)
+  ; Instructions = (I1, I0) ),
+  call(Instructions).
+
+prolog_tokens(file(File), Tokens, Options) :-
   \+ var(File),
   !,
   open(File, read, Stream),
-  prolog_tokens(stream(Stream), Tokens),
+  prolog_tokens(stream(Stream), Tokens, Options),
   close(Stream).
 
-prolog_tokens(stream(Stream), Tokens) :-
+prolog_tokens(stream(Stream), Tokens, Options) :-
   \+ var(Stream),
   !,
   read_string(Stream, _Length, String),
-  prolog_tokens(string(String), Tokens).
+  prolog_tokens(string(String), Tokens, Options).
 
-prolog_tokens(chars(Chars), Tokens) :-
+prolog_tokens(chars(Chars), Tokens, User_Options) :-
   !,
-  phrase(plammar:term(term(Tokens)), Chars, []).
+  normalise_options(prolog_tokens, User_Options, Options),
+  prolog_tokens_(chars(Chars), Tokens, Options),
+  revise_options(prolog_tokens, Options).
 
-prolog_tokens(_, _) :-
+prolog_tokens(_, _, _) :-
   !,
   setof(
     Type,
-    [Selector,Argument,Body,A]^(
-      clause(prolog_tokens(Selector,A), Body),
+    [Selector,Argument,Body,A,B]^(
+      clause(prolog_tokens(Selector,A,B), Body),
       \+ var(Selector),
       Selector =.. [Type, Argument]
     ),
     Types 
   ),
   warning('Use one of input formats string ~w', Types).
+
+prolog_tokens_(chars(Chars), Tokens, _Options) :-
+  phrase(plammar:term(term(Tokens)), Chars, []).
 
 prolog_parsetree(A, B) :-
   prolog_parsetree(A, B, []).
@@ -96,7 +97,8 @@ prolog_parsetree(chars(Chars), PT, User_Options) :-
 prolog_parsetree(tokens(Tokens), PT, User_Options) :-
   !,
   normalise_options(prolog_parsetree, User_Options, Options),
-  prolog(Options, PT, Tokens, []).
+  prolog(Options, PT, Tokens, []),
+  revise_options(prolog_parsetree, Options).
 
 
 prolog_parsetree(_, _, _) :-
@@ -113,7 +115,7 @@ prolog_parsetree(_, _, _) :-
   warning('Use one of input formats ~w', [Types]).
 
 prolog_parsetree_(chars(Chars), PT, Options) :-
-  I0 = prolog_tokens(chars(Chars), Tokens),
+  I0 = prolog_tokens(chars(Chars), Tokens, Options),
   I1 = prolog(Options, PT, Tokens, []),
   ( \+ var(Chars) -> Instructions = (I0, !, I1)
   ; Instructions = (I1, !, I0) ),
