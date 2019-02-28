@@ -6,11 +6,6 @@
 :- use_module(library(plammar/operators)).
 :- use_module(library(plammar/util)).
 
-yes(yes).
-yes(true).
-yes(y).
-yes(ok).
-
 normalise_options(prolog_parsetree, User_Options, Options) :-
   default_options(prolog_parsetree, Default_Options),
   merge_options(User_Options, Default_Options, Options0),
@@ -29,9 +24,14 @@ default_options(prolog_parsetree, Options) :-
     infer_operators(no)
   ].
 
+default_options(prolog_tokens, Options) :-
+  Options = [
+    var_prefix(false)
+  ].
+
 % take the open lists from option `infer_operators`
 %   and make them closed
 revise_options(prolog_parsetree, Options) :-
   option(infer_operators(Inferred_Ops), Options),
-  ( Inferred_Ops == no
+  ( no(No), Inferred_Ops == No
   ; list_close(Inferred_Ops)).

@@ -2,7 +2,9 @@
     warning/1,
     warning/2,
     list_open/2,
-    list_close/1
+    list_close/1,
+    yes/1,
+    no/1
   ]).
 
 warning(Format, Arguments) :-
@@ -17,3 +19,12 @@ list_close([]).
 list_close([_|Xs]) :-
   ( var(Xs) -> Xs = []
   ; list_close(Xs) ).
+
+yes(yes).
+yes(true).
+yes(y).
+yes(ok).
+
+no(no).
+no(false).
+no(n).
