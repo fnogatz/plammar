@@ -192,7 +192,7 @@ term_(0, Opts) -->
     atom
   , [ open_ct(_) ]
   , arg_list(Opts)
-  , [ close_(_) ].
+  , [ close(_) ].
 /*
 arg_list(Opts) -->
     arg(Opts).
@@ -244,13 +244,13 @@ arg(Opts, arg(Term_Tree), In, Out) :-
 term_(0, Opts) -->
     [ open_(_) ]
   , term(P, Opts)
-  , [ close_(_) ]
+  , [ close(_) ]
   , { P #=< 1201 }.
 
 term_(0, Opts) -->
     [ open_ct(_) ]
   , term(P, Opts)
-  , [ close_(_) ]
+  , [ close(_) ]
   , { P #=< 1201 }.
 
 /* 6.3.4.2 Operators as functors */

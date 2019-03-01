@@ -181,7 +181,7 @@ prolog("a(\"string with blanks\").").
               term(integer([integer_token('1',integer_constant([decimal_digit_char('1')]))])),
               op(atom(name([name_token(+,graphic_token([graphic_token_char(graphic_char(+))]))]))),
               term(integer([integer_token('1',integer_constant([decimal_digit_char('1')]))]))]))),
-            close_([close_token(close_char(')'))])]),
+            close([close_token(close_char(')'))])]),
         end([end_token(end_char('.'))])
       ])
     ])

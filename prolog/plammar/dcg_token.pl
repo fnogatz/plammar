@@ -41,7 +41,7 @@ token_(Opts, token_(Tree), A, Z) :-
   ; double_quoted_list_token(Opts, Token_Tree, B, Z),
     Tree = double_quoted_list(Inner)
   ; close_token(Token_Tree, B, Z),
-    Tree = close_(Inner)
+    Tree = close(Inner)
   ; open_list_token(Token_Tree, B, Z),
     Tree = open_list(Inner)
   ; close_list_token(Token_Tree, B, Z),
