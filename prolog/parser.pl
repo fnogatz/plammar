@@ -193,6 +193,15 @@ term_(0, Opts) -->
   , [ open_ct(_) ]
   , arg_list(Opts)
   , [ close(_) ].
+
+term_(0, Opts, term_(T), A, Z) :-
+  option(allow_variable_name_as_functor(Allow), Opts),
+  yes(Allow),
+  T = [variable(VT), open_ct(H),L|N],
+  A = [variable(VT), open_ct(H)|M],
+  arg_list(Opts, L, M, [close(Q)|Z]),
+  N = [close(Q)].
+
 /*
 arg_list(Opts) -->
     arg(Opts).

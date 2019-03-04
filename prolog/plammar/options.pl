@@ -38,7 +38,8 @@ default_options(prolog_parsetree, Options) :-
   Options = [
     operators([]),
     targets([iso]),
-    infer_operators(no)
+    infer_operators(no),
+    allow_variable_name_as_functor(no)
   ].
 
 revise_options(prolog_tokens, _).

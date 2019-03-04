@@ -252,6 +252,41 @@ prolog("a :- q yf, c.", [ operators([ op(600, yf, yf) ]) ]).
   !,
   PTs = [ _SingleResult ].
 
+'"F(1)." is invalid for allow_variable_name_as_functor(no)' :-
+  Options = [
+    allow_variable_name_as_functor(no)
+  ],
+  prolog_parsetrees(string("F(1)."), PTs, Options),
+  !,
+  PTs = [].
+
+'"F(1)." is valid for allow_variable_name_as_functor(true)' :-
+  Options = [
+    allow_variable_name_as_functor(true)
+  ],
+  prolog_parsetrees(string("F(1)."), PTs, Options),
+  !,
+  PTs = [ _SingleResult ].
+
+'"_x(1)." is valid for allow_variable_name_as_functor(true)' :-
+  Options = [
+    allow_variable_name_as_functor(true)
+  ],
+  prolog_parsetrees(string("_x(1)."), PTs, Options),
+  !,
+  PTs = [ _SingleResult ].
+
+'"_(1)." is valid for allow_variable_name_as_functor(true)' :-
+  Options = [
+    allow_variable_name_as_functor(true)
+  ],
+  prolog_parsetrees(string("_(1)."), PTs, Options),
+  !,
+  PTs = [ _SingleResult ].
+
+invalid("A(B(C)).", [allow_variable_name_as_functor(false)] ).
+prolog("A(B(C)).", [allow_variable_name_as_functor(true)] ).
+
 %% Part V: infer operator definitions
 
 '"a b." invalid for infer_operators(no)' :-
