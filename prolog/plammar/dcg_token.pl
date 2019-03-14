@@ -454,7 +454,6 @@ double_quoted_item -->              % 6.4.6
     double_quoted_character         % 6.4.2.1
   | continuation_escape_sequence.   % 6.4.2
 
-
 /* 6.4.7 Back quoted strings */
 
 back_quoted_string -->              % 6.4.7
