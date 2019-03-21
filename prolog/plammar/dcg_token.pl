@@ -5,9 +5,14 @@
 
 /* 6.4 TOKENS */
 
+% also allow newlines, etc. at the end of the file
+term(Opts) -->
+    *token(Opts),
+    ?layout_text_sequence(Opts).
+/*
 term(Opts) -->                      % 6.4
     *token(Opts).                   % 6.4
-
+*/
 read_term_(Opts) -->                % 6.4
     term(Opts)                      % 6.4
   , end(Opts).                      % 6.4

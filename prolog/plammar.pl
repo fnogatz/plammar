@@ -87,7 +87,6 @@ prolog_parsetree(stream(Stream), PT, Options) :-
   read_string(Stream, _Length, String),
   prolog_parsetree(string(String), PT, Options).
 
-
 prolog_parsetree(chars(Chars), PT, User_Options) :-
   !,
   normalise_options(prolog_parsetree, User_Options, Options),
@@ -97,7 +96,7 @@ prolog_parsetree(chars(Chars), PT, User_Options) :-
 prolog_parsetree(tokens(Tokens), PT, User_Options) :-
   !,
   normalise_options(prolog_parsetree, User_Options, Options),
-  prolog(Options, PT, Tokens, []),
+  prolog(Options, PT, Tokens),
   revise_options(prolog_parsetree, Options).
 
 
@@ -116,7 +115,7 @@ prolog_parsetree(_, _, _) :-
 
 prolog_parsetree_(chars(Chars), PT, Options) :-
   I0 = prolog_tokens(chars(Chars), Tokens, Options),
-  I1 = prolog(Options, PT, Tokens, []),
+  I1 = prolog(Options, PT, Tokens),
   ( \+ var(Chars) -> Instructions = (I0, !, I1)
   ; Instructions = (I1, !, I0) ),
   call(Instructions).
