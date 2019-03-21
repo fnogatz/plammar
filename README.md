@@ -13,6 +13,15 @@ We make use of the following packages:
 
 All can be installed by calling `?- pack_install(tap).` etc. in SWI-Prolog.
 
+### Development Version
+
+To get the latest development version, clone it via git, and link it to your `~/lib/swipl/pack/` directory:
+
+```shell
+git clone git@gitlab2.informatik.uni-wuerzburg.de:Prolog-Lint/plammar.git
+ln -s plammar ~/lib/swipl/pack/plammar
+```
+
 ### Pre-Compilation
 
 It is possible to create a pre-compiled file which increases the tool's performance significantly. The command line interface is compiled using swipl's [`-c` option](http://www.swi-prolog.org/pldoc/doc_for?object=section%282,%272.10%27,swi%28%27/doc/Manual/compilation.html%27%29%29):
@@ -22,6 +31,24 @@ swipl -g main -o cli.exe -c cli.pl
 ```
 
 The `.exe` suffix is chosen for compatibility with Windows systems. You can also use `make cli` to generate the pre-compiled CLI.
+
+## Usage with SWI-Prolog
+
+First, load the package:
+
+```prolog
+?- use_module(library(plammar)).
+```
+
+Examples:
+
+```
+?- prolog_tokens(string("a(1)."), Tokens).
+?- prolog_parsetree(string("a(1)."), PT).
+?- prolog_ast(string("a(1)."), AST).
+```
+
+For more examples, have a look at the `/test` directory.
 
 ## Usage as CLI
 
@@ -39,7 +66,7 @@ After the pre-compilation step mentioned before, the created executable can be c
 ./cli.exe [options] [<filename>]
 ```
 
-## Usage with SWI-Prolog
+## Usage with SWI-Prolog (**Needs to be updated**)
 
 Load the `ast.pl` script as follows:
 
