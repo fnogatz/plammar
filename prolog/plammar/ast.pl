@@ -36,6 +36,31 @@ parsetree_ast(PT, AST, User_Options) :-
 pt_ast(Opts, prolog(PT_List), prolog(AST_List)) :-
   maplist(pt_ast(Opts), PT_List, AST_List).
 
+pt_ast(
+  Opts,
+  clause_term([term(PT_Term), end(PT_End)]),
+  clause(AST_Term)
+) :- 
+  pt_ast(Opts, PT_Term, AST_Term),
+  append(Layout_Text_Sequence, [end_token(_)], PT_End),
+  space(Layout_Text_Sequence, space_before_clause_end, Opts).
+
+pt_ast(
+  _Opts,
+  atom(name(PT_Name)),
+  atom(Atom)
+) :-
+  PT_Name = [name_token(Atom, PT_Name_Token)],
+  ( \+ var(PT_Name_Token), !,
+    true %% TODO: check whitespaces in front of name
+  ; atom_chars(Atom, Chars),
+    plammar:name_token(Chars, name_token(_, PT_Name_Token), Chars, []),
+    true %% TODO: add whitespaces in front of name if needed
+  ).
+
+
+
+/*
 pt_ast(Opts,
   clause_term([term(PT_Term), end(PT_End)]),
   clause_term(AST_Term)
@@ -75,7 +100,7 @@ pt_ast(_Opts, name([name_token(Atom, _PT_Name_Token)]), name(Atom)) :-
 pt_ast(Opts, name([layout_text_sequence(_PT_Layout), name_token(A,B)]), AST) :-
   pt_ast(Opts, name([name_token(A,B)]), AST),
   true. %% TODO: handle layout_text_sequence in _PT_Layout
-
+*/
 pt_ast(_, Q, Q) :-  !,
   Q =.. [Kind|_],
   setof(
