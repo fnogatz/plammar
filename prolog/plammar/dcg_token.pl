@@ -717,7 +717,8 @@ horizontal_tab_char -->             % 6.5.4
     ['\t'].                         % implementation dependent
 
 new_line_char -->                   % 6.5.4
-    ['\n'].                         % implementation dependent
+    ['\n']                          % implementation dependent
+  | ['\r','\n'].
 
 /* 6.5.5 Meta characters */
 
