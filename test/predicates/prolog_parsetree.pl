@@ -132,6 +132,13 @@ prolog(":- [load].").
 
 prolog("a :- b.").
 
+% Ends with layout_text_sequence
+
+prolog("a.\n").
+prolog("a. % this is a comment\n").
+prolog("a.% this is a comment\n").
+prolog("a. /* this is a comment */\n").
+
 % Comments
 
 prolog("a. % linecomment\nb.").

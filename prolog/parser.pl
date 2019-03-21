@@ -87,17 +87,21 @@ atom_tree('{}', atom([open_curly(_),close_curly(_)])).
 
 /* 6.2 PROLOG TEXT AND DATA */
 
-prolog(Opts, prolog(PT), A, Z) :-
+prolog(Opts, prolog(PT), A) :-
   \+ var(A), !,
   *(p_text(Opts), PT_PText, A, B),
-  ( layout_text_sequence(Opts, PT_Lts, B, Z),
-    append(PT_PText, PT_Lts, PT)
-  ; B = Z,
-    PT = PT_PText ).
+  ( B = [],
+    PT = PT_PText
+  ; B = [layout_text_sequence(_)],
+    append(PT_PText, B, PT) ).
 
-prolog(Opts, prolog(PT), A, Z) :-
+prolog(Opts, prolog(PT), A) :-
   \+ var(PT), !,
-  *(p_text(Opts), PT, A, Z).
+  ( append(PT_PText, [layout_text_sequence(LTS)], PT),
+    B = [layout_text_sequence(LTS)]
+  ; B = [],
+    PT = PT_PText ),
+  *(p_text(Opts), PT_PText, A, B).
 
 /*
 prolog(Opts) -->
