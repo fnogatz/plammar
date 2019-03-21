@@ -7,12 +7,11 @@ A Prolog Grammar written in Prolog.
 First, you need [SWI-Prolog](http://www.swi-prolog.org/). See there for installation instructions.
 
 We make use of the following packages:
+- [`library(tap)`](https://github.com/fnogatz/tap)
 - [`library(dcg4pt)`](https://github.com/fnogatz/dcg4pt)
 - [`library(clitable)`](https://github.com/fnogatz/clitable)
 
-Both can be installed by calling `?- pack_install(dcg4pt).` resp. `?- pack_install(clitable)` in SWI-Prolog.
-
-Only for development purposes the [`library(tap)`](https://github.com/mndrix/tap) is needed, which can be installed the same way.
+All can be installed by calling `?- pack_install(tap).` etc. in SWI-Prolog.
 
 ### Pre-Compilation
 
