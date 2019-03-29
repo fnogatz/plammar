@@ -158,16 +158,15 @@ comment(Opts) -->                   % 6.4.1
     single_line_comment(Opts)       % 6.4.1
   | bracketed_comment(Opts).        % 6.4.1
 
-single_line_comment(_Opts) -->      % 6.4.1
-    end_line_comment_char           % 6.5.3
-  , comment_text                    % 6.4.1
+single_line_comment(Opts0) -->      % 6.4.1
+    { merge_options([disallow_chars(['\n'])], Opts0, Opts) }
+  , end_line_comment_char           % 6.5.3
+  , comment_text(Opts)              % 6.4.1
   , new_line_char.                  % 6.5.4
-    %% TODO: "The comment text of a Single line
-    %%   comment shall not contain a new line char."
 
-bracketed_comment(_Opts) -->        % 6.4.1
+bracketed_comment(Opts) -->         % 6.4.1
     comment_open                    % 6.4.1
-  , comment_text                    % 6.4.1
+  , comment_text(Opts)              % 6.4.1
   , comment_close.                  % 6.4.1
     %% TODO: "The comment text of a bracketed comment
     %%   shall not contain the comment close sequence."
@@ -180,8 +179,8 @@ comment_close -->                   % 6.4.1
     comment_2_char                  % 6.4.1
   , comment_1_char.                 % 6.4.1
 
-comment_text -->                    % 6.4.1
-    *char.                          % 6.5
+comment_text(Opts) -->              % 6.4.1
+    *char(Opts).                    % 6.5
 
 comment_1_char -->                  % 6.4.1
     ['/'].
@@ -504,7 +503,13 @@ end_char -->                        % 6.4.8
 
 /* 6.5 PROCESSOR CHARACTER SET */
 
-char -->                            % 6.5
+char(Opts, char(Tree), [C|Z], Z) :-
+  char_(char_(Tree), [C|Z], Z),
+  option(disallow_chars(Disallowed), Opts, []),
+  \+ member(C, Disallowed).
+%% TODO: new_line_char could consume two elements
+
+char_ -->                           % 6.5
     graphic_char                    % 6.5.1
   | alphanumeric_char               % 6.5.2
   | solo_char                       % 6.5.3
