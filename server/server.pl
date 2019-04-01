@@ -42,6 +42,7 @@ handle(post, Request) :-
          _Catcher,
          reply_error
       ),
+      % log(AST),
       reply_by(Request, AST)
    ;
       reply_error
@@ -130,6 +131,14 @@ tree_to_dict(Token, Dict) :-
       token: Token_Atom,
       value: InnerDict
    }.
+tree_to_dict(comment_text(Text,List), Dict) :-
+   !,
+   tree_to_dict(List, ListDict),
+   Dict = _{
+      type: comment_text,
+      text: Text,
+      elements: ListDict
+   }.
 
 add_types_to_tree(List, Typed) :-
    is_list(List),
@@ -152,3 +161,8 @@ add_types_to_tree(Key-Value, Key-Typed) :-
 add_types_to_tree(Value, Value) :-
    atom(Value),
    !.
+
+log(Term) :-
+   open('/tmp/plammar-server.log', append, Stream),
+   writeq(Stream, Term), nl,
+   close(Stream).
