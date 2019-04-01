@@ -12,6 +12,7 @@ bracketed_comment:
           comment_2_char(*)
         ]),
       comment_text(
+        ' cs ',
         [ char(
             layout_char(
               space_char(' '))),

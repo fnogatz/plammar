@@ -157,12 +157,18 @@ layout_text(Opts) -->               % 6.4.1
 comment(Opts) -->                   % 6.4.1
     single_line_comment(Opts)       % 6.4.1
   | bracketed_comment(Opts).        % 6.4.1
-
+/*
 single_line_comment(Opts0) -->      % 6.4.1
     { merge_options([disallow_chars(['\n'])], Opts0, Opts) }
   , end_line_comment_char           % 6.5.3
   , comment_text(Opts)              % 6.4.1
   , new_line_char.                  % 6.5.4
+*/
+single_line_comment(Opts0, single_line_comment([ELCC_Tree,CT_Tree,NLC_Tree]), A, Z) :-
+  merge_options([disallow_chars(['\n'])], Opts0, Opts),
+  end_line_comment_char(ELCC_Tree, A, B),
+  comment_text(Opts, CT_Tree, B, C),
+  new_line_char(NLC_Tree, C, Z).
 
 bracketed_comment(Opts) -->         % 6.4.1
     comment_open                    % 6.4.1
@@ -179,7 +185,7 @@ comment_close -->                   % 6.4.1
     comment_2_char                  % 6.4.1
   , comment_1_char.                 % 6.4.1
 
-comment_text(Opts) -->              % 6.4.1
+comment_text(Opts) wrap_text -->    % 6.4.1
     *char(Opts).                    % 6.5
 
 comment_1_char -->                  % 6.4.1

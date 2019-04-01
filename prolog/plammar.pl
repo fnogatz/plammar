@@ -184,6 +184,28 @@ user:term_expansion(X1 token Opts --> Y1, [Rule]) :-
       ; true )
   ).
 
+:- op(600, xf, wrap_text).
+
+user:term_expansion(Head wrap_text --> Y1, [Rule]) :-
+  dcg4pt:dcg4pt_rule_to_dcg_rule(Head --> Y1, X2 --> Y2),
+  dcg_translate_rule(X2 --> Y2, Expanded_DCG_Rule),
+  Expanded_DCG_Rule = (
+    Expanded_DCG_Rule_Head :-
+      Expanded_DCG_Rule_Body
+  ),
+  Expanded_DCG_Rule_Head =.. [X1_token, Opts, Initial_Tree, In, Out],
+  Initial_Tree =.. [X1_token, Inner_Tree],
+  New_DCG_Rule_Head =.. [X1_token, Opts, New_Tree, In, Out],
+  New_Tree =.. [X1_token, Consumed, Inner_Tree],
+  Rule = (
+    New_DCG_Rule_Head :-
+      Expanded_DCG_Rule_Body,
+      ( var(Consumed) ->
+        append(Consumed_Chars, Out, In),
+        atom_chars(Consumed, Consumed_Chars)
+      ; true )
+  ).
+
 user:term_expansion(X1 --> Y1, [Rule]) :-
   dcg4pt:dcg4pt_rule_to_dcg_rule(X1 --> Y1, X2 --> Y2),
   dcg_translate_rule(X2 --> Y2, Rule).
