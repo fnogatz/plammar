@@ -11,8 +11,7 @@ normalise_options(User_Options, Options) :-
   O1 = User_Options,
   normalise_options(prolog_tokens, O1, O2),
   normalise_options(prolog_parsetree, O2, O3),
-  normalise_options(pt_ast, O3, O4),
-  Options = O4.
+  Options = O3.
 
 normalise_options(prolog_tokens, User_Options, Options) :-
   default_options(prolog_tokens, Default_Options),
@@ -30,19 +29,6 @@ normalise_options(prolog_parsetree, User_Options, Options) :-
   ),
   Options = Options1.
 
-normalise_options(pt_ast, User_Options, Options) :-
-  default_options(pt_ast, Default_Options),
-  merge_options(User_Options, Default_Options, Options0),
-  option(style(User_Style), Options0, []),
-  normalise_options(pt_ast/style, User_Style, Style),
-  merge_options([style(Style)], Options0, Options1),
-  Options = Options1.
-
-normalise_options(pt_ast/style, User_Options, Options) :-
-  default_options(pt_ast/style, Default_Options),
-  merge_options(User_Options, Default_Options, Options0),
-  Options = Options0.
-
 default_options(prolog_tokens, Options) :-
   Options = [
     var_prefix(no)
@@ -54,18 +40,6 @@ default_options(prolog_parsetree, Options) :-
     targets([iso]),
     infer_operators(no),
     allow_variable_name_as_functor(no)
-  ].
-
-default_options(pt_ast, Options) :-
-  Options = [
-    style_mode(warn),
-    style_bind(yes)
-  ].
-
-default_options(pt_ast/style, Options) :-
-  Options = [
-    space_before_clause_end(0),
-    space_before_close_arglist(0)
   ].
 
 revise_options(prolog_tokens, _).
