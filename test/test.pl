@@ -1,5 +1,4 @@
 :- use_module(library(plammar)).
-:- use_module(library(plammar/ast)).
 :- use_module(library(plammar/options)).
 
 :- op(800, xfx, <=>).
@@ -201,35 +200,6 @@ permutation2([], []).
   permutation(First, First_),
   permutation2(Rest, Perm).
 
-prolog_asts(In, ASTs, Options) :-
-  findall(
-    AST,
-    prolog_ast(In, AST, Options),
-    ASTs
-  ).
-
-:- op(800,xfx,ast).
-
-term_expansion(ast(String, AST), Tests) :-
-  format(atom(Head1), '"~s" to AST', [String]),
-  format(atom(Head2), '"~s" from AST', [String]),
-  Tests = [
-    ( Head1 :- Test1 ),
-    ( Head2 :- Test2 )
-  ],
-  Test1 = (
-    prolog_ast(string(String), AST1),
-    !,
-    AST == AST1
-  ),
-  Test2 = (
-    prolog_ast(string(String2), AST),
-    !,
-    String2 == String
-  ),
-  tap:register_test(Head1),
-  tap:register_test(Head2).
-
 /* End of dynamic test generation */
 
 :- set_test_paths.
@@ -261,4 +231,3 @@ run(prolog_tokens/2). % replaced via term expansion
 
 :- load_files('predicates/prolog_parsetree.pl').
 :- load_files('predicates/operators.pl').
-:- load_files('predicates/prolog_ast.pl').
