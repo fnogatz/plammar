@@ -61,7 +61,7 @@ token_(Opts, token_(Tree), A, Z) :-
     Tree = comma(Inner)
   ; open_token(Token_Tree, B, Z),
     ( Inner = [LTS_Tree, Token_Tree] ->
-      Tree = open_(Inner)
+      Tree = open(Inner)
     ; % otherwise ->
       Tree = open_ct(Token_Tree)
     )

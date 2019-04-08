@@ -268,7 +268,7 @@ arg(Opts, arg(Term_Tree), In, Out) :-
 %% non-termination because of left-recursion
 
 term_(0, Opts) -->
-    [ open_(_) ]
+    [ open(_) ]
   , term(P, Opts)
   , [ close(_) ]
   , { P #=< 1201 }.
