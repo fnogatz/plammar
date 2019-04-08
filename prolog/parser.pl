@@ -266,7 +266,7 @@ arg(Opts, arg(Term_Tree), In, Out) :-
 %% Note that we do not distinguish between
 %% `term` and `lterm` to avoid trivial
 %% non-termination because of left-recursion
-
+/*
 term_(0, Opts) -->
     [ open(_) ]
   , term(P, Opts)
@@ -278,6 +278,20 @@ term_(0, Opts) -->
   , term(P, Opts)
   , [ close(_) ]
   , { P #=< 1201 }.
+*/
+term_(0, Opts, term_(Inner), A, Z) :-
+  Inner = [open(Open_Tree), Term_Tree, close(Close_Tree)],
+  A = [open(Open_Tree)|B],
+  term(P, Opts, Term_Tree, B, C),
+  C = [close(Close_Tree)|Z],
+  P #=< 1201.
+
+term_(0, Opts, term_(Inner), A, Z) :-
+  Inner = [open_ct(Open_Ct_Tree), Term_Tree, close(Close_Tree)],
+  A = [open_ct(Open_Ct_Tree)|B],
+  term(P, Opts, Term_Tree, B, C),
+  C = [close(Close_Tree)|Z],
+  P #=< 1201.
 
 /* 6.3.4.2 Operators as functors */
 
