@@ -59,6 +59,7 @@ prolog_tokens(_, _, _) :-
 
 prolog_tokens_(chars(Chars), Tokens, Options) :-
   phrase(plammar:term(Options, term(Tokens)), Chars, []).
+%  tokens(Options, Tokens, Chars).
 
 prolog_parsetree(A, B) :-
   prolog_parsetree(A, B, []).
@@ -137,6 +138,257 @@ tree_from_file(Body, Filename, Tree) :-
   read_file_to_codes(Filename, Codes, []),
   maplist(char_code, Chars, Codes),
   tree(Body, Chars, Tree).
+
+
+:- discontiguous tokens/4, tokens/5.
+
+test_tokens(file(File), Tokens, Opts) :-
+  open(File, read, Stream),
+  read_string(Stream, _Length, String),
+  string_chars(String, Chars),
+  tokens(Opts, Tokens, Chars).
+
+tokens(Opts, Tokens, A) :-
+  \+ var(Tokens),
+  !,
+  phrase(plammar:term(Opts, term(Tokens)), A, []).
+
+tokens(Opts, Tokens, A) :-
+  var(Tokens),
+  !,
+  tokens(Opts, start, Tokens, A, []).
+
+%% start
+tokens(Opts, start, Tokens, A, LTS0) :-
+  ( A = [] ->
+    Tokens = []
+  ; layout_char(PT_Layout_Char, A, B) ->
+    append(LTS0, [layout_text(PT_Layout_Char)], LTS1),
+    tokens(Opts, start, Tokens, B, LTS1)
+  ; comment_open(PT_Comment_Open, A, B) ->
+    tokens(Opts, bracketed_comment(LTS0,[],B), Tokens, PT_Comment_Open, B)
+  ; end_line_comment_char(PT_End_Line_Comment_Char, A, B) ->
+    tokens(Opts, single_line_comment(LTS0,[],B), Tokens, PT_End_Line_Comment_Char, B)
+  ; otherwise ->
+    tokens(Opts, token, Tokens, A, LTS0)
+  ).
+
+%% token
+tokens(Opts, token, [Token|Tokens], A, LTS) :-
+  ( % some number
+    decimal_digit_char(PT_Decimal_Digit_Char, A, B),
+    tokens(Opts, number_token(PT,Tag,A), Tokens, [PT_Decimal_Digit_Char], B)
+  ; % name token
+    small_letter_char(PT_Small_Letter_Char, A, B) ->
+    tokens(Opts, name_token(PT,A), Tokens, PT_Small_Letter_Char, B),
+    Tag = name
+  ; % named variable starting with capital letter
+    capital_letter_char(PT_Capital_Letter_Char, A, B) ->
+    tokens(Opts, capital_variable(PT,A), Tokens, PT_Capital_Letter_Char, B),
+    Tag = variable
+  ; % anonymous or named variable
+    variable_indicator_char(PT_Variable_Indicator_Char, A, B) ->
+    tokens(Opts, underscore_variable(PT,A), Tokens, PT_Variable_Indicator_Char, B),
+    Tag = variable
+  ; % comma token
+    comma_char(PT_Comma_Char, A, B) ->
+    PT = comma_token(PT_Comma_Char),
+    Tag = comma,
+    tokens(Opts, start, Tokens, B, [])
+  ; % head tail separator token
+    head_tail_separator_char(PT_Ht_Sep_Char, A, B) ->
+    PT = head_tail_separator_token(PT_Ht_Sep_Char),
+    Tag = ht_sep,
+    tokens(Opts, start, Tokens, B, [])
+  ; % open list token
+    open_list_char(PT_Open_List_Char, A, B) ->
+    PT = open_list_token(PT_Open_List_Char),
+    Tag = open_list,
+    tokens(Opts, start, Tokens, B, [])
+  ; % close list token
+    close_list_char(PT_Close_List_Char, A, B) ->
+    PT = close_list_token(PT_Close_List_Char),
+    Tag = close_list,
+    tokens(Opts, start, Tokens, B, [])
+  ; % open curly token
+    open_curly_char(PT_Open_Curly_Char, A, B) ->
+    PT = open_curly_token(PT_Open_Curly_Char),
+    Tag = open_curly,
+    tokens(Opts, start, Tokens, B, [])
+  ; % close curly token
+    close_curly_char(PT_Close_Curly_Char, A, B) ->
+    PT = close_curly_token(PT_Close_Curly_Char),
+    Tag = close_curly,
+    tokens(Opts, start, Tokens, B, [])
+  ; % graphic token
+    graphic_token_char(PT_Graphic_Token_Char, A, B) ->
+    tokens(Opts, graphic_token(PT,A), Tokens, PT_Graphic_Token_Char, B),
+    Tag = name
+  ; % open or open_ct
+    open_char(PT_Open_Char, A, B) ->
+    PT = open_token(PT_Open_Char),
+    ( LTS = [] ->
+      Tag = open_ct
+    ; otherwise ->
+      Tag = open
+    ),
+    tokens(Opts, start, Tokens, B, [])
+  ; % close token
+    close_char(PT_Close_Char, A, B) ->
+    PT = close_token(PT_Close_Char),
+    Tag = close,
+    tokens(Opts, start, Tokens, B, [])
+  ),
+  ( LTS = [] ->
+    Token =.. [Tag, [PT]]
+  ; otherwise ->
+    Token =.. [Tag, [layout_text_sequence(LTS), PT]]
+  ).
+
+%% number_token/3
+tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
+  ( decimal_digit_char(PT_Decimal_Digit_Char, A, B) ->
+    append(Ls0, [PT_Decimal_Digit_Char], Ls1),
+    tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls1, B)
+  ; decimal_point_char(PT_Decimal_Point_Char, A, B),
+    decimal_digit_char(PT_Decimal_Digit_Char, B, C) ->
+    PT = float_number_token(Atom, [integer_constant(Ls0), fraction([PT_Decimal_Point_Char, [PT_Decimal_Digit_Char|Ls]])|Exponent]),
+    Tag = float_number,
+    tokens(Opts, fraction(Ls,Exponent,Beg,Cons), Tokens, C),
+    atom_chars(Atom, Cons)
+  ; otherwise ->
+    Tag = integer,
+    append(Cons,A,Beg),
+    atom_chars(Atom, Cons),
+    PT = integer_token(Atom, integer_constant(Ls0)),
+    tokens(Opts, start, Tokens, A, [])
+  ).
+
+%% fraction/4
+tokens(_Opts, fraction([],[],Beg,Beg), [], []) :-
+  !.
+tokens(Opts, fraction(Ls,Exponent,Beg,Cons), Tokens, A) :-
+  ( decimal_digit_char(PT_Decimal_Digit_Char, A, B) ->
+    Ls = [PT_Decimal_Digit_Char|PTs],
+    tokens(Opts, fraction(PTs,Exponent,Beg,Cons), Tokens, B)
+  ; exponent_char(PT_Exponent_Char, A, B),
+    decimal_digit_char(PT_Decimal_Digit_Char, B, C) ->
+    Sign = sign([]),
+    Ls = [],
+    Exponent = [exponent([PT_Exponent_Char,Sign,integer_constant([PT_Decimal_Digit_Char|Rs])])],
+    tokens(Opts, seq_decimal_digit_char(Rs,Beg,Cons), Tokens, C)
+  ; otherwise ->
+    append(Cons,A,Beg),
+    tokens(Opts, start, Tokens, A, []),
+    Ls = [],
+    Exponent = []
+  ).
+
+%% name_token/2
+tokens(Opts, name_token(PT,Beg), Tokens, PT_Small_Letter_Char, A) :-
+  PT = name_token(Atom, letter_digit_token([PT_Small_Letter_Char|Ls])),
+  tokens(Opts, seq_alphanumeric_char(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons).
+
+%% capital_variable/2
+tokens(Opts, capital_variable(PT,Beg), Tokens, PT_Capital_Letter_Char, A) :-
+  PT = variable_token(Atom, named_variable([PT_Capital_Letter_Char|Ls])),
+  tokens(Opts, seq_alphanumeric_char(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons).
+
+%% underscore_variable/2
+tokens(Opts, underscore_variable(PT,Beg), Tokens, PT_Variable_Indicator_Char, A) :-
+  tokens(Opts, seq_alphanumeric_char(Ls,Beg,Cons), Tokens, A),
+  ( Ls = [] ->
+    PT = variable_token('_', anonymous_variable(PT_Variable_Indicator_Char)),
+    Beg = _ % does not matter, would only return '_'
+  ; otherwise ->
+    PT = variable_token(Atom, named_variable([PT_Variable_Indicator_Char|Ls])),
+    atom_chars(Atom, Cons)
+  ).
+
+%% graphic_token/2
+tokens(Opts, graphic_token(PT,Beg), Tokens, PT_Graphic_Token_Char, A) :-
+  PT = name_token(Atom, graphic_token([PT_Graphic_Token_Char|Ls])),
+  tokens(Opts, seq_graphic_token_char(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons).
+
+%% bracketed_comment/3
+tokens(Opts, bracketed_comment(LTS0,CT,Beg), Tokens, PT_Comment_Open, ['*','/'|A]) :-
+  !,
+  append(Cons, ['*','/'|A], Beg),
+  atom_chars(Atom, Cons),
+  PT = layout_text(comment(bracketed_comment([
+    PT_Comment_Open,
+    comment_text(Atom, CT),
+    comment_close([
+      comment_2_char('*'),
+      comment_1_char('/')
+    ])
+  ]))),
+  append(LTS0, [PT], LTS1),
+  tokens(Opts, start, Tokens, A, LTS1).
+
+tokens(Opts, bracketed_comment(LTS,CT0,Beg), Tokens, PT_Comment_Open, A) :-
+  char(Opts, PT_Char, A, B),
+  append(CT0, [PT_Char], CT1),
+  tokens(Opts, bracketed_comment(LTS,CT1,Beg), Tokens, PT_Comment_Open, B).
+
+%% single_line_comment/3
+tokens(Opts, single_line_comment(LTS0,CT0,Beg), Tokens, PT_End_Line_Comment_Char, A) :-
+  ( new_line_char(PT_New_Line_Char, A, B) ->
+    append(Cons, A, Beg),
+    atom_chars(Atom, Cons),
+    PT = layout_text(comment(single_line_comment([
+      PT_End_Line_Comment_Char,
+      comment_text(Atom, CT0),
+      PT_New_Line_Char
+    ]))),
+    append(LTS0, [PT], LTS1),
+    tokens(Opts, start, Tokens, B, LTS1)
+  ; char(Opts, PT_Char, A, B) ->
+    append(CT0, [PT_Char], CT1),
+    tokens(Opts, single_line_comment(LTS0,CT1,Beg), Tokens, PT_End_Line_Comment_Char, B)
+  ).
+
+%% seq_alphanumeric_char/3
+tokens(_Opts, seq_alphanumeric_char([],Beg,Beg), [], []) :-
+  !.
+tokens(Opts, seq_alphanumeric_char(Ls,Beg,Cons), Tokens, A) :-
+  ( alphanumeric_char(PT_Alphanumeric_Char, A, B) ->
+    tokens(Opts, seq_alphanumeric_char(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Alphanumeric_Char|PTs]
+  ; otherwise ->
+    append(Cons,A,Beg),
+    tokens(Opts, start, Tokens, A, []),
+    Ls = []
+  ).
+
+%% seq_graphic_token_char/3
+tokens(_Opts, seq_graphic_token_char([],Beg,Beg), [], []) :-
+  !.
+tokens(Opts, seq_graphic_token_char(Ls,Beg,Cons), Tokens, A) :-
+  ( graphic_token_char(PT_Graphic_Token_Char, A, B) ->
+    tokens(Opts, seq_graphic_token_char(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Graphic_Token_Char|PTs]
+  ; otherwise ->
+    append(Cons,A,Beg),
+    tokens(Opts, start, Tokens, A, []),
+    Ls = []
+  ).
+
+%% seq_decimal_digit_char/3
+tokens(_Opts, seq_decimal_digit_char([],Beg,Beg), [], []) :-
+  !.
+tokens(Opts, seq_decimal_digit_char(Ls,Beg,Cons), Tokens, A) :-
+  ( decimal_digit_char(PT_Decimal_Digit_Char, A, B) ->
+    tokens(Opts, seq_decimal_digit_char(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Decimal_Digit_Char|PTs]
+  ; otherwise ->
+    append(Cons,A,Beg),
+    tokens(Opts, start, Tokens, A, []),
+    Ls = []
+  ).
 
 
 %% "A token shall not be followed by characters such that
