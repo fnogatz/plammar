@@ -156,7 +156,8 @@ tokens(Opts, Tokens, A) :-
 tokens(Opts, Tokens, A) :-
   var(Tokens),
   !,
-  tokens(Opts, start, Tokens, A, []).
+  tokens(Opts, start, Tokens, A, []),
+  !.
 
 %% start
 tokens(Opts, start, Tokens, A, LTS0) :-
@@ -188,8 +189,14 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     Tag = name
   ; % named variable starting with capital letter
     capital_letter_char(PT_Capital_Letter_Char, A, B) ->
-    tokens(Opts, capital_variable(PT,A), Tokens, PT_Capital_Letter_Char, B),
-    Tag = variable
+    option(var_prefix(Var_Prefix), Opts),
+    ( no(Var_Prefix) ->
+      tokens(Opts, capital_variable(PT,A), Tokens, PT_Capital_Letter_Char, B),
+      Tag = variable
+    ; yes(Var_Prefix) ->
+      tokens(Opts, name_token(PT,A), Tokens, PT_Capital_Letter_Char, B),
+      Tag = name
+    )
   ; % anonymous or named variable
     variable_indicator_char(PT_Variable_Indicator_Char, A, B) ->
     tokens(Opts, underscore_variable(PT,A), Tokens, PT_Variable_Indicator_Char, B),

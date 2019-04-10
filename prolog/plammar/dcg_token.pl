@@ -203,18 +203,9 @@ name token Opts -->                 % 6.4.2
   | semicolon_token                 % 6.4.2
   | cut_token.                      % 6.4.2
 
-/*
 letter_digit_token(_Opts) -->       % 6.4.2
     small_letter_char               % 6.5.2
   , *alphanumeric_char.             % 6.5.2
-*/
-letter_digit_token(Opts, letter_digit_token(Tree), A, Z) :-
-  Tree=[Char_Tree|Alphanumeric_Char_List],
-  ( small_letter_char(Char_Tree, A, B)
-  ; option(var_prefix(Var_Prefix), Opts),
-    yes(Var_Prefix),
-    capital_letter_char(Char_Tree, A, B) ),
-  call_sequence_ground(sequence(*, alphanumeric_char, E), E, [], Alphanumeric_Char_List, B, Z).
 
 graphic_token -->                   % 6.4.2
     graphic_token_char              % 6.4.2
