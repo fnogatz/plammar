@@ -58,8 +58,8 @@ prolog_tokens(_, _, _) :-
   warning('Use one of input formats string ~w', Types).
 
 prolog_tokens_(chars(Chars), Tokens, Options) :-
-%  phrase(plammar:term(Options, term(Tokens)), Chars, []).
-  tokens(Options, Tokens, Chars).
+  phrase(plammar:term(Options, term(Tokens)), Chars, []).
+%  tokens(Options, Tokens, Chars).
 
 prolog_parsetree(A, B) :-
   prolog_parsetree(A, B, []).
@@ -180,7 +180,11 @@ tokens(Opts, start, Tokens, A, LTS0) :-
 
 %% token
 tokens(Opts, token, [Token|Tokens], A, LTS) :-
-  ( % some number
+  ( % character_code_constant
+    A = ['0'|B],
+    single_quote_char(PT_Single_Quote_Char, B, C) ->
+    tokens(Opts, character_code_constant(PT,Tag,A), Tokens, PT_Single_Quote_Char, C)
+  ; % some number
     decimal_digit_char(PT_Decimal_Digit_Char, A, B),
     tokens(Opts, number_token(PT,Tag,A), Tokens, [PT_Decimal_Digit_Char], B)
   ; % name token
@@ -276,6 +280,20 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     Token =.. [Tag, [layout_text_sequence(LTS), PT]]
   ).
 
+%% character_code_constant/3
+tokens(Opts, character_code_constant(PT,Tag,Beg), Tokens, PT_Single_Quote_Char, A) :-
+  single_quoted_character(PT_Single_Quoted_Character, A, B),
+  PT = integer_token(Atom, character_code_constant([
+    '0',
+    PT_Single_Quote_Char,
+    PT_Single_Quoted_Character
+  ])),
+  Tag = integer,
+  append(Cons, B, Beg),
+  atom_chars(Atom, Cons),
+  tokens(Opts, start, Tokens, B, []).
+
+
 %% number_token/3
 tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
   ( decimal_digit_char(PT_Decimal_Digit_Char, A, B) ->
@@ -289,7 +307,7 @@ tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
     atom_chars(Atom, Cons)
   ; otherwise ->
     Tag = integer,
-    append(Cons,A,Beg),
+    append(Cons, A, Beg),
     atom_chars(Atom, Cons),
     PT = integer_token(Atom, integer_constant(Ls0)),
     tokens(Opts, start, Tokens, A, [])
