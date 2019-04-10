@@ -58,8 +58,8 @@ prolog_tokens(_, _, _) :-
   warning('Use one of input formats string ~w', Types).
 
 prolog_tokens_(chars(Chars), Tokens, Options) :-
-  phrase(plammar:term(Options, term(Tokens)), Chars, []).
-%  tokens(Options, Tokens, Chars).
+%  phrase(plammar:term(Options, term(Tokens)), Chars, []).
+  tokens(Options, Tokens, Chars).
 
 prolog_parsetree(A, B) :-
   prolog_parsetree(A, B, []).
@@ -161,7 +161,11 @@ tokens(Opts, Tokens, A) :-
 %% start
 tokens(Opts, start, Tokens, A, LTS0) :-
   ( A = [] ->
-    Tokens = []
+    ( LTS0 = [] ->
+      Tokens = []
+    ; otherwise ->
+      Tokens = [layout_text_sequence(LTS0)]
+    )
   ; layout_char(PT_Layout_Char, A, B) ->
     append(LTS0, [layout_text(PT_Layout_Char)], LTS1),
     tokens(Opts, start, Tokens, B, LTS1)
@@ -220,6 +224,14 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     PT = close_curly_token(PT_Close_Curly_Char),
     Tag = close_curly,
     tokens(Opts, start, Tokens, B, [])
+  ; % double quoted list token
+    double_quote_char(PT_Double_Quote_Char, A, B) ->
+    tokens(Opts, double_quoted_list(PT,B), Tokens, PT_Double_Quote_Char, B),
+    Tag = double_quoted_list
+  ; % quoted_token
+    single_quote_char(PT_Single_Quote_Char, A, B) ->
+    tokens(Opts, quoted_token(PT,A), Tokens, PT_Single_Quote_Char, B),
+    Tag = name
   ; % graphic token
     graphic_token_char(PT_Graphic_Token_Char, A, B) ->
     tokens(Opts, graphic_token(PT,A), Tokens, PT_Graphic_Token_Char, B),
@@ -239,7 +251,9 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     Tag = close,
     tokens(Opts, start, Tokens, B, [])
   ),
-  ( LTS = [] ->
+  ( Tag = open_ct ->
+    Token =.. [Tag, PT]
+  ; LTS = [] ->
     Token =.. [Tag, [PT]]
   ; otherwise ->
     Token =.. [Tag, [layout_text_sequence(LTS), PT]]
@@ -252,7 +266,7 @@ tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
     tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls1, B)
   ; decimal_point_char(PT_Decimal_Point_Char, A, B),
     decimal_digit_char(PT_Decimal_Digit_Char, B, C) ->
-    PT = float_number_token(Atom, [integer_constant(Ls0), fraction([PT_Decimal_Point_Char, [PT_Decimal_Digit_Char|Ls]])|Exponent]),
+    PT = float_number_token(Atom, [integer_constant(Ls0), fraction([PT_Decimal_Point_Char, PT_Decimal_Digit_Char|Ls])|Exponent]),
     Tag = float_number,
     tokens(Opts, fraction(Ls,Exponent,Beg,Cons), Tokens, C),
     atom_chars(Atom, Cons)
@@ -283,6 +297,18 @@ tokens(Opts, fraction(Ls,Exponent,Beg,Cons), Tokens, A) :-
     Ls = [],
     Exponent = []
   ).
+
+%% double_quoted_list/2
+tokens(Opts, double_quoted_list(PT,Beg), Tokens, PT_Double_Quote_Char, A) :-
+  PT = double_quoted_list_token(Atom, [PT_Double_Quote_Char|Ls]),
+  tokens(Opts, seq_double_quoted_item(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons).
+
+%% quoted_token/2
+tokens(Opts, quoted_token(PT,Beg), Tokens, PT_Single_Quote_Char, A) :-
+  PT = name_token(Atom, quoted_token([PT_Single_Quote_Char|Ls])),
+  tokens(Opts, seq_single_quoted_item(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons).
 
 %% name_token/2
 tokens(Opts, name_token(PT,Beg), Tokens, PT_Small_Letter_Char, A) :-
@@ -388,6 +414,28 @@ tokens(Opts, seq_decimal_digit_char(Ls,Beg,Cons), Tokens, A) :-
     append(Cons,A,Beg),
     tokens(Opts, start, Tokens, A, []),
     Ls = []
+  ).
+
+%% seq_double_quoted_item/3
+tokens(Opts, seq_double_quoted_item(Ls,Beg,Cons), Tokens, A) :-
+  ( double_quoted_item(PT_Double_Quoted_Item, A, B) ->
+    tokens(Opts, seq_double_quoted_item(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Double_Quoted_Item|PTs]
+  ; double_quote_char(PT_Double_Quote_Char, A, B) ->
+    append(Cons, A, Beg),
+    tokens(Opts, start, Tokens, B, []),
+    Ls = [PT_Double_Quote_Char]
+  ).
+
+%% seq_single_quoted_item/3
+tokens(Opts, seq_single_quoted_item(Ls,Beg,Cons), Tokens, A) :-
+  ( single_quoted_item(PT_Single_Quoted_Item, A, B) ->
+    tokens(Opts, seq_single_quoted_item(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Single_Quoted_Item|PTs]
+  ; single_quote_char(PT_Single_Quote_Char, A, B) ->
+    append(Cons, B, Beg),
+    tokens(Opts, start, Tokens, B, []),
+    Ls = [PT_Single_Quote_Char]
   ).
 
 
