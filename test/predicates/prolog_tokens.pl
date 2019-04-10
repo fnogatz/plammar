@@ -1,9 +1,9 @@
 :- op(800, xfx, <=>).
 
-string("a/*") <=>
+string("a**") <=>
   [
     name([name_token('a', letter_digit_token([small_letter_char(a)]))]),
-    name([name_token('/*', graphic_token([graphic_token_char(graphic_char('/')),graphic_token_char(graphic_char('*'))]))])
+    name([name_token('**', graphic_token([graphic_token_char(graphic_char('*')),graphic_token_char(graphic_char('*'))]))])
   ].
 
 string("a b c") <=>
