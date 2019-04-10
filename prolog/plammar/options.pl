@@ -5,6 +5,7 @@
   ]).
 
 :- use_module(library(plammar/operators)).
+:- use_module(library(plammar/environments)).
 :- use_module(library(plammar/util)).
 
 normalise_options(User_Options, Options) :-
@@ -14,8 +15,12 @@ normalise_options(User_Options, Options) :-
   Options = O3.
 
 normalise_options(prolog_tokens, User_Options, Options) :-
-  default_options(prolog_tokens, Default_Options),
-  merge_options(User_Options, Default_Options, Options0),
+  option(targets(Targets), User_Options, [iso]),
+  ( Targets = [] ->
+    Target = iso
+  ; Targets = [Target|_] ),
+  target_options(Target, Target_Options),
+  merge_options(User_Options, Target_Options, Options0),
   Options = Options0.
 
 normalise_options(prolog_parsetree, User_Options, Options) :-
@@ -28,11 +33,6 @@ normalise_options(prolog_parsetree, User_Options, Options) :-
   ; Options1 = Options0 % user provided `no` or an unbound variable
   ),
   Options = Options1.
-
-default_options(prolog_tokens, Options) :-
-  Options = [
-    var_prefix(no)
-  ].
 
 default_options(prolog_parsetree, Options) :-
   Options = [

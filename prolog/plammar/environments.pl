@@ -1,6 +1,10 @@
 :- module(plammar_environments, [
-      target_ops/2
-   ]).
+    target_ops/2,
+    target_options/2
+  ]).
+
+
+%% Operators for Environments
 
 target_ops(iso, Ops) :-
   Ops = [
@@ -75,3 +79,27 @@ target_ops(swi, Ops) :-
 extend_ops(Target, Extension, Combined) :-
   target_ops(Target, Target_Ops),
   append(Target_Ops, Extension, Combined).
+
+
+%% Options for Environments
+
+target_options(swi, Options) :-
+  target_options(swi(8), Options).
+
+target_options(swi(8), Options) :-
+  extend_options(swi(7), [], Options).
+
+target_options(swi(7), Options) :-
+  extend_options(iso, [
+    back_quoted_text(yes)
+  ], Options).
+
+target_options(iso, Options) :-
+  Options = [
+    var_prefix(no),
+    back_quoted_text(no)
+  ].  
+
+extend_options(Target, Extension, Combined) :-
+  target_options(Target, Target_Options),
+  merge_options(Extension, Target_Options, Combined).

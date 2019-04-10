@@ -58,8 +58,8 @@ prolog_tokens(_, _, _) :-
   warning('Use one of input formats string ~w', Types).
 
 prolog_tokens_(chars(Chars), Tokens, Options) :-
-  phrase(plammar:term(Options, term(Tokens)), Chars, []).
-%  tokens(Options, Tokens, Chars).
+%  phrase(plammar:term(Options, term(Tokens)), Chars, []).
+  tokens(Options, Tokens, Chars).
 
 prolog_parsetree(A, B) :-
   prolog_parsetree(A, B, []).
@@ -243,6 +243,13 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     single_quote_char(PT_Single_Quote_Char, A, B) ->
     tokens(Opts, quoted_token(PT,A), Tokens, PT_Single_Quote_Char, B),
     Tag = name
+  ; % back quoted string token
+    back_quote_char(PT_Back_Quote_Char, A, B),
+    writeln(Opts),
+    option(back_quoted_text(Back_Quoted_Text), Opts),
+    yes(Back_Quoted_Text) ->
+    tokens(Opts, back_quoted_string(PT,B), Tokens, PT_Back_Quote_Char, B),
+    Tag = back_quoted_string
   ; % semicolon token
     semicolon_char(PT_Semicolon_Char, A, B) ->
     PT = name_token(';', semicolon_token(PT_Semicolon_Char)),
@@ -343,6 +350,12 @@ tokens(Opts, double_quoted_list(PT,Beg), Tokens, PT_Double_Quote_Char, A) :-
 tokens(Opts, quoted_token(PT,Beg), Tokens, PT_Single_Quote_Char, A) :-
   PT = name_token(Atom, quoted_token([PT_Single_Quote_Char|Ls])),
   tokens(Opts, seq_single_quoted_item(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons).
+
+%% back_quoted_string/2
+tokens(Opts, back_quoted_string(PT,Beg), Tokens, PT_Back_Quote_Char, A) :-
+  PT = back_quoted_string_token(Atom, [PT_Back_Quote_Char|Ls]),
+  tokens(Opts, seq_back_quoted_item(Ls,Beg,Cons), Tokens, A),
   atom_chars(Atom, Cons).
 
 %% name_token/2
@@ -460,6 +473,17 @@ tokens(Opts, seq_double_quoted_item(Ls,Beg,Cons), Tokens, A) :-
     append(Cons, A, Beg),
     tokens(Opts, start, Tokens, B, []),
     Ls = [PT_Double_Quote_Char]
+  ).
+
+%% seq_back_quoted_item/3
+tokens(Opts, seq_back_quoted_item(Ls,Beg,Cons), Tokens, A) :-
+  ( back_quoted_item(PT_Back_Quoted_Item, A, B) ->
+    tokens(Opts, seq_back_quoted_item(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Back_Quoted_Item|PTs]
+  ; back_quote_char(PT_Back_Quote_Char, A, B) ->
+    append(Cons, A, Beg),
+    tokens(Opts, start, Tokens, B, []),
+    Ls = [PT_Back_Quote_Char]
   ).
 
 %% seq_single_quoted_item/3
