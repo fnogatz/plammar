@@ -245,7 +245,6 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     Tag = name
   ; % back quoted string token
     back_quote_char(PT_Back_Quote_Char, A, B),
-    writeln(Opts),
     option(back_quoted_text(Back_Quoted_Text), Opts),
     yes(Back_Quoted_Text) ->
     tokens(Opts, back_quoted_string(PT,B), Tokens, PT_Back_Quote_Char, B),

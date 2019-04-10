@@ -404,3 +404,7 @@ term_(0, Opts) -->
 
 term_(0, _Opts) -->
     [ double_quoted_list(_) ].
+
+/* Extension for SWI 7+ - back quoted string notation */
+term_(0, _Opts) -->
+    [ back_quoted_string(_) ].

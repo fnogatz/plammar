@@ -65,6 +65,8 @@ token_(Opts, token_(Tree), A, Z) :-
     ; % otherwise ->
       Tree = open_ct(Token_Tree)
     )
+  ; back_quoted_string_token(Opts, Token_Tree, B, Z),
+    Tree = back_quoted_string(Inner)
   ).
 
 /*
@@ -138,6 +140,10 @@ ht_sep -->                          % 6.4
 comma -->                           % 6.4
     ?layout_text_sequence           % 6.4
   , comma_token.                    % 6.4.8
+
+back_quoted_string -->              % 6.4
+    ?layout_text_sequence           % 6.4
+  , back_quoted_string_token.       % 6.4.
 */
 
 end(Opts) -->                       % 6.4
@@ -457,7 +463,7 @@ double_quoted_item -->              % 6.4.6
 
 /* 6.4.7 Back quoted strings */
 
-back_quoted_string -->              % 6.4.7
+back_quoted_string token _Opts -->  % 6.4.7
     back_quote_char                 % 6.5.5
   , *back_quoted_item               % 6.4.7
   , back_quote_char.                % 6.5.5

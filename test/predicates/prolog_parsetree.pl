@@ -173,6 +173,10 @@ prolog("a(\"\").").
 prolog("a(\"s\").").
 prolog("a(\"string with blanks\").").
 
+% Back quoted text, as in SWI 7+
+prolog("a(`b`).", [ back_quoted_text(yes) ]).
+prolog("a(`b`).", [ targets([swi(7)]) ]).
+
 %%% III.b): Operators
 
 '"a(1+1)." is correctly parsed' :-
