@@ -232,6 +232,11 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     single_quote_char(PT_Single_Quote_Char, A, B) ->
     tokens(Opts, quoted_token(PT,A), Tokens, PT_Single_Quote_Char, B),
     Tag = name
+  ; % cut token
+    cut_char(PT_Cut_Char, A, B) ->
+    PT = name_token('!', cut_token(PT_Cut_Char)),
+    Tag = name,
+    tokens(Opts, start, Tokens, B, [])
   ; % graphic token
     graphic_token_char(PT_Graphic_Token_Char, A, B) ->
     tokens(Opts, graphic_token(PT,A), Tokens, PT_Graphic_Token_Char, B),
