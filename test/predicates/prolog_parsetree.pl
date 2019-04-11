@@ -343,3 +343,4 @@ prolog("A(B(C)).", [allow_variable_name_as_functor(true)] ).
 prolog(":- op(600,fx,p).\np q.").
 prolog(":- module(a,[op(600,fx,p)]).\np q.").
 prolog(":- module(a,[b,op(600,fx,p),c]).\np q.").
+prolog(":- module(a,[b,op(600,fx,p),c/2]).\np q.").

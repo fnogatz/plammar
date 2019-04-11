@@ -137,6 +137,7 @@ get_operator_from_term(Opts, term(Term)) :-
   ; otherwise ->
     true
   ).
+get_operator_from_term(Opts, term(_,_)).
 
 get_operators_from_items(Opts, items([arg(Arg), comma(_), Items])) :-
   get_operator_from_term(Opts, Arg),
