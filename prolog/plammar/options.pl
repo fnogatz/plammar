@@ -37,10 +37,12 @@ normalise_options(prolog_parsetree, User_Options, Options) :-
 default_options(prolog_parsetree, Options) :-
   Options = [
     operators([]),
-    targets([iso]),
+    specified_operators(L),
     infer_operators(no),
+    targets([iso]),
     allow_variable_name_as_functor(no)
-  ].
+  ],
+  list_open([], L).
 
 revise_options(prolog_tokens, _).
 

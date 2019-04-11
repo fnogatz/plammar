@@ -337,3 +337,9 @@ prolog("A(B(C)).", [allow_variable_name_as_functor(true)] ).
     [op(_,fx,a), op(_,_,b)]
   ],
   permutation2(Inferred_Ops, Expected), !.
+
+%% Part VI: use operator definitions given in source
+
+prolog(":- op(600,fx,p).\np q.").
+prolog(":- module(a,[op(600,fx,p)]).\np q.").
+prolog(":- module(a,[b,op(600,fx,p),c]).\np q.").

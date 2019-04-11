@@ -17,20 +17,24 @@ is_operator(Op0, Options) :-
   is_priority(Prec),
   
   % get relevant options
+  option(specified_operators(Specified_Operators), Options, _),
   option(operators(Operators), Options),
   option(targets(Targets), Options),
   option(infer_operators(Inferred_Ops), Options),
   
-  ( % Option I: it is part of the operators(_) option
+  ( % Option I: it is part of the specified_operators(_) option
+    %   of operators given in the source code
+    open_member(Op, Specified_Operators)
+  ; % Option II: it is part of the operators(_) option
     member(Op, Operators)
-  ; % Option II: it is part of the operators defined in the target
+  ; % Option III: it is part of the operators defined in the target
     Targets = [Target], %% TODO: Support more than one target, e.g.
                         %%   `targets([swi,gnu])`, to throw warnings
                         %%   for operators that are not defined in
                         %%   all target systems
     target_ops(Target, Target_Ops),
     member(Op, Target_Ops)
-  ; % Option III: operators should be inferred
+  ; % Option IV: operators should be inferred
     Inferred_Ops \== no,
     memberchk(Op, Inferred_Ops)
   ).
@@ -58,6 +62,14 @@ not_member(X, [Y|Ys]) :-
   X \= Y,
   not_member(X, Ys).
 
+open_member(X, Xs) :-
+  \+ var(Xs),
+  Xs = [X|_].
+open_member(X, [_|Xs]) :-
+  \+ var(Xs),
+  open_member(X, Xs).
+
+
 principal_functor(term(_), indef).
 principal_functor(term(Spec, [_, op(Atom_Tree), _]), Atom) :-
   member(Spec, [xfx, yfx, xfy]),
@@ -83,6 +95,55 @@ atom_tree(Atom, atom(name(L))) :-
 
 atom_tree('[]', atom([open_list(_),close_list(_)])).
 atom_tree('{}', atom([open_curly(_),close_curly(_)])).
+
+get_operators(Opts, Term_Tree) :-
+  ( Term_Tree = term(fx, [op(_), term(Term)]),
+    Term = [atom(name(Name)), open_ct(_), arg_list(Arg_List0), close(_)],
+    append(_, [name_token(Op, _)], Name) ->
+    ( Op = op ->
+      get_operator_from_term(Opts, term(Term))
+    ; Op = module,
+      Arg_List0 = [arg(_), comma(_), arg_list(arg(Arg1))],
+      % [..., op(Prec,Spec,Functor), ... ]
+      Arg1 = term([open_list(_), Items, close_list(_)]) ->
+      get_operators_from_items(Opts, Items)
+    ; otherwise ->
+      true
+    )
+  ; otherwise ->
+    true
+  ).
+
+get_operator_from_term(Opts, term(Term)) :-
+  ( Term = [atom(name(Name)), open_ct(_), arg_list(Arg_List0), close(_)],
+    append(_, [name_token(op, _)], Name),
+    Arg_List0 = [arg(Arg0), comma(_), arg_list(Arg_List1)],
+    Arg_List1 = [arg(Arg1), comma(_), arg_list(Arg_List2)],
+    Arg_List2 = arg(Arg2),
+    % Prec
+    Arg0 = term(integer(Integer0)),
+    append(_, [integer_token(Prec_Atom, _)], Integer0),
+    atom_number(Prec_Atom, Prec),
+    % Spec
+    Arg1 = term(atom(name(Name1))),
+    append(_, [name_token(Spec, _)], Name1),
+    % Functor
+    Arg2 = term(atom(name(Name2))),
+    append(_, [name_token(Functor, _)], Name2)
+  ->
+    Op = op(Prec,Spec,Functor),
+    option(specified_operators(Open_List), Opts, _),
+    memberchk(Op, Open_List)
+  ; otherwise ->
+    true
+  ).
+
+get_operators_from_items(Opts, items([arg(Arg), comma(_), Items])) :-
+  get_operator_from_term(Opts, Arg),
+  get_operators_from_items(Opts, Items).
+get_operators_from_items(Opts, items(arg(Arg))) :-
+  get_operator_from_term(Opts, Arg).
+
 
 
 /* 6.2 PROLOG TEXT AND DATA */
@@ -114,14 +175,20 @@ p_text(Opts, PT, A, C) :-
   end_(End_Tree, B, C),
   principal_functor(Term_Tree, Principal_Functor),
   (  Principal_Functor = (:-)
-  -> Tree_Name = directive_term
+  -> Tree_Name = directive_term,
+     get_operators(Opts, Term_Tree)
   ;  Tree_Name = clause_term ),
   PT =.. [Tree_Name, [Term_Tree, End_Tree]].
 
 p_text(Opts, PT, A, C) :-
   \+ var(PT), !,
-  PT =.. [_Tree_Name, [Term_Tree, End_Tree]],
+  PT =.. [Tree_Name, [Term_Tree, End_Tree]],
   term(P, Opts, Term_Tree, A, B),
+  ( Tree_Name = directive_term ->
+    get_operators(Opts, Term_Tree)
+  ; otherwise ->
+    true
+  ),
   end_(End_Tree, B, C),
   P #=< 1201.
 
