@@ -174,7 +174,12 @@ single_line_comment(Opts0, single_line_comment([ELCC_Tree,CT_Tree,NLC_Tree]), A,
   merge_options([disallow_chars(['\n'])], Opts0, Opts),
   end_line_comment_char(ELCC_Tree, A, B),
   comment_text(Opts, CT_Tree, B, C),
-  new_line_char(NLC_Tree, C, Z).
+  ( (C == Z ; NLC_Tree == end_of_file) ->
+    NLC_Tree = end_of_file,
+    C = Z
+  ; otherwise ->
+    new_line_char(NLC_Tree, C, Z)
+  ).
 
 bracketed_comment(Opts) -->         % 6.4.1
     comment_open                    % 6.4.1

@@ -409,7 +409,17 @@ tokens(Opts, bracketed_comment(LTS,CT0,Beg), Tokens, PT_Comment_Open, A) :-
 
 %% single_line_comment/3
 tokens(Opts, single_line_comment(LTS0,CT0,Beg), Tokens, PT_End_Line_Comment_Char, A) :-
-  ( new_line_char(PT_New_Line_Char, A, B) ->
+  ( A = [] ->
+    append(Cons, A, Beg),
+    atom_chars(Atom, Cons),
+    PT = layout_text(comment(single_line_comment([
+      PT_End_Line_Comment_Char,
+      comment_text(Atom, CT0),
+      end_of_file
+    ]))),
+    append(LTS0, [PT], LTS1),
+    tokens(Opts, start, Tokens, [], LTS1)
+  ; new_line_char(PT_New_Line_Char, A, B) ->
     append(Cons, A, Beg),
     atom_chars(Atom, Cons),
     PT = layout_text(comment(single_line_comment([

@@ -150,6 +150,8 @@ prolog("a. /*/**/\nb."). % no nesting of comments
 % missing layout_char between end_token and next clause:
 invalid("a./**/\nb.").
 invalid("a./* this is a comment */\nb.").
+% line comment ends with end_of_file
+prolog("a.% linecomment").
 
 % Sec. 6.3.5, Compound terms - list notation
 prolog("list([]).").

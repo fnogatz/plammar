@@ -1,7 +1,16 @@
 single_line_comment: "% c\n".
 
-% missing ending newline
-single_line_comment! "% c".
+% missing ending newline, so it must be end_of_file
+single_line_comment:
+  single_line_comment([
+    end_line_comment_char('%'),
+    comment_text(' c', [
+      char(layout_char(space_char(' '))),
+      char(alphanumeric_char(alpha_char(letter_char(small_letter_char(c)))))
+    ]),
+    end_of_file
+  ])
+  <=> "% c".
 
 single_line_comment: "% a % b\n".
 
