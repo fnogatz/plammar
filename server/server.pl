@@ -87,6 +87,11 @@ tree_to_dict(Tree, Dict) :-
    is_list(Tree),
    !,
    maplist(tree_to_dict, Tree, Dict).
+tree_to_dict(end_of_file, Dict) :-
+   !,
+   Dict = _{
+      type: end_of_file
+   }.
 tree_to_dict(Tree, Dict) :-
    Tree =.. [Name, Inner],
    is_list(Inner),
