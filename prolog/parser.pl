@@ -27,7 +27,7 @@ is_operator(Op0, Options) :-
     %   of operators given in the source code
     open_member(Op, Specified_Operators)
   ; % Option II: it is part of the operators(_) option
-    member(Op, Operators)
+    once(member(Op, Operators))
   ; % Option III: it is part of the operators defined in the target
     Targets = [Target], %% TODO: Support more than one target, e.g.
                         %%   `targets([swi,gnu])`, to throw warnings
