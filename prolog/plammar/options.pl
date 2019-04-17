@@ -32,7 +32,11 @@ normalise_options(prolog_parsetree, User_Options, Options) :-
     merge_options([ infer_operators(_) ], Options0, Options1)
   ; Options1 = Options0 % user provided `no` or an unbound variable
   ),
-  Options = Options1.
+  % option: operators
+  option(operators(Operators0), Options1),
+  normalise_operators(Operators0, Operators1),
+  merge_options([operators(Operators1)], Options1, Options2),
+  Options = Options2.
 
 default_options(prolog_parsetree, Options) :-
   Options = [
