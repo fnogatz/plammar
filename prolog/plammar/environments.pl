@@ -73,7 +73,8 @@ target_ops(swi, Ops) :-
     op(1150,  fx, 'meta_predicate'),
     op(1150,  fx, 'public'),
     op(1150,  fx, 'table'),
-    op( 700, xfx, 'as')
+    op( 700, xfx, 'as'),
+    op(1150,  fx, 'record')  % library(record)
   ], Ops).
 
 extend_ops(Target, Extension, Combined) :-
