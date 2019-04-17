@@ -184,6 +184,18 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     A = ['0'|B],
     single_quote_char(PT_Single_Quote_Char, B, C) ->
     tokens(Opts, character_code_constant(PT,Tag,A), Tokens, PT_Single_Quote_Char, C)
+  ; % binary_constant
+    A = ['0', 'b'|B],
+    binary_digit_char(PT_Binary_Digit_Char, B, C) ->
+    tokens(Opts, binary_constant(PT,Tag,A), Tokens, PT_Binary_Digit_Char, C)
+  ; % octal_constant
+    A = ['0', 'o'|B],
+    octal_digit_char(PT_Octal_Digit_Char, B, C) ->
+    tokens(Opts, octal_constant(PT,Tag,A), Tokens, PT_Octal_Digit_Char, C)
+  ; % hexadecimal_constant
+    A = ['0', 'x'|B],
+    hexadecimal_digit_char(PT_Hexadecimal_Char, B, C) ->
+    tokens(Opts, hexadecimal_constant(PT,Tag,A), Tokens, PT_Hexadecimal_Char, C)
   ; % some number
     decimal_digit_char(PT_Decimal_Digit_Char, A, B),
     tokens(Opts, number_token(PT,Tag,A), Tokens, [PT_Decimal_Digit_Char], B)
@@ -299,6 +311,38 @@ tokens(Opts, character_code_constant(PT,Tag,Beg), Tokens, PT_Single_Quote_Char, 
   atom_chars(Atom, Cons),
   tokens(Opts, start, Tokens, B, []).
 
+%% binary_constant/3
+tokens(Opts, binary_constant(PT,Tag,Beg), Tokens, PT_Binary_Digit_Char, A) :-
+  PT = integer_token(Atom, binary_constant([
+    binary_constant_indicator(['0', 'b']),
+    PT_Binary_Digit_Char|
+    Ls
+  ])),
+  tokens(Opts, seq_binary_digit_char(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons),
+  Tag = integer.
+
+%% octal_constant/3
+tokens(Opts, octal_constant(PT,Tag,Beg), Tokens, PT_Octal_Digit_Char, A) :-
+  PT = integer_token(Atom, octal_constant([
+    octal_constant_indicator(['0', 'o']),
+    PT_Octal_Digit_Char|
+    Ls
+  ])),
+  tokens(Opts, seq_octal_digit_char(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons),
+  Tag = integer.
+
+%% hexadecimal_constant/3
+tokens(Opts, hexadecimal_constant(PT,Tag,Beg), Tokens, PT_Hexadecimal_Char, A) :-
+  PT = integer_token(Atom, hexadecimal_constant([
+    hexadecimal_constant_indicator(['0', 'x']),
+    PT_Hexadecimal_Char|
+    Ls
+  ])),
+  tokens(Opts, seq_hexadecimal_digit_char(Ls,Beg,Cons), Tokens, A),
+  atom_chars(Atom, Cons),
+  Tag = integer.
 
 %% number_token/3
 tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
@@ -504,6 +548,45 @@ tokens(Opts, seq_single_quoted_item(Ls,Beg,Cons), Tokens, A) :-
     append(Cons, B, Beg),
     tokens(Opts, start, Tokens, B, []),
     Ls = [PT_Single_Quote_Char]
+  ).
+
+%% seq_binary_digit_char/3
+tokens(_Opts, seq_binary_digit_char([],Beg,Beg), [], []) :-
+  !.
+tokens(Opts, seq_binary_digit_char(Ls,Beg,Cons), Tokens, A) :-
+  ( binary_digit_char(PT_Binary_Digit_Char, A, B) ->
+    tokens(Opts, seq_binary_digit_char(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Binary_Digit_Char|PTs]
+  ; otherwise ->
+    append(Cons,A,Beg),
+    tokens(Opts, start, Tokens, A, []),
+    Ls = []
+  ).
+
+%% seq_octal_digit_char/3
+tokens(_Opts, seq_octal_digit_char([],Beg,Beg), [], []) :-
+  !.
+tokens(Opts, seq_octal_digit_char(Ls,Beg,Cons), Tokens, A) :-
+  ( octal_digit_char(PT_Octal_Digit_Char, A, B) ->
+    tokens(Opts, seq_octal_digit_char(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Octal_Digit_Char|PTs]
+  ; otherwise ->
+    append(Cons,A,Beg),
+    tokens(Opts, start, Tokens, A, []),
+    Ls = []
+  ).
+
+%% seq_hexadecimal_digit_char/3
+tokens(_Opts, seq_hexadecimal_digit_char([],Beg,Beg), [], []) :-
+  !.
+tokens(Opts, seq_hexadecimal_digit_char(Ls,Beg,Cons), Tokens, A) :-
+  ( hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, A, B) ->
+    tokens(Opts, seq_hexadecimal_digit_char(PTs,Beg,Cons), Tokens, B),
+    Ls = [PT_Hexadecimal_Digit_Char|PTs]
+  ; otherwise ->
+    append(Cons,A,Beg),
+    tokens(Opts, start, Tokens, A, []),
+    Ls = []
   ).
 
 

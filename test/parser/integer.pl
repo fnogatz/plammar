@@ -22,3 +22,5 @@ integer_token! "1.2".
 integer_token: "123".
 
 integer_token: "0'0".
+
+integer_token: "0b0".
