@@ -74,16 +74,13 @@
   prolog_parsetrees(string("f :- a."), PTs, Options),
   length(PTs, 1).
 
-
-'"f :- a." is valid for f being an operator fy@1100' :-
+'"f :- a." is invalid for f being an operator fy@1100'(fail) :-
   Options = [ operators([ op(1100,fy,f) ]) ],
-  prolog_parsetrees(string("f :- a."), PTs, Options),
-  length(PTs, 1).
+  prolog_parsetree(string("f :- a."), _PTs, Options).
 
-'"f :- a." is valid for f being an operator fx@1100' :-
+'"f :- a." is invalid for f being an operator fx@1100'(fail) :-
   Options = [ operators([ op(1100,fx,f) ]) ],
-  prolog_parsetrees(string("f :- a."), PTs, Options),
-  length(PTs, 1).
+  prolog_parsetree(string("f :- a."), _PT, Options).
 
 '"f :- a." is valid for f being an operator fy@1200' :-
   Options = [ operators([ op(1200,fy,f) ]) ],
