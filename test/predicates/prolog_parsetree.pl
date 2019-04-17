@@ -307,13 +307,12 @@ prolog("A(B(C)).", [allow_variable_name_as_functor(true)] ).
   Options = [ targets([]), infer_operators(yes) ],
   prolog_parsetrees(string("a b."), PTs, Options),
   length(PTs, PTs_Count),
-  % with the current implementation, it is 8, because of:
-  % a@yf, b not an operator
-  % a@yf, b any operator type
-  % a@xf, b not an operator
-  % a@xf, b any operator type
-  % ... and the same the other way around
-  PTs_Count >= 8.
+  % with the current implementation, it is 4, because of:
+  % a@fx, b not an operator
+  % a@fy, b not an operator
+  % b@xf, a not an operator
+  % b@yf, a not an operator
+  PTs_Count = 4.
 
 '"a b." valid for infer_operators(Ops)' :-
   findall(
@@ -327,13 +326,9 @@ prolog("A(B(C)).", [allow_variable_name_as_functor(true)] ).
   ),
   Expected = [
     [op(_,yf,b)],
-    [op(_,yf,b), op(_,_,a)],
     [op(_,xf,b)],
-    [op(_,xf,b), op(_,_,a)],
     [op(_,fy,a)],
-    [op(_,fy,a), op(_,_,b)],
-    [op(_,fx,a)],
-    [op(_,fx,a), op(_,_,b)]
+    [op(_,fx,a)]
   ],
   permutation2(Inferred_Ops, Expected), !.
 

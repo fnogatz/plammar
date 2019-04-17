@@ -14,14 +14,15 @@ is_operator(Op0, Options) :-
   % remove leading space if present
   ( atom_concat(' ', Name, Name0) ; Name = Name0 ), !,
   Op = op(Prec, Spec, Name),
-  is_priority(Prec),
-  
+  Prec #>= 0,
+  Prec #=< 1200, % strictly less than 1201
+
   % get relevant options
   option(specified_operators(Specified_Operators), Options, _),
-  option(operators(Operators), Options),
-  option(targets(Targets), Options),
-  option(infer_operators(Inferred_Ops), Options),
-  
+  option(operators(Operators), Options, []),
+  option(targets(Targets), Options, []),
+  option(infer_operators(Inferred_Ops), Options, no),
+
   ( % Option I: it is part of the specified_operators(_) option
     %   of operators given in the source code
     open_member(Op, Specified_Operators)
@@ -64,10 +65,12 @@ not_member(X, [Y|Ys]) :-
 
 open_member(X, Xs) :-
   \+ var(Xs),
-  Xs = [X|_].
+  Xs = [X|_],
+  !.
 open_member(X, [_|Xs]) :-
   \+ var(Xs),
-  open_member(X, Xs).
+  open_member(X, Xs),
+  !.
 
 
 principal_functor(term(_), indef).
@@ -250,7 +253,7 @@ term_(0, Opts, term_(Atom_Tree), In, Out) :-
   atom_tree(Atom, Atom_Tree),
   not_operator(op(_,_,Atom), Opts).
 
-term_(P, Opts, term_(Atom_Tree), In, Out) :-
+term_(1201, Opts, term_(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
   is_operator(op(P,_,Atom), Opts).
