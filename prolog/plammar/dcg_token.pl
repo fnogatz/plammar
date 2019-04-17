@@ -542,7 +542,9 @@ graphic_char -->                    % 6.5.1
   | ['?']
   | ['@']
   | ['^']
-  | ['~'].
+  | ['~']
+  | ['§']  % not in ISO
+  | ['°']. % not in ISO
 
 /* 6.5.2 Alphanumeric characters */
 
