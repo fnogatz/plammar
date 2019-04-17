@@ -22,12 +22,11 @@ is_operator(Op0, Options) :-
   option(operators(Operators), Options, []),
   option(targets(Targets), Options, []),
   option(infer_operators(Inferred_Ops), Options, no),
-
   ( % Option I: it is part of the specified_operators(_) option
     %   of operators given in the source code
     open_member(Op, Specified_Operators)
   ; % Option II: it is part of the operators(_) option
-    once(member(Op, Operators))
+    member(Op, Operators)
   ; % Option III: it is part of the operators defined in the target
     Targets = [Target], %% TODO: Support more than one target, e.g.
                         %%   `targets([swi,gnu])`, to throw warnings
@@ -45,15 +44,23 @@ not_operator(Op0, Options) :-
   % remove leading space if present
   ( atom_concat(' ', Name, Name0) ; Name = Name0 ), !,
   Op = op(Prec, Spec, Name),
-  
-  % get relevant options
-  option(operators(Operators), Options),
-  option(targets(Targets), Options),
-  option(infer_operators(Inferred_Ops), Options),
 
-  % check that it can not be defined as an operator
-  \+ member(Op, Operators),
-  ( Inferred_Ops == no ; not_member(Op, Inferred_Ops) ).
+  % get relevant options
+  option(specified_operators(Specified_Operators), Options, _),
+  option(operators(Operators), Options, []),
+  option(targets(Targets), Options, []),
+  option(infer_operators(Inferred_Ops), Options, no),
+
+  ( % Test I: it is not part of the specified_operators(_) option
+    %   of operators given in the source code
+    not_member(Op, Specified_Operators)
+  , % Test II: it is not part of the operators(_) option
+    \+ member(Op, Operators)
+  , % Test III: it is not part of the operators defined in the target
+    \+ (Targets = [Target], target_ops(Target, Target_Ops), member(Op, Target_Ops))
+  , % Test IV: operator can not be inferred
+    ( Inferred_Ops == no ; not_member(Op, Inferred_Ops))
+  ).
 
 
 not_member(_, Ys) :-
@@ -256,7 +263,7 @@ term_(0, Opts, term_(Atom_Tree), In, Out) :-
 term_(1201, Opts, term_(Atom_Tree), In, Out) :-
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
-  is_operator(op(P,_,Atom), Opts).
+  once(is_operator(op(_,_,Atom), Opts)).
 
 atom -->
     [ name(_) ].
@@ -323,7 +330,7 @@ arg_list(Opts, arg_list([Arg, Comma, Arg_List]), A, Z) :-
 arg(Opts, arg(Atom_Tree), In, Out) :-
     phrase(atom(Atom_Tree), In, Out)
   , atom_tree(Atom, Atom_Tree)
-  , is_operator(op(_,_,Atom), Opts).
+  , once(is_operator(op(_,_,Atom), Opts)).
 
 arg(Opts, arg(Term_Tree), In, Out) :-
     phrase(term(P, Opts, Term_Tree), In, Out)
