@@ -315,11 +315,12 @@ arg_list(Opts) -->
 arg_list(Opts, arg_list(Inner), A, Z) :-
   \+ var(A),
   arg(Opts, Arg, A, B),
-  ( B = Z,
-    Inner = Arg
-  ; B = [comma(Comma)|C],
+  ( B = [comma(Comma)|C],
     arg_list(Opts, Arg_List, C, Z),
-    Inner = [ Arg, comma(Comma), Arg_List ]
+    Inner = [ Arg, comma(Comma), Arg_List ],
+    !
+  ; B = Z,
+    Inner = Arg
   ).
 arg_list(Opts, arg_list(arg(Arg)), A, Z) :-
   \+ var(Arg),
@@ -336,15 +337,12 @@ arg(Opts, arg(Atom_Tree), In, Out) :-
   , atom_tree(Atom, Atom_Tree)
   , once(is_operator(op(_,_,Atom), Opts)).
 
-arg(Opts0, arg(Term_Tree), In, Out) :-
-    option(arg_precedence_lt_1000(Arg_Precedence_Lt_1000), Opts0, no)
+arg(Opts, arg(Term_Tree), In, Out) :-
+    option(arg_precedence_lt_1000(Arg_Precedence_Lt_1000), Opts, no)
   , ( yes(Arg_Precedence_Lt_1000) ->
-      P #< 1000,
-      Opts = Opts0
+      P #< 1000
     ; otherwise ->
-      P #=< 1200,
-      option(disallow_operators(Disallow_Operators0), Opts0, []),
-      merge_options([disallow_operators([op(1000,xfy,',')|Disallow_Operators0])], Opts0, Opts)
+      P #=< 1200
     )
   , phrase(term(P, Opts, Term_Tree), In, Out).
 
