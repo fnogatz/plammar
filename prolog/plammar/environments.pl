@@ -39,12 +39,14 @@ target_ops(iso, Ops) :-
     op( 400, yfx, '*'),
     op( 400, yfx, '/'),
     op( 400, yfx, '//'),
+    op( 400, yfx, 'div'),  % ISO 13211 Corr. 2
     op( 400, yfx, 'rem'),
     op( 400, yfx, 'mod'),
     op( 400, yfx, '<<'),
     op( 400, yfx, '>>'),
     op( 200, xfx, '**'),
     op( 200, xfy, '^'),
+    op( 200,  fy, '+'),    % ISO 13211 Corr. 2 
     op( 200,  fy, '-'),
     op( 200,  fy, '\\')
   ].
@@ -58,10 +60,8 @@ target_ops(swi, Ops) :-
     op( 700, xfx, '=@='),
     op( 700, xfx, '\\=@='),
     op( 600, xfy, ':'),
-    op( 400, yfx, 'div'),
     op( 400, yfx, 'rdiv'),
     op( 400, yfx, 'xor'),
-    op( 200,  fy, '+'),
     op(1150,  fx, 'discontiguous'),
     op(1150,  fx, 'dynamic'),
     op(1150,  fx, 'volatile'),
@@ -74,7 +74,8 @@ target_ops(swi, Ops) :-
     op(1150,  fx, 'public'),
     op(1150,  fx, 'table'),
     op( 700, xfx, 'as'),
-    op(1150,  fx, 'record')  % library(record)
+    op(1150,  fx, 'record'),  % library(record)
+    op(1150,  fx, rdf_meta)   % library(semweb)
   ], Ops).
 
 extend_ops(Target, Extension, Combined) :-
@@ -93,7 +94,7 @@ target_options(swi(8), Options) :-
 target_options(swi(7), Options) :-
   extend_options(iso, [
     back_quoted_text(yes),
-    arg_precedence_lt_1000(no)
+    arg_precedence_lt_1000(yes)
   ], Options).
 
 target_options(iso, Options) :-
