@@ -156,25 +156,27 @@ tokens(Opts, Tokens, A) :-
 tokens(Opts, Tokens, A) :-
   var(Tokens),
   !,
-  tokens(Opts, start, Tokens, A, []),
+  tokens(Opts, start, Tokens, A, DL-DL),
   !.
 
 %% start
-tokens(Opts, start, Tokens, A, LTS0) :-
+tokens(Opts, start, Tokens, A, LTS0-L0) :-
   ( A = [] ->
-    ( LTS0 = [] ->
+    ( L0 == LTS0 ->
       Tokens = []
     ; otherwise ->
+      L0 = [],
       Tokens = [layout_text_sequence(LTS0)]
     )
   ; layout_char(PT_Layout_Char, A, B) ->
-    append(LTS0, [layout_text(PT_Layout_Char)], LTS1),
-    tokens(Opts, start, Tokens, B, LTS1)
+    L0 = [layout_text(PT_Layout_Char)|E1],
+    tokens(Opts, start, Tokens, B, LTS0-E1)
   ; comment_open(PT_Comment_Open, A, B) ->
-    tokens(Opts, bracketed_comment(LTS0,DL-DL,B), Tokens, PT_Comment_Open, B)
+    tokens(Opts, bracketed_comment(LTS0-L0,DL-DL,B), Tokens, PT_Comment_Open, B)
   ; end_line_comment_char(PT_End_Line_Comment_Char, A, B) ->
-    tokens(Opts, single_line_comment(LTS0,DL-DL,B), Tokens, PT_End_Line_Comment_Char, B)
+    tokens(Opts, single_line_comment(LTS0-L0,DL-DL,B), Tokens, PT_End_Line_Comment_Char, B)
   ; otherwise ->
+    L0 = [],
     tokens(Opts, token, Tokens, A, LTS0)
   ).
 
@@ -221,32 +223,32 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     comma_char(PT_Comma_Char, A, B) ->
     PT = comma_token(PT_Comma_Char),
     Tag = comma,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % head tail separator token
     head_tail_separator_char(PT_Ht_Sep_Char, A, B) ->
     PT = head_tail_separator_token(PT_Ht_Sep_Char),
     Tag = ht_sep,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % open list token
     open_list_char(PT_Open_List_Char, A, B) ->
     PT = open_list_token(PT_Open_List_Char),
     Tag = open_list,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % close list token
     close_list_char(PT_Close_List_Char, A, B) ->
     PT = close_list_token(PT_Close_List_Char),
     Tag = close_list,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % open curly token
     open_curly_char(PT_Open_Curly_Char, A, B) ->
     PT = open_curly_token(PT_Open_Curly_Char),
     Tag = open_curly,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % close curly token
     close_curly_char(PT_Close_Curly_Char, A, B) ->
     PT = close_curly_token(PT_Close_Curly_Char),
     Tag = close_curly,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % double quoted list token
     double_quote_char(PT_Double_Quote_Char, A, B) ->
     tokens(Opts, double_quoted_list(PT,B), Tokens, PT_Double_Quote_Char, B),
@@ -265,12 +267,12 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     semicolon_char(PT_Semicolon_Char, A, B) ->
     PT = name_token(';', semicolon_token(PT_Semicolon_Char)),
     Tag = name,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % cut token
     cut_char(PT_Cut_Char, A, B) ->
     PT = name_token('!', cut_token(PT_Cut_Char)),
     Tag = name,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % graphic token
     graphic_token_char(PT_Graphic_Token_Char, A, B) ->
     tokens(Opts, graphic_token(PT,A), Tokens, PT_Graphic_Token_Char, B),
@@ -283,12 +285,12 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     ; otherwise ->
       Tag = open
     ),
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ; % close token
     close_char(PT_Close_Char, A, B) ->
     PT = close_token(PT_Close_Char),
     Tag = close,
-    tokens(Opts, start, Tokens, B, [])
+    tokens(Opts, start, Tokens, B, DL-DL)
   ),
   ( Tag = open_ct ->
     Token =.. [Tag, PT]
@@ -309,7 +311,7 @@ tokens(Opts, character_code_constant(PT,Tag,Beg), Tokens, PT_Single_Quote_Char, 
   Tag = integer,
   append(Cons, B, Beg),
   atom_chars(Atom, Cons),
-  tokens(Opts, start, Tokens, B, []).
+  tokens(Opts, start, Tokens, B, DL-DL).
 
 %% binary_constant/3
 tokens(Opts, binary_constant(PT,Tag,Beg), Tokens, PT_Binary_Digit_Char, A) :-
@@ -360,7 +362,7 @@ tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
     append(Cons, A, Beg),
     atom_chars(Atom, Cons),
     PT = integer_token(Atom, integer_constant(Ls0)),
-    tokens(Opts, start, Tokens, A, [])
+    tokens(Opts, start, Tokens, A, DL-DL)
   ).
 
 %% fraction/4
@@ -378,7 +380,7 @@ tokens(Opts, fraction(Ls,Exponent,Beg,Cons), Tokens, A) :-
     tokens(Opts, seq_decimal_digit_char(Rs,Beg,Cons), Tokens, C)
   ; otherwise ->
     append(Cons,A,Beg),
-    tokens(Opts, start, Tokens, A, []),
+    tokens(Opts, start, Tokens, A, DL-DL),
     Ls = [],
     Exponent = []
   ).
@@ -431,7 +433,7 @@ tokens(Opts, graphic_token(PT,Beg), Tokens, PT_Graphic_Token_Char, A) :-
   atom_chars(Atom, Cons).
 
 %% bracketed_comment/3
-tokens(Opts, bracketed_comment(LTS0,CT-[],Beg), Tokens, PT_Comment_Open, ['*','/'|A]) :-
+tokens(Opts, bracketed_comment(LTS0-L0,CT-[],Beg), Tokens, PT_Comment_Open, ['*','/'|A]) :-
   !,
   append(Cons, ['*','/'|A], Beg),
   atom_chars(Atom, Cons),
@@ -443,16 +445,16 @@ tokens(Opts, bracketed_comment(LTS0,CT-[],Beg), Tokens, PT_Comment_Open, ['*','/
       comment_1_char('/')
     ])
   ]))),
-  append(LTS0, [PT], LTS1),
-  tokens(Opts, start, Tokens, A, LTS1).
+  L0 = [PT|L1],
+  tokens(Opts, start, Tokens, A, LTS0-L1).
 
-tokens(Opts, bracketed_comment(LTS,CT0-E0,Beg), Tokens, PT_Comment_Open, A) :-
+tokens(Opts, bracketed_comment(LTS0-L0,CT0-E0,Beg), Tokens, PT_Comment_Open, A) :-
   char(Opts, PT_Char, A, B),
   E0 = [PT_Char|E1],
-  tokens(Opts, bracketed_comment(LTS,CT0-E1,Beg), Tokens, PT_Comment_Open, B).
+  tokens(Opts, bracketed_comment(LTS0-L0,CT0-E1,Beg), Tokens, PT_Comment_Open, B).
 
 %% single_line_comment/3
-tokens(Opts, single_line_comment(LTS0,CT0-E0,Beg), Tokens, PT_End_Line_Comment_Char, A) :-
+tokens(Opts, single_line_comment(LTS0-L0,CT0-E0,Beg), Tokens, PT_End_Line_Comment_Char, A) :-
   ( A = [] ->
     append(Cons, A, Beg),
     atom_chars(Atom, Cons),
@@ -462,8 +464,8 @@ tokens(Opts, single_line_comment(LTS0,CT0-E0,Beg), Tokens, PT_End_Line_Comment_C
       comment_text(Atom, CT0),
       end_of_file
     ]))),
-    append(LTS0, [PT], LTS1),
-    tokens(Opts, start, Tokens, [], LTS1)
+    L0 = [PT|L1],
+    tokens(Opts, start, Tokens, [], LTS0-L1)
   ; new_line_char(PT_New_Line_Char, A, B) ->
     append(Cons, A, Beg),
     atom_chars(Atom, Cons),
@@ -473,11 +475,11 @@ tokens(Opts, single_line_comment(LTS0,CT0-E0,Beg), Tokens, PT_End_Line_Comment_C
       comment_text(Atom, CT0),
       PT_New_Line_Char
     ]))),
-    append(LTS0, [PT], LTS1),
-    tokens(Opts, start, Tokens, B, LTS1)
+    L0 = [PT|L1],
+    tokens(Opts, start, Tokens, B, LTS0-L1)
   ; char(Opts, PT_Char, A, B) ->
     E0 = [PT_Char|E1],
-    tokens(Opts, single_line_comment(LTS0,CT0-E1,Beg), Tokens, PT_End_Line_Comment_Char, B)
+    tokens(Opts, single_line_comment(LTS0-L0,CT0-E1,Beg), Tokens, PT_End_Line_Comment_Char, B)
   ).
 
 %% seq_alphanumeric_char/3
@@ -488,8 +490,8 @@ tokens(Opts, seq_alphanumeric_char(Ls,Beg,Cons), Tokens, A) :-
     tokens(Opts, seq_alphanumeric_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Alphanumeric_Char|PTs]
   ; otherwise ->
-    append(Cons,A,Beg),
-    tokens(Opts, start, Tokens, A, []),
+    append(Cons, A, Beg),
+    tokens(Opts, start, Tokens, A, DL-DL),
     Ls = []
   ).
 
@@ -501,8 +503,8 @@ tokens(Opts, seq_graphic_token_char(Ls,Beg,Cons), Tokens, A) :-
     tokens(Opts, seq_graphic_token_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Graphic_Token_Char|PTs]
   ; otherwise ->
-    append(Cons,A,Beg),
-    tokens(Opts, start, Tokens, A, []),
+    append(Cons, A, Beg),
+    tokens(Opts, start, Tokens, A, DL-DL),
     Ls = []
   ).
 
@@ -514,8 +516,8 @@ tokens(Opts, seq_decimal_digit_char(Ls,Beg,Cons), Tokens, A) :-
     tokens(Opts, seq_decimal_digit_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Decimal_Digit_Char|PTs]
   ; otherwise ->
-    append(Cons,A,Beg),
-    tokens(Opts, start, Tokens, A, []),
+    append(Cons, A, Beg),
+    tokens(Opts, start, Tokens, A, DL-DL),
     Ls = []
   ).
 
@@ -526,7 +528,7 @@ tokens(Opts, seq_double_quoted_item(Ls,Beg,Cons), Tokens, A) :-
     Ls = [PT_Double_Quoted_Item|PTs]
   ; double_quote_char(PT_Double_Quote_Char, A, B) ->
     append(Cons, A, Beg),
-    tokens(Opts, start, Tokens, B, []),
+    tokens(Opts, start, Tokens, B, DL-DL),
     Ls = [PT_Double_Quote_Char]
   ).
 
@@ -537,7 +539,7 @@ tokens(Opts, seq_back_quoted_item(Ls,Beg,Cons), Tokens, A) :-
     Ls = [PT_Back_Quoted_Item|PTs]
   ; back_quote_char(PT_Back_Quote_Char, A, B) ->
     append(Cons, A, Beg),
-    tokens(Opts, start, Tokens, B, []),
+    tokens(Opts, start, Tokens, B, DL-DL),
     Ls = [PT_Back_Quote_Char]
   ).
 
@@ -548,7 +550,7 @@ tokens(Opts, seq_single_quoted_item(Ls,Beg,Cons), Tokens, A) :-
     Ls = [PT_Single_Quoted_Item|PTs]
   ; single_quote_char(PT_Single_Quote_Char, A, B) ->
     append(Cons, B, Beg),
-    tokens(Opts, start, Tokens, B, []),
+    tokens(Opts, start, Tokens, B, DL-DL),
     Ls = [PT_Single_Quote_Char]
   ).
 
@@ -560,8 +562,8 @@ tokens(Opts, seq_binary_digit_char(Ls,Beg,Cons), Tokens, A) :-
     tokens(Opts, seq_binary_digit_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Binary_Digit_Char|PTs]
   ; otherwise ->
-    append(Cons,A,Beg),
-    tokens(Opts, start, Tokens, A, []),
+    append(Cons, A, Beg),
+    tokens(Opts, start, Tokens, A, DL-DL),
     Ls = []
   ).
 
@@ -573,8 +575,8 @@ tokens(Opts, seq_octal_digit_char(Ls,Beg,Cons), Tokens, A) :-
     tokens(Opts, seq_octal_digit_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Octal_Digit_Char|PTs]
   ; otherwise ->
-    append(Cons,A,Beg),
-    tokens(Opts, start, Tokens, A, []),
+    append(Cons, A, Beg),
+    tokens(Opts, start, Tokens, A, DL-DL),
     Ls = []
   ).
 
@@ -586,8 +588,8 @@ tokens(Opts, seq_hexadecimal_digit_char(Ls,Beg,Cons), Tokens, A) :-
     tokens(Opts, seq_hexadecimal_digit_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Hexadecimal_Digit_Char|PTs]
   ; otherwise ->
-    append(Cons,A,Beg),
-    tokens(Opts, start, Tokens, A, []),
+    append(Cons, A, Beg),
+    tokens(Opts, start, Tokens, A, DL-DL),
     Ls = []
   ).
 
