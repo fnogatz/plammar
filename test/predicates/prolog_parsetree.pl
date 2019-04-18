@@ -230,6 +230,13 @@ invalid("fx fx 1.", [ operators([ op(600, fx, fx) ]) ]).
 invalid("1 xf xf.", [ operators([ op(600, xf, xf) ]) ]).
 invalid("1 xfx 2 xfx 3.", [ operators([ op(600, xfx, xfx) ]) ]).
 
+% Operators have precedence 1201 and need to be bracketed (Sec. 6.3.1.3)
+prolog( "a :- b, f.").
+invalid("a :- c, f.",  [ operators([ op(600, fx, f) ]) ]).
+prolog( "a :- d, (f).", [ operators([ op(600, fx, f) ]) ]).
+prolog( "a :- e, f.",   [ operators([ op(600, fx, f) ]), allow_operator_as_operand(yes) ]).
+
+
 %%% III.c): Complex Example Prolog programs
 
 prolog("a :- b, d.", [ targets([swi]) ]).

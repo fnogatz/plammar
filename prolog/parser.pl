@@ -264,7 +264,13 @@ term_(0, Opts, term_(Atom_Tree), In, Out) :-
   atom_tree(Atom, Atom_Tree),
   not_operator(op(_,_,Atom), Opts).
 
-term_(1201, Opts, term_(Atom_Tree), In, Out) :-
+term_(Prec, Opts, term_(Atom_Tree), In, Out) :-
+  option(allow_operator_as_operand(Allow_Operator_As_Operand), Opts, no),
+  ( no(Allow_Operator_As_Operand) ->
+    Prec = 1201
+  ; otherwise ->
+    Prec = 0
+  ),
   phrase(atom(Atom_Tree), In, Out),
   atom_tree(Atom, Atom_Tree),
   once(is_operator(op(_,_,Atom), Opts)).
