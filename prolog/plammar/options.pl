@@ -24,19 +24,27 @@ normalise_options(prolog_tokens, User_Options, Options) :-
   Options = Options0.
 
 normalise_options(prolog_parsetree, User_Options, Options) :-
-  default_options(prolog_parsetree, Default_Options),
-  merge_options(User_Options, Default_Options, Options0),
+  default_options(prolog_parsetree, Options0),
+  % merge target options
+  option(targets(Targets), User_Options, [iso]),
+  ( Targets = [] ->
+    Target = iso
+  ; Targets = [Target|_] ),
+  target_options(Target, Target_Options),
+  merge_options(Target_Options, Options0, Options1),
+  % merge user options
+  merge_options(User_Options, Options1, Options2),
   % option: infer_operators
-  option(infer_operators(Opt_Infer_Operators), Options0),
+  option(infer_operators(Opt_Infer_Operators), Options2),
   ( yes(Yes), Opt_Infer_Operators == Yes ->
-    merge_options([ infer_operators(_) ], Options0, Options1)
-  ; Options1 = Options0 % user provided `no` or an unbound variable
+    merge_options([ infer_operators(_) ], Options2, Options3)
+  ; Options3 = Options2 % user provided `no` or an unbound variable
   ),
   % option: operators
-  option(operators(Operators0), Options1),
+  option(operators(Operators0), Options3),
   normalise_operators(Operators0, Operators1),
-  merge_options([operators(Operators1)], Options1, Options2),
-  Options = Options2.
+  merge_options([operators(Operators1)], Options3, Options4),
+  Options = Options4.
 
 default_options(prolog_parsetree, Options) :-
   Options = [
@@ -44,7 +52,8 @@ default_options(prolog_parsetree, Options) :-
     specified_operators(L),
     infer_operators(no),
     targets([iso]),
-    allow_variable_name_as_functor(no)
+    allow_variable_name_as_functor(no),
+    arg_precedence_lt_1000(yes)
   ],
   list_open([], L).
 

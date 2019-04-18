@@ -92,13 +92,15 @@ target_options(swi(8), Options) :-
 
 target_options(swi(7), Options) :-
   extend_options(iso, [
-    back_quoted_text(yes)
+    back_quoted_text(yes),
+    arg_precedence_lt_1000(no)
   ], Options).
 
 target_options(iso, Options) :-
   Options = [
     var_prefix(no),
-    back_quoted_text(no)
+    back_quoted_text(no),
+    arg_precedence_lt_1000(yes)
   ].  
 
 extend_options(Target, Extension, Combined) :-

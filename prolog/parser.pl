@@ -22,6 +22,8 @@ is_operator(Op0, Options) :-
   option(operators(Operators), Options, []),
   option(targets(Targets), Options, []),
   option(infer_operators(Inferred_Ops), Options, no),
+  option(disallow_operators(Disallow_Operators), Options, []),
+
   ( % Option I: it is part of the specified_operators(_) option
     %   of operators given in the source code
     open_member(Op, Specified_Operators)
@@ -37,7 +39,9 @@ is_operator(Op0, Options) :-
   ; % Option IV: operators should be inferred
     Inferred_Ops \== no,
     memberchk(Op, Inferred_Ops)
-  ).
+  ),
+  % must not be in `disallow_operators` option
+  \+ member(Op, Disallow_Operators).
 
 not_operator(Op0, Options) :-
   Op0 = op(Prec, Spec, Name0),
@@ -332,10 +336,18 @@ arg(Opts, arg(Atom_Tree), In, Out) :-
   , atom_tree(Atom, Atom_Tree)
   , once(is_operator(op(_,_,Atom), Opts)).
 
-arg(Opts, arg(Term_Tree), In, Out) :-
-    phrase(term(P, Opts, Term_Tree), In, Out)
-  , is_priority(P)
-  , P #< 1000.
+arg(Opts0, arg(Term_Tree), In, Out) :-
+    option(arg_precedence_lt_1000(Arg_Precedence_Lt_1000), Opts0, no)
+  , ( yes(Arg_Precedence_Lt_1000) ->
+      P #< 1000,
+      Opts = Opts0
+    ; otherwise ->
+      P #=< 1200,
+      option(disallow_operators(Disallow_Operators0), Opts0, []),
+      merge_options([disallow_operators([op(1000,xfy,',')|Disallow_Operators0])], Opts0, Opts)
+    )
+  , phrase(term(P, Opts, Term_Tree), In, Out).
+
 
 /* 6.3.4 Compund terms - operator notation */
 
@@ -442,9 +454,13 @@ op(P, Spec, Opts, op(Atom_Tree), In, Out) :-
     phrase(atom(Atom_Tree), In, Out)
   , atom_tree(Atom, Atom_Tree)
   , is_operator(op(P, Spec, Atom), Opts).
-
+/*
 op(1000, xfy, _Opts) -->
     [ comma(_) ].
+*/
+op(1000, xfy, Opts, op(comma(A)), [comma(A)|B], B) :-
+    option(disallow_operators(Disallow_Operators), Opts, [])
+  , \+ member(op(1000,xfy,','), Disallow_Operators).
 
 /* 6.3.5 Compound terms - list notation */
 
