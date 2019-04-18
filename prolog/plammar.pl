@@ -28,9 +28,11 @@ prolog_tokens(string(String), Tokens, Options) :-
 prolog_tokens(file(File), Tokens, Options) :-
   \+ var(File),
   !,
-  open(File, read, Stream),
-  prolog_tokens(stream(Stream), Tokens, Options),
-  close(Stream).
+  setup_call_cleanup(
+    open(File, read, Stream),
+    prolog_tokens(stream(Stream), Tokens, Options),
+    close(Stream)
+  ).
 
 prolog_tokens(stream(Stream), Tokens, Options) :-
   \+ var(Stream),
@@ -78,9 +80,11 @@ prolog_parsetree(string(String), PT, Options) :-
 prolog_parsetree(file(File), PT, Options) :-
   \+ var(File),
   !,
-  open(File, read, Stream),
-  prolog_parsetree(stream(Stream), PT, Options),
-  close(Stream).
+  setup_call_cleanup(
+    open(File, read, Stream),
+    prolog_parsetree(stream(Stream), PT, Options),
+    close(Stream)
+  ).
 
 prolog_parsetree(stream(Stream), PT, Options) :-
   \+ var(Stream),
