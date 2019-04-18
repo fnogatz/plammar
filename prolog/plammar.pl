@@ -173,7 +173,7 @@ tokens(Opts, start, Tokens, A, LTS0) :-
   ; comment_open(PT_Comment_Open, A, B) ->
     tokens(Opts, bracketed_comment(LTS0,DL-DL,B), Tokens, PT_Comment_Open, B)
   ; end_line_comment_char(PT_End_Line_Comment_Char, A, B) ->
-    tokens(Opts, single_line_comment(LTS0,[],B), Tokens, PT_End_Line_Comment_Char, B)
+    tokens(Opts, single_line_comment(LTS0,DL-DL,B), Tokens, PT_End_Line_Comment_Char, B)
   ; otherwise ->
     tokens(Opts, token, Tokens, A, LTS0)
   ).
@@ -452,10 +452,11 @@ tokens(Opts, bracketed_comment(LTS,CT0-E0,Beg), Tokens, PT_Comment_Open, A) :-
   tokens(Opts, bracketed_comment(LTS,CT0-E1,Beg), Tokens, PT_Comment_Open, B).
 
 %% single_line_comment/3
-tokens(Opts, single_line_comment(LTS0,CT0,Beg), Tokens, PT_End_Line_Comment_Char, A) :-
+tokens(Opts, single_line_comment(LTS0,CT0-E0,Beg), Tokens, PT_End_Line_Comment_Char, A) :-
   ( A = [] ->
     append(Cons, A, Beg),
     atom_chars(Atom, Cons),
+    E0 = [],
     PT = layout_text(comment(single_line_comment([
       PT_End_Line_Comment_Char,
       comment_text(Atom, CT0),
@@ -466,6 +467,7 @@ tokens(Opts, single_line_comment(LTS0,CT0,Beg), Tokens, PT_End_Line_Comment_Char
   ; new_line_char(PT_New_Line_Char, A, B) ->
     append(Cons, A, Beg),
     atom_chars(Atom, Cons),
+    E0 = [],
     PT = layout_text(comment(single_line_comment([
       PT_End_Line_Comment_Char,
       comment_text(Atom, CT0),
@@ -474,8 +476,8 @@ tokens(Opts, single_line_comment(LTS0,CT0,Beg), Tokens, PT_End_Line_Comment_Char
     append(LTS0, [PT], LTS1),
     tokens(Opts, start, Tokens, B, LTS1)
   ; char(Opts, PT_Char, A, B) ->
-    append(CT0, [PT_Char], CT1),
-    tokens(Opts, single_line_comment(LTS0,CT1,Beg), Tokens, PT_End_Line_Comment_Char, B)
+    E0 = [PT_Char|E1],
+    tokens(Opts, single_line_comment(LTS0,CT0-E1,Beg), Tokens, PT_End_Line_Comment_Char, B)
   ).
 
 %% seq_alphanumeric_char/3
