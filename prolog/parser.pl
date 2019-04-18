@@ -335,7 +335,7 @@ arg(Opts, arg(Atom_Tree), In, Out) :-
 arg(Opts, arg(Term_Tree), In, Out) :-
     phrase(term(P, Opts, Term_Tree), In, Out)
   , is_priority(P)
-  , P #=< 999.
+  , P #< 1000.
 
 /* 6.3.4 Compund terms - operator notation */
 
