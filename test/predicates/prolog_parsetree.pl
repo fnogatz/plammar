@@ -120,6 +120,7 @@ prolog("a(1,2).").
 prolog("a( 1 , 2 ).").
 
 prolog("a(b(c)).").
+prolog("a(b, c(d)).").
 
 prolog("a(1,2,3,4,5,6,7,8,9,10).").
 

@@ -315,12 +315,11 @@ arg_list(Opts) -->
 arg_list(Opts, arg_list(Inner), A, Z) :-
   \+ var(A),
   arg(Opts, Arg, A, B),
-  ( B = [comma(Comma)|C],
-    arg_list(Opts, Arg_List, C, Z),
-    Inner = [ Arg, comma(Comma), Arg_List ],
-    !
-  ; B = Z,
+  ( B = Z,
     Inner = Arg
+  ; B = [comma(Comma)|C],
+    arg_list(Opts, Arg_List, C, Z),
+    Inner = [ Arg, comma(Comma), Arg_List ]
   ).
 arg_list(Opts, arg_list(arg(Arg)), A, Z) :-
   \+ var(Arg),
@@ -344,7 +343,8 @@ arg(Opts, arg(Term_Tree), In, Out) :-
     ; otherwise ->
       P #=< 1200
     )
-  , phrase(term(P, Opts, Term_Tree), In, Out).
+  , phrase(term(P, Opts, Term_Tree), In, Out)
+  , Term_Tree \= term(xfy, [_, op(comma(_)), _]).
 
 
 /* 6.3.4 Compund terms - operator notation */

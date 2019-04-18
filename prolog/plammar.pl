@@ -379,7 +379,7 @@ tokens(Opts, fraction(Ls,Exponent,Beg,Cons), Tokens, A) :-
     Exponent = [exponent([PT_Exponent_Char,Sign,integer_constant([PT_Decimal_Digit_Char|Rs])])],
     tokens(Opts, seq_decimal_digit_char(Rs,Beg,Cons), Tokens, C)
   ; otherwise ->
-    append(Cons,A,Beg),
+    append(Cons, A, Beg),
     tokens(Opts, start, Tokens, A, DL-DL),
     Ls = [],
     Exponent = []

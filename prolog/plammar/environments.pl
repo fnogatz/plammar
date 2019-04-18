@@ -75,7 +75,7 @@ target_ops(swi, Ops) :-
     op(1150,  fx, 'table'),
     op( 700, xfx, 'as'),
     op(1150,  fx, 'record'),  % library(record)
-    op(1150,  fx, rdf_meta)   % library(semweb)
+    op(1150,  fx, 'rdf_meta')   % library(semweb)
   ], Ops).
 
 extend_ops(Target, Extension, Combined) :-
