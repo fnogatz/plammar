@@ -172,6 +172,26 @@ prolog("curly({a}).").
 prolog("curly({a,1}).").
 prolog("curly( { b , 2 } ).").
 
+'"c({a})." is correctly parsed' :-
+  prolog_parsetrees(string("c({a})."), PTs, []),
+  PTs = [
+    prolog([
+      clause_term([
+        term([
+          atom(name([name_token(c,letter_digit_token([small_letter_char(c)]))])),
+          open_ct(open_token(open_char('('))),
+          arg_list(arg(term([
+            open_curly([open_curly_token(open_curly_char('{'))]),
+            term(atom(name([name_token(a,letter_digit_token([small_letter_char(a)]))]))),
+            close_curly([close_curly_token(close_curly_char('}'))])
+          ]))),
+          close([close_token(close_char(')'))])
+        ]),
+        end([end_token(end_char('.'))])
+      ])
+    ])
+  ].
+
 % Sec. 6.3.7, Terms - double quoted list notation
 prolog("a(\"\").").
 prolog("a(\"s\").").

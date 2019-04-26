@@ -494,9 +494,8 @@ items(Opts) -->
 % {}(l)
 term_(0, Opts) -->
     [ open_curly(_) ]
-  , term(P, Opts)
-  , [ close_curly(_) ]
-  , { P #=< 1201 }.
+  , term(_P, Opts)
+  , [ close_curly(_) ].
 
 /* 6.3.7 Terms - double quoted list notation */
 
