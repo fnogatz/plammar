@@ -337,21 +337,46 @@ arg_list(Opts, arg_list([Arg, Comma, Arg_List]), A, Z) :-
 
 /* 6.3.3.1 Arguments */
 
-arg(Opts, arg(Atom_Tree), In, Out) :-
-    phrase(atom(Atom_Tree), In, Out)
-  , atom_tree(Atom, Atom_Tree)
-  , once(is_operator(op(_,_,Atom), Opts))
-  , !. % cut required to avoid multiple solutions for arg_precedence_lt_1000(yes)
-
-arg(Opts, arg(Term_Tree), In, Out) :-
-    option(arg_precedence_lt_1000(Arg_Precedence_Lt_1000), Opts, no)
-  , ( yes(Arg_Precedence_Lt_1000) ->
+arg(Opts, arg(PT), In, Out) :-
+    \+ var(In)
+  , option(allow_arg_precedence_geq_1000(Allow_Arg_Precedence_Geq_1000), Opts, no)
+  , ( no(Allow_Arg_Precedence_Geq_1000) ->
+      % ISO 6.3.3.1: Priority must be less than 1000
       P #< 1000
     ; otherwise ->
       P #=< 1200
+      %% TODO: Do not allow comma at top-level to disambigue
+      %%   terms like a(b :- c, d)
     )
   , phrase(term(P, Opts, Term_Tree), In, Out)
-  , Term_Tree \= term(xfy, [_, op(comma(_)), _]).
+  , ( Term_Tree = term(Atom_Tree),
+      Atom_Tree = atom(_),
+      atom_tree(Atom, atom(Atom_Tree)),
+      once(is_operator(op(_,_,Atom), Opts)) ->
+      PT = Atom_Tree
+    ; otherwise ->
+      PT = Term_Tree
+    ).
+
+% This is only needed for logical purity
+arg(Opts, arg(PT), In, Out) :-
+    \+ var(PT)
+  , option(allow_arg_precedence_geq_1000(Allow_Arg_Precedence_Geq_1000), Opts, no)
+  , ( no(Allow_Arg_Precedence_Geq_1000) ->
+      % ISO 6.3.3.1: Priority must be less than 1000
+      P #< 1000
+    ; otherwise ->
+      P #=< 1200
+      %% TODO: Do not allow comma at top-level to disambigue
+      %%   terms like a(b :- c, d)
+    )
+  , ( PT = atom(_) ->
+      phrase(atom(PT), In, Out),
+      atom_tree(Atom, PT),
+      once(is_operator(op(_,_,Atom), Opts))
+    ; PT =.. [term|_] ->
+      phrase(term(P, Opts, PT), In, Out)
+    ).
 
 
 /* 6.3.4 Compund terms - operator notation */
@@ -400,6 +425,8 @@ term(P, Opts, Res, A, Z) :-
 term(P, Opts, Res, A, Z) :-
   \+ var(A),
   op(Op_P, Type, Opts, Op_Tree, A, B),
+  % 6.3.4.2: "The first token of a is not open_ct"
+  B \= [open_ct(_)|_],
   spec_class(Type, prefix),
   prec_constraints(Type, Op_P, P_Term),
   term(P_Term, Opts, Term_Tree, B, C),

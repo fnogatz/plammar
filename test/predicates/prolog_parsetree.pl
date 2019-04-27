@@ -256,6 +256,9 @@ invalid("a :- c, f.",  [ operators([ op(600, fx, f) ]) ]).
 prolog( "a :- d, (f).", [ operators([ op(600, fx, f) ]) ]).
 prolog( "a :- e, f.",   [ operators([ op(600, fx, f) ]), allow_operator_as_operand(yes) ]).
 
+% Others
+prolog("a(fx b).", [ operators([ op(100, fx, fx) ]) ]).
+prolog("a(fx(b)).", [ operators([ op(100, fx, fx) ]) ]).
 
 %%% III.c): Complex Example Prolog programs
 
