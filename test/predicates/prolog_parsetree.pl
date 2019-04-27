@@ -370,3 +370,11 @@ prolog(":- op(600,fx,p).\np q.").
 prolog(":- module(a,[op(600,fx,p)]).\np q.").
 prolog(":- module(a,[b,op(600,fx,p),c]).\np q.").
 prolog(":- module(a,[b,op(600,fx,p),c/2]).\np q.").
+
+%% Part VII: Various test cases (mainly because of observed bugs)
+
+'"a(+)." has a single parse tree for target "swi"' :-
+  Options = [ targets([swi]) ],
+  prolog_parsetrees(string("a(+)."), PTs, Options),
+  !,
+  PTs = [ _SingleResult ].

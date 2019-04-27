@@ -340,7 +340,8 @@ arg_list(Opts, arg_list([Arg, Comma, Arg_List]), A, Z) :-
 arg(Opts, arg(Atom_Tree), In, Out) :-
     phrase(atom(Atom_Tree), In, Out)
   , atom_tree(Atom, Atom_Tree)
-  , once(is_operator(op(_,_,Atom), Opts)).
+  , once(is_operator(op(_,_,Atom), Opts))
+  , !. % cut required to avoid multiple solutions for arg_precedence_lt_1000(yes)
 
 arg(Opts, arg(Term_Tree), In, Out) :-
     option(arg_precedence_lt_1000(Arg_Precedence_Lt_1000), Opts, no)
