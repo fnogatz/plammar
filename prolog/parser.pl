@@ -337,22 +337,22 @@ arg_list(Opts, arg_list([Arg, Comma, Arg_List]), A, Z) :-
 
 /* 6.3.3.1 Arguments */
 
-arg(Opts, arg(PT), In, Out) :-
+arg(Opts0, arg(PT), In, Out) :-
     \+ var(In)
-  , option(allow_arg_precedence_geq_1000(Allow_Arg_Precedence_Geq_1000), Opts, no)
+  , option(allow_arg_precedence_geq_1000(Allow_Arg_Precedence_Geq_1000), Opts0, no)
   , ( no(Allow_Arg_Precedence_Geq_1000) ->
       % ISO 6.3.3.1: Priority must be less than 1000
-      P #< 1000
+      P #< 1000,
+      Opts = Opts0
     ; otherwise ->
-      P #=< 1200
-      %% TODO: Do not allow comma at top-level to disambigue
-      %%   terms like a(b :- c, d)
+      P #=< 1200,
+      merge_options([allow_comma_op(no)], Opts0, Opts)
     )
   , phrase(term(P, Opts, Term_Tree), In, Out)
   , ( Term_Tree = term(Atom_Tree),
       Atom_Tree = atom(_),
       atom_tree(Atom, atom(Atom_Tree)),
-      once(is_operator(op(_,_,Atom), Opts)) ->
+      once(is_operator(op(_,_,Atom), Opts0)) ->
       PT = Atom_Tree
     ; otherwise ->
       PT = Term_Tree
@@ -399,16 +399,12 @@ term_(0, Opts) -->
   , [ close(_) ]
   , { P #=< 1201 }.
 */
-term_(0, Opts, term_(Inner), A, Z) :-
-  Inner = [open(Open_Tree), Term_Tree, close(Close_Tree)],
-  A = [open(Open_Tree)|B],
-  term(P, Opts, Term_Tree, B, C),
-  C = [close(Close_Tree)|Z],
-  P #=< 1201.
-
-term_(0, Opts, term_(Inner), A, Z) :-
-  Inner = [open_ct(Open_Ct_Tree), Term_Tree, close(Close_Tree)],
-  A = [open_ct(Open_Ct_Tree)|B],
+term_(0, Opts0, term_(Inner), A, Z) :-
+  member(Open_Symbol, [open, open_ct]),
+  Opening =.. [Open_Symbol, Open_Tree],
+  Inner = [Opening, Term_Tree, close(Close_Tree)],
+  A = [Opening|B],
+  merge_options([allow_comma_op(yes)], Opts0, Opts),
   term(P, Opts, Term_Tree, B, C),
   C = [close(Close_Tree)|Z],
   P #=< 1201.
@@ -491,8 +487,8 @@ op(1000, xfy, _Opts) -->
     [ comma(_) ].
 */
 op(1000, xfy, Opts, op(comma(A)), [comma(A)|B], B) :-
-    option(disallow_operators(Disallow_Operators), Opts, [])
-  , \+ member(op(1000,xfy,','), Disallow_Operators).
+    option(allow_comma_op(Allow_Comma_Op), Opts, yes)
+  , yes(Allow_Comma_Op).
 
 /* 6.3.5 Compound terms - list notation */
 

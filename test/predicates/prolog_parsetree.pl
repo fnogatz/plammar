@@ -280,17 +280,17 @@ prolog("a :- q yf, c.", [ operators([ op(600, yf, yf) ]) ]).
   ],
   prolog_parsetree(string("a."), _, Options), !.
 
-'"A :- B." is valid for var_prefix(true)' :-
+'"A :- B." is valid for var_prefix(yes)' :-
   Options = [
-    var_prefix(true)
+    var_prefix(yes)
   ],
   prolog_parsetrees(string("A :- B."), PTs, Options),
   !,
   PTs = [ _SingleResult ].
 
-'"A B." is valid for var_prefix(true) and A as prefix operator' :-
+'"A B." is valid for var_prefix(yes) and A as prefix operator' :-
   Options = [
-    var_prefix(true),
+    var_prefix(yes),
     operators([ op(300, fx, 'A') ])
   ],
   prolog_parsetrees(string("A B."), PTs, Options),
@@ -305,32 +305,41 @@ prolog("a :- q yf, c.", [ operators([ op(600, yf, yf) ]) ]).
   !,
   PTs = [].
 
-'"F(1)." is valid for allow_variable_name_as_functor(true)' :-
+'"F(1)." is valid for allow_variable_name_as_functor(yes)' :-
   Options = [
-    allow_variable_name_as_functor(true)
+    allow_variable_name_as_functor(yes)
   ],
   prolog_parsetrees(string("F(1)."), PTs, Options),
   !,
   PTs = [ _SingleResult ].
 
-'"_x(1)." is valid for allow_variable_name_as_functor(true)' :-
+'"_x(1)." is valid for allow_variable_name_as_functor(yes)' :-
   Options = [
-    allow_variable_name_as_functor(true)
+    allow_variable_name_as_functor(yes)
   ],
   prolog_parsetrees(string("_x(1)."), PTs, Options),
   !,
   PTs = [ _SingleResult ].
 
-'"_(1)." is valid for allow_variable_name_as_functor(true)' :-
+'"_(1)." is valid for allow_variable_name_as_functor(yes)' :-
   Options = [
-    allow_variable_name_as_functor(true)
+    allow_variable_name_as_functor(yes)
   ],
   prolog_parsetrees(string("_(1)."), PTs, Options),
   !,
   PTs = [ _SingleResult ].
 
-invalid("A(B(C)).", [allow_variable_name_as_functor(false)] ).
-prolog("A(B(C)).", [allow_variable_name_as_functor(true)] ).
+invalid("A(B(C)).", [allow_variable_name_as_functor(no)] ).
+prolog("A(B(C)).", [allow_variable_name_as_functor(yes)] ).
+
+invalid("a(b :- c).", [ allow_arg_precedence_geq_1000(no) ]).
+prolog( "a(b :- c).", [ allow_arg_precedence_geq_1000(yes) ]).
+
+'"a(b :- c, d)." has single parse tree for allow_arg_precedence_geq_1000(yes)' :-
+  Options = [ allow_arg_precedence_geq_1000(yes) ],
+  prolog_parsetrees(string("a(b :- c, d)."), PTs, Options),
+  !,
+  PTs = [ _SingleResult ].
 
 %% Part V: infer operator definitions
 
