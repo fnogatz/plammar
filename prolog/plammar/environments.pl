@@ -104,7 +104,8 @@ target_options(swi(6), Options) :-
 target_options(swi(5), Options) :-
   extend_options(iso, [
     allow_tab_as_quote_char(yes),
-    allow_newline_as_quote_char(yes)
+    allow_newline_as_quote_char(yes),
+    allow_c_as_continuation_escape_symbol(yes)
   ], Options).
 
 
@@ -115,7 +116,8 @@ target_options(iso, Options) :-
     allow_arg_precedence_geq_1000(no),
     allow_operator_as_operand(no),
     allow_tab_as_quote_char(no),
-    allow_newline_as_quote_char(no)
+    allow_newline_as_quote_char(no),
+    allow_c_as_continuation_escape_symbol(no)
   ].  
 
 extend_options(Target, Extension, Combined) :-

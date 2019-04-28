@@ -341,11 +341,22 @@ prolog( "a(b :- c).", [ allow_arg_precedence_geq_1000(yes) ]).
   !,
   PTs = [ _SingleResult ].
 
+/* The following is valid according to ISO and reads as:
+a("b\
+").
+*/
+prolog( "a(\"b\\\n\").", [ allow_newline_as_quote_char(no) ]).
+
 invalid("a(\"b\n\").", [ allow_newline_as_quote_char(no) ]).
 prolog( "a(\"b\n\").", [ allow_newline_as_quote_char(yes) ]).
 
 invalid("a(\"b\t\").", [ allow_tab_as_quote_char(no) ]).
 prolog( "a(\"b\t\").", [ allow_tab_as_quote_char(yes) ]).
+
+% Allow \c continuation escape sequence for SWI-Prolog
+invalid("a(\"b\\c\n\").", [ allow_c_as_continuation_escape_symbol(no) ]).
+prolog( "a(\"b\\c\n\").", [ allow_c_as_continuation_escape_symbol(yes) ]).
+
 
 %% Part V: infer operator definitions
 

@@ -238,11 +238,22 @@ quoted_token(Opts) -->              % 6.4.2
 
 single_quoted_item(Opts) -->        % 6.4.2
     single_quoted_character(Opts)   % 6.4.2.1
-  | continuation_escape_sequence.   % 6.4.2
-
-continuation_escape_sequence -->    % 6.4.2
+  | continuation_escape_sequence(Opts). % 6.4.2
+/*
+continuation_escape_sequence(_Opts) --> % 6.4.2
     backslash_char                  % 6.5.5
   , new_line_char.                  % 6.5.4
+*/
+continuation_escape_sequence(Opts, continuation_escape_sequence(PT), A, Z) :-
+  backslash_char(PT_Backslash_Char, A, B),
+  ( option(allow_c_as_continuation_escape_symbol(Allow_C_As_Continuation_Escape_Symbol), Opts, no),
+    yes(Allow_C_As_Continuation_Escape_Symbol),
+    B = ['c'|C],
+    PT = [PT_Backslash_Char, 'c', PT_New_Line_Char]
+  ; B = C,
+    PT = [PT_Backslash_Char, PT_New_Line_Char]
+  ),
+  new_line_char(PT_New_Line_Char, C, Z).
 
 semicolon_token -->                 % 6.4.2
     semicolon_char.                 % 6.5.3
@@ -482,7 +493,7 @@ double_quoted_list token Opts -->   % 6.4.6
 
 double_quoted_item(Opts) -->        % 6.4.6
     double_quoted_character(Opts)   % 6.4.2.1
-  | continuation_escape_sequence.   % 6.4.2
+  | continuation_escape_sequence(Opts). % 6.4.2
 
 /* 6.4.7 Back quoted strings */
 
@@ -493,7 +504,7 @@ back_quoted_string token Opts -->   % 6.4.7
 
 back_quoted_item(Opts) -->          % 6.4.7
     back_quoted_character(Opts)     % 6.4.2.1
-  | continuation_escape_sequence.   % 6.4.2
+  | continuation_escape_sequence(Opts). % 6.4.2
 
 /* 6.4.8 Other tokens */
 
