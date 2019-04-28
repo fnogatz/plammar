@@ -260,6 +260,9 @@ prolog( "a :- e, f.",   [ operators([ op(600, fx, f) ]), allow_operator_as_opera
 prolog("a(fx b).", [ operators([ op(100, fx, fx) ]) ]).
 prolog("a(fx(b)).", [ operators([ op(100, fx, fx) ]) ]).
 
+% Corr. 2, bar resp. ht_sep as operator
+prolog("a | b.", [ operators([ op(1050, xfy, '|') ]) ]).
+
 %%% III.c): Complex Example Prolog programs
 
 prolog("a :- b, d.", [ targets([swi]) ]).

@@ -110,6 +110,8 @@ atom_tree(Atom, atom(name(L))) :-
 atom_tree('[]', atom([open_list(_),close_list(_)])).
 atom_tree('{}', atom([open_curly(_),close_curly(_)])).
 
+atom_tree('|', ht_sep(_)).
+
 get_operators(Opts, Term_Tree) :-
   ( Term_Tree = term(fx, [op(_), term(Term)]),
     Term = [atom(name(Name)), open_ct(_), arg_list(Arg_List0), close(_)],
@@ -489,6 +491,9 @@ op(1000, xfy, _Opts) -->
 op(1000, xfy, Opts, op(comma(A)), [comma(A)|B], B) :-
     option(allow_comma_op(Allow_Comma_Op), Opts, yes)
   , yes(Allow_Comma_Op).
+
+op(P, Spec, Opts, op(ht_sep(A)), [ht_sep(A)|B], B) :-
+    is_operator(op(P, Spec, '|'), Opts).
 
 /* 6.3.5 Compound terms - list notation */
 
