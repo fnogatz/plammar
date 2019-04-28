@@ -374,6 +374,19 @@ invalid("a :- Ä = 1.").
 prolog( "a :- Ä = 1.", [ allow_unicode(yes) ]).
 
 
+%%% IV.b): Dicts
+
+invalid("a(_{}).").
+invalid("a(A{}).").
+invalid("a(b{}).").
+% prolog( "a(_{}).", [ dicts(yes) ]).
+% prolog( "a(A{}).", [ dicts(yes) ]).
+% prolog( "a(b{}).", [ dicts(yes) ]).
+
+% tag is either a variable or atom
+% invalid("a(1{}).", [ dicts(yes) ]).
+
+
 %% Part V: infer operator definitions
 
 '"a b." invalid for infer_operators(no)' :-

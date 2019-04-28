@@ -95,6 +95,8 @@ target_ops(swi, Ops) :-
     op(700, xfx, 'in'),
     op(700, xfx, 'ins'),
     op(450, xfx, '..')
+
+    %% TODO: remove operators of libraries
   ], Ops).
 
 extend_ops(Target, Extension, Combined) :-
@@ -112,6 +114,7 @@ target_options(swi(8), Options) :-
 
 target_options(swi(7), Options) :-
   extend_options(swi(6), [
+%    dicts(yes),
     back_quoted_text(yes),
     allow_arg_precedence_geq_1000(yes),
     allow_operator_as_operand(yes)
@@ -133,13 +136,14 @@ target_options(iso, Options) :-
   Options = [
     allow_unicode(no),
     var_prefix(no),
+%    dicts(no),
     back_quoted_text(no),
     allow_arg_precedence_geq_1000(no),
     allow_operator_as_operand(no),
     allow_tab_as_quote_char(no),
     allow_newline_as_quote_char(no),
     allow_c_as_continuation_escape_symbol(no)
-  ].  
+  ].
 
 extend_options(Target, Extension, Combined) :-
   target_options(Target, Target_Options),
