@@ -206,11 +206,11 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     decimal_digit_char(PT_Decimal_Digit_Char, A, B),
     tokens(Opts, number_token(PT,Tag,A), Tokens, [PT_Decimal_Digit_Char], B)
   ; % name token
-    small_letter_char(PT_Small_Letter_Char, A, B) ->
+    small_letter_char(Opts, PT_Small_Letter_Char, A, B) ->
     tokens(Opts, name_token(PT,A), Tokens, PT_Small_Letter_Char, B),
     Tag = name
   ; % named variable starting with capital letter
-    capital_letter_char(PT_Capital_Letter_Char, A, B) ->
+    capital_letter_char(Opts, PT_Capital_Letter_Char, A, B) ->
     option(var_prefix(Var_Prefix), Opts),
     ( no(Var_Prefix) ->
       tokens(Opts, capital_variable(PT,A), Tokens, PT_Capital_Letter_Char, B),
@@ -490,7 +490,7 @@ tokens(Opts, single_line_comment(LTS0-L0,CT0-E0,Beg), Tokens, PT_End_Line_Commen
 tokens(_Opts, seq_alphanumeric_char([],Beg,Beg), [], []) :-
   !.
 tokens(Opts, seq_alphanumeric_char(Ls,Beg,Cons), Tokens, A) :-
-  ( alphanumeric_char(PT_Alphanumeric_Char, A, B) ->
+  ( alphanumeric_char(Opts, PT_Alphanumeric_Char, A, B) ->
     tokens(Opts, seq_alphanumeric_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Alphanumeric_Char|PTs]
   ; otherwise ->

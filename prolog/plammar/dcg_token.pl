@@ -214,9 +214,9 @@ name token Opts -->                 % 6.4.2
   | semicolon_token                 % 6.4.2
   | cut_token.                      % 6.4.2
 
-letter_digit_token(_Opts) -->       % 6.4.2
-    small_letter_char               % 6.5.2
-  , *alphanumeric_char.             % 6.5.2
+letter_digit_token(Opts) -->        % 6.4.2
+    small_letter_char(Opts)         % 6.5.2
+  , *alphanumeric_char(Opts).       % 6.5.2
 
 graphic_token -->                   % 6.4.2
     graphic_token_char              % 6.4.2
@@ -295,9 +295,9 @@ back_quoted_character(_Opts) -->    % 6.4.2.1
   , back_quote_char.                % 6.5.5
 
 /*
-non_quote_char(_Opts) -->           % 6.4.2.1
+non_quote_char(Opts) -->            % 6.4.2.1
     graphic_char                    % 6.5.1
-  | alphanumeric_char               % 6.5.2
+  | alphanumeric_char(Opts)         % 6.5.2
   | solo_char                       % 6.5.3
   | space_char                      % 6.5.4
   | meta_escape_sequence            % 6.4.2.1
@@ -307,7 +307,7 @@ non_quote_char(_Opts) -->           % 6.4.2.1
 */
 non_quote_char(Opts, non_quote_char(PT), A, Z) :-
   ( graphic_char(PT, A, Z)
-  ; alphanumeric_char(PT, A, Z)
+  ; alphanumeric_char(Opts, PT, A, Z)
   ; solo_char(PT, A, Z)
   ; space_char(PT, A, Z)
   ; meta_escape_sequence(PT, A, Z)
@@ -385,14 +385,14 @@ variable token Opts -->             % 6.4.3
 anonymous_variable(_Opts) -->       % 6.4.3
     variable_indicator_char.        % 6.4.3
 
-named_variable(_Opts) -->           % 6.4.3
+named_variable(Opts) -->            % 6.4.3
     variable_indicator_char         % 6.4.3
-  , alphanumeric_char               % 6.5.2
-  , *alphanumeric_char.             % 6.5.2
+  , alphanumeric_char(Opts)         % 6.5.2
+  , *alphanumeric_char(Opts).       % 6.5.2
 /*
-named_variable(_Opts) -->           % 6.4.3
-    capital_letter_char             % 6.5.2
-  , *alphanumeric_char.             % 6.5.2
+named_variable(Opts) -->            % 6.4.3
+    capital_letter_char(Opts)       % 6.5.2
+  , *alphanumeric_char(Opts).       % 6.5.2
 */
 
 %% handle var_prefix option
@@ -400,8 +400,8 @@ named_variable(Opts, named_variable(Tree), A, Z) :-
   option(var_prefix(Var_Prefix), Opts),
   no(Var_Prefix),
   Tree=[Capital_Letter_Tree|Sequence_List],
-  capital_letter_char(Capital_Letter_Tree, A, B),
-  call_sequence_ground(sequence(*, alphanumeric_char, T), T, [], Sequence_List, B, Z).
+  capital_letter_char(Opts, Capital_Letter_Tree, A, B),
+  call_sequence_ground(sequence(*, alphanumeric_char(Opts), T), T, [], Sequence_List, B, Z).
 
 variable_indicator_char -->         % 6.4.3
     underscore_char.                % 6.5.2
@@ -541,14 +541,14 @@ end_char -->                        % 6.4.8
 /* 6.5 PROCESSOR CHARACTER SET */
 
 char(Opts, char(Tree), [C|Z], Z) :-
-  char_(char_(Tree), [C|Z], Z),
+  char_(Opts, char_(Tree), [C|Z], Z),
   option(disallow_chars(Disallowed), Opts, []),
   \+ member(C, Disallowed).
 %% TODO: new_line_char could consume two elements
 
-char_ -->                           % 6.5
+char_(Opts) -->                     % 6.5
     graphic_char                    % 6.5.1
-  | alphanumeric_char               % 6.5.2
+  | alphanumeric_char(Opts)         % 6.5.2
   | solo_char                       % 6.5.3
   | layout_char                     % 6.5.4
   | meta_char.                      % 6.5.5
@@ -577,19 +577,19 @@ graphic_char -->                    % 6.5.1
 
 /* 6.5.2 Alphanumeric characters */
 
-alphanumeric_char -->               % 6.5.2
-    alpha_char                      % 6.5.2
+alphanumeric_char(Opts) -->         % 6.5.2
+    alpha_char(Opts)                % 6.5.2
   | decimal_digit_char.             % 6.5.2
 
-alpha_char -->                      % 6.5.2
+alpha_char(Opts) -->                % 6.5.2
     underscore_char                 % 6.5.2
-  | letter_char.                    % 6.5.2
+  | letter_char(Opts).              % 6.5.2
 
-letter_char -->                     % 6.5.2
-    capital_letter_char             % 6.5.2
-  | small_letter_char.              % 6.5.2
+letter_char(Opts) -->               % 6.5.2
+    capital_letter_char(Opts)       % 6.5.2
+  | small_letter_char(Opts).        % 6.5.2
 
-small_letter_char -->               % 6.5.2
+small_letter_char_(_Opts) -->       % 6.5.2
     ['a']
   | ['b']
   | ['c']
@@ -617,7 +617,14 @@ small_letter_char -->               % 6.5.2
   | ['y']
   | ['z'].
 
-capital_letter_char -->             % 6.5.2
+small_letter_char(Opts, small_letter_char(Char), [Char|Z], Z) :-
+  ( small_letter_char_(Opts, small_letter_char_(Char), [Char|Z], Z),
+    !
+  ; option(allow_unicode(Allow_Unicode), Opts, no),
+    yes(Allow_Unicode),
+    char_type(Char, lower) ).
+
+capital_letter_char_(_Opts) -->     % 6.5.2
     ['A']
   | ['B']
   | ['C']
@@ -644,6 +651,13 @@ capital_letter_char -->             % 6.5.2
   | ['X']
   | ['Y']
   | ['Z'].
+
+capital_letter_char(Opts, capital_letter_char(Char), [Char|Z], Z) :-
+  ( capital_letter_char_(Opts, capital_letter_char_(Char), [Char|Z], Z),
+    !
+  ; option(allow_unicode(Allow_Unicode), Opts, no),
+    yes(Allow_Unicode),
+    char_type(Char, upper) ).
 
 decimal_digit_char -->              % 6.5.2
     ['0']

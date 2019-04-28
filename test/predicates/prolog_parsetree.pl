@@ -360,6 +360,19 @@ prolog( "a(\"b\t\").", [ allow_tab_as_quote_char(yes) ]).
 invalid("a(\"b\\c\n\").", [ allow_c_as_continuation_escape_symbol(no) ]).
 prolog( "a(\"b\\c\n\").", [ allow_c_as_continuation_escape_symbol(yes) ]).
 
+% ISO has only restricted charset
+invalid("%éÄ\na.").
+prolog( "%éÄ\na.", [ allow_unicode(yes) ]).
+
+invalid("f('é').").
+prolog( "f('é').", [ allow_unicode(yes) ]).
+
+invalid("é.").
+prolog( "é.", [ allow_unicode(yes) ]).
+
+invalid("a :- Ä = 1.").
+prolog( "a :- Ä = 1.", [ allow_unicode(yes) ]).
+
 
 %% Part V: infer operator definitions
 

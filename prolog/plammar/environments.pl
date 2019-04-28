@@ -124,12 +124,14 @@ target_options(swi(5), Options) :-
   extend_options(iso, [
     allow_tab_as_quote_char(yes),
     allow_newline_as_quote_char(yes),
-    allow_c_as_continuation_escape_symbol(yes)
+    allow_c_as_continuation_escape_symbol(yes),
+    allow_unicode(yes)
   ], Options).
 
 
 target_options(iso, Options) :-
   Options = [
+    allow_unicode(no),
     var_prefix(no),
     back_quoted_text(no),
     allow_arg_precedence_geq_1000(no),
