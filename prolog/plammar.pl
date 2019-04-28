@@ -306,7 +306,7 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
 
 %% character_code_constant/3
 tokens(Opts, character_code_constant(PT,Tag,Beg), Tokens, PT_Single_Quote_Char, A) :-
-  single_quoted_character(PT_Single_Quoted_Character, A, B),
+  single_quoted_character(Opts, PT_Single_Quoted_Character, A, B),
   PT = integer_token(Atom, character_code_constant([
     '0',
     PT_Single_Quote_Char,
@@ -527,7 +527,7 @@ tokens(Opts, seq_decimal_digit_char(Ls,Beg,Cons), Tokens, A) :-
 
 %% seq_double_quoted_item/3
 tokens(Opts, seq_double_quoted_item(Ls,Beg,Cons), Tokens, A) :-
-  ( double_quoted_item(PT_Double_Quoted_Item, A, B) ->
+  ( double_quoted_item(Opts, PT_Double_Quoted_Item, A, B) ->
     tokens(Opts, seq_double_quoted_item(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Double_Quoted_Item|PTs]
   ; double_quote_char(PT_Double_Quote_Char, A, B) ->
@@ -538,7 +538,7 @@ tokens(Opts, seq_double_quoted_item(Ls,Beg,Cons), Tokens, A) :-
 
 %% seq_back_quoted_item/3
 tokens(Opts, seq_back_quoted_item(Ls,Beg,Cons), Tokens, A) :-
-  ( back_quoted_item(PT_Back_Quoted_Item, A, B) ->
+  ( back_quoted_item(Opts, PT_Back_Quoted_Item, A, B) ->
     tokens(Opts, seq_back_quoted_item(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Back_Quoted_Item|PTs]
   ; back_quote_char(PT_Back_Quote_Char, A, B) ->
@@ -549,7 +549,7 @@ tokens(Opts, seq_back_quoted_item(Ls,Beg,Cons), Tokens, A) :-
 
 %% seq_single_quoted_item/3
 tokens(Opts, seq_single_quoted_item(Ls,Beg,Cons), Tokens, A) :-
-  ( single_quoted_item(PT_Single_Quoted_Item, A, B) ->
+  ( single_quoted_item(Opts, PT_Single_Quoted_Item, A, B) ->
     tokens(Opts, seq_single_quoted_item(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Single_Quoted_Item|PTs]
   ; single_quote_char(PT_Single_Quote_Char, A, B) ->

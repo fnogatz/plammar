@@ -210,7 +210,7 @@ comment_2_char -->                  % 6.4.1
 name token Opts -->                 % 6.4.2
     letter_digit_token(Opts)        % 6.4.2
   | graphic_token                   % 6.4.2
-  | quoted_token                    % 6.4.2
+  | quoted_token(Opts)              % 6.4.2
   | semicolon_token                 % 6.4.2
   | cut_token.                      % 6.4.2
 
@@ -231,13 +231,13 @@ graphic_token_char -->              % 6.4.2
     graphic_char                    % 6.5.1
   | backslash_char.                 % 6.5.5
 
-quoted_token -->                    % 6.4.2
+quoted_token(Opts) -->              % 6.4.2
     single_quote_char               % 6.5.5
-  , *single_quoted_item             % 6.4.2
+  , *single_quoted_item(Opts)       % 6.4.2
   , single_quote_char.              % 6.5.5
 
-single_quoted_item -->              % 6.4.2
-    single_quoted_character         % 6.4.2.1
+single_quoted_item(Opts) -->        % 6.4.2
+    single_quoted_character(Opts)   % 6.4.2.1
   | continuation_escape_sequence.   % 6.4.2
 
 continuation_escape_sequence -->    % 6.4.2
@@ -252,38 +252,39 @@ cut_token -->                       % 6.4.2
 
 /* 6.4.2.1 */
 
-single_quoted_character -->         % 6.4.2.1
-    non_quote_char.                 % 6.4.2.1
-single_quoted_character -->         % 6.4.2.1
+single_quoted_character(Opts) -->   % 6.4.2.1
+    non_quote_char(Opts).           % 6.4.2.1
+single_quoted_character(_Opts) -->  % 6.4.2.1
     single_quote_char               % 6.5.5
   , single_quote_char.              % 6.5.5
-single_quoted_character -->         % 6.4.2.1
+single_quoted_character(_Opts) -->  % 6.4.2.1
     double_quote_char.              % 6.5.5
-single_quoted_character -->         % 6.4.2.1
+single_quoted_character(_Opts) -->  % 6.4.2.1
     back_quote_char.                % 6.5.5
 
-double_quoted_character -->         % 6.4.2.1
-    non_quote_char.                 % 6.4.2.1
-double_quoted_character -->         % 6.4.2.1
+double_quoted_character(Opts) -->   % 6.4.2.1
+    non_quote_char(Opts).           % 6.4.2.1
+double_quoted_character(_Opts) -->  % 6.4.2.1
     single_quote_char.              % 6.5.5
-double_quoted_character -->         % 6.4.2.1
+double_quoted_character(_Opts) -->  % 6.4.2.1
     double_quote_char               % 6.5.5
   , double_quote_char.              % 6.5.5
-double_quoted_character -->         % 6.4.2.1
+double_quoted_character(_Opts) -->  % 6.4.2.1
     back_quote_char.                % 6.5.5
 
 
-back_quoted_character -->           % 6.4.2.1
-    non_quote_char.                 % 6.4.2.1
-back_quoted_character -->           % 6.4.2.1
+back_quoted_character(Opts) -->     % 6.4.2.1
+    non_quote_char(Opts).           % 6.4.2.1
+back_quoted_character(_Opts) -->    % 6.4.2.1
     single_quote_char.              % 6.5.5
-back_quoted_character -->           % 6.4.2.1
+back_quoted_character(_Opts) -->    % 6.4.2.1
     double_quote_char.              % 6.5.5
-back_quoted_character -->           % 6.4.2.1
+back_quoted_character(_Opts) -->    % 6.4.2.1
     back_quote_char                 % 6.5.5
   , back_quote_char.                % 6.5.5
 
-non_quote_char -->                  % 6.4.2.1
+/*
+non_quote_char(_Opts) -->           % 6.4.2.1
     graphic_char                    % 6.5.1
   | alphanumeric_char               % 6.5.2
   | solo_char                       % 6.5.3
@@ -292,6 +293,23 @@ non_quote_char -->                  % 6.4.2.1
   | control_escape_sequence         % 6.4.2.1
   | octal_escape_sequence           % 6.4.2.1
   | hexadecimal_escape_sequence.    % 6.4.2.1
+*/
+non_quote_char(Opts, non_quote_char(PT), A, Z) :-
+  ( graphic_char(PT, A, Z)
+  ; alphanumeric_char(PT, A, Z)
+  ; solo_char(PT, A, Z)
+  ; space_char(PT, A, Z)
+  ; meta_escape_sequence(PT, A, Z)
+  ; control_escape_sequence(PT, A, Z)
+  ; octal_escape_sequence(PT, A, Z)
+  ; hexadecimal_escape_sequence(PT, A, Z)
+  ; option(allow_tab_as_quote_char(Allow_Tab_As_Quote_Char), Opts, no),
+    yes(Allow_Tab_As_Quote_Char),
+    horizontal_tab_char(PT, A, Z)
+  ; option(allow_newline_as_quote_char(Allow_Newline_As_Quote_Char), Opts, no),
+    yes(Allow_Newline_As_Quote_Char),
+    new_line_char(PT, A, Z)
+  ).
 
 meta_escape_sequence -->            % 6.4.2.1
     backslash_char                  % 6.5.5
@@ -380,9 +398,9 @@ variable_indicator_char -->         % 6.4.3
 
 /* 6.4.4 Integer numbers */
 
-integer token _Opts -->             % 6.4.3
+integer token Opts -->              % 6.4.3
     integer_constant                % 6.4.4
-  | character_code_constant         % 6.4.4
+  | character_code_constant(Opts)   % 6.4.4
   | binary_constant                 % 6.4.4
   | octal_constant                  % 6.4.4
   | hexadecimal_constant.           % 6.4.4
@@ -391,10 +409,10 @@ integer_constant -->                % 6.4.4
     decimal_digit_char              % 6.5.2
   , *decimal_digit_char.            % 6.5.2
 
-character_code_constant -->         % 6.4.4
+character_code_constant(Opts) -->   % 6.4.4
     ['0']
   , single_quote_char               % 6.5.5
-  , single_quoted_character.        % 6.4.2.1
+  , single_quoted_character(Opts).  % 6.4.2.1
 
 binary_constant -->                 % 6.4.4
     binary_constant_indicator       % 6.4.4
@@ -457,24 +475,24 @@ exponent_char -->                   % 6.4.5
 
 /* 6.4.6 Double quoted lists */
 
-double_quoted_list token _Opts -->  % 6.4.6
+double_quoted_list token Opts -->   % 6.4.6
     double_quote_char               % 6.5.5
-  , *double_quoted_item             % 6.4.6
+  , *double_quoted_item(Opts)       % 6.4.6
   , double_quote_char.              % 6.5.5
 
-double_quoted_item -->              % 6.4.6
-    double_quoted_character         % 6.4.2.1
+double_quoted_item(Opts) -->        % 6.4.6
+    double_quoted_character(Opts)   % 6.4.2.1
   | continuation_escape_sequence.   % 6.4.2
 
 /* 6.4.7 Back quoted strings */
 
-back_quoted_string token _Opts -->  % 6.4.7
+back_quoted_string token Opts -->   % 6.4.7
     back_quote_char                 % 6.5.5
-  , *back_quoted_item               % 6.4.7
+  , *back_quoted_item(Opts)         % 6.4.7
   , back_quote_char.                % 6.5.5
 
-back_quoted_item -->                % 6.4.7
-    back_quoted_character           % 6.4.2.1
+back_quoted_item(Opts) -->          % 6.4.7
+    back_quoted_character(Opts)     % 6.4.2.1
   | continuation_escape_sequence.   % 6.4.2
 
 /* 6.4.8 Other tokens */

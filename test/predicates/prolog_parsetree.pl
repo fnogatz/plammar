@@ -341,6 +341,12 @@ prolog( "a(b :- c).", [ allow_arg_precedence_geq_1000(yes) ]).
   !,
   PTs = [ _SingleResult ].
 
+invalid("a(\"b\n\").", [ allow_newline_as_quote_char(no) ]).
+prolog( "a(\"b\n\").", [ allow_newline_as_quote_char(yes) ]).
+
+invalid("a(\"b\t\").", [ allow_tab_as_quote_char(no) ]).
+prolog( "a(\"b\t\").", [ allow_tab_as_quote_char(yes) ]).
+
 %% Part V: infer operator definitions
 
 '"a b." invalid for infer_operators(no)' :-
