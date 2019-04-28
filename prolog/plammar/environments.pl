@@ -92,13 +92,21 @@ target_options(swi(8), Options) :-
   extend_options(swi(7), [], Options).
 
 target_options(swi(7), Options) :-
-  extend_options(iso, [
+  extend_options(swi(6), [
     back_quoted_text(yes),
     allow_arg_precedence_geq_1000(yes),
-    allow_operator_as_operand(yes),
+    allow_operator_as_operand(yes)
+  ], Options).
+
+target_options(swi(6), Options) :-
+  extend_options(swi(5), [], Options).
+
+target_options(swi(5), Options) :-
+  extend_options(iso, [
     allow_tab_as_quote_char(yes),
     allow_newline_as_quote_char(yes)
   ], Options).
+
 
 target_options(iso, Options) :-
   Options = [
