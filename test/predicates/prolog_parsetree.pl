@@ -361,8 +361,8 @@ invalid("a(\"b\\c\n\").", [ allow_c_as_continuation_escape_symbol(no) ]).
 prolog( "a(\"b\\c\n\").", [ allow_c_as_continuation_escape_symbol(yes) ]).
 
 % ISO has only restricted charset
-invalid("%éÄ\na.").
-prolog( "%éÄ\na.", [ allow_unicode(yes) ]).
+invalid("% é Ä § ° \na.").
+prolog( "% é Ä § ° \na.", [ allow_unicode(yes) ]).
 
 invalid("f('é').").
 prolog( "f('é').", [ allow_unicode(yes) ]).

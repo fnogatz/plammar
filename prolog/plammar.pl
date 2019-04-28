@@ -278,7 +278,7 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     Tag = name,
     tokens(Opts, start, Tokens, B, DL-DL)
   ; % graphic token
-    graphic_token_char(PT_Graphic_Token_Char, A, B) ->
+    graphic_token_char(Opts, PT_Graphic_Token_Char, A, B) ->
     tokens(Opts, graphic_token(PT,A), Tokens, PT_Graphic_Token_Char, B),
     Tag = name
   ; % open or open_ct
@@ -503,7 +503,7 @@ tokens(Opts, seq_alphanumeric_char(Ls,Beg,Cons), Tokens, A) :-
 tokens(_Opts, seq_graphic_token_char([],Beg,Beg), [], []) :-
   !.
 tokens(Opts, seq_graphic_token_char(Ls,Beg,Cons), Tokens, A) :-
-  ( graphic_token_char(PT_Graphic_Token_Char, A, B) ->
+  ( graphic_token_char(Opts, PT_Graphic_Token_Char, A, B) ->
     tokens(Opts, seq_graphic_token_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Graphic_Token_Char|PTs]
   ; otherwise ->

@@ -209,7 +209,7 @@ comment_2_char -->                  % 6.4.1
 
 name token Opts -->                 % 6.4.2
     letter_digit_token(Opts)        % 6.4.2
-  | graphic_token                   % 6.4.2
+  | graphic_token(Opts)             % 6.4.2
   | quoted_token(Opts)              % 6.4.2
   | semicolon_token                 % 6.4.2
   | cut_token.                      % 6.4.2
@@ -218,17 +218,17 @@ letter_digit_token(Opts) -->        % 6.4.2
     small_letter_char(Opts)         % 6.5.2
   , *alphanumeric_char(Opts).       % 6.5.2
 
-graphic_token -->                   % 6.4.2
-    graphic_token_char              % 6.4.2
-  , *graphic_token_char.            % 6.4.2
+graphic_token(Opts) -->             % 6.4.2
+    graphic_token_char(Opts)        % 6.4.2
+  , *graphic_token_char(Opts).      % 6.4.2
     %% TODO: "A graphic token shall not begin with
     %%   the Character sequence comment_open (6.4.1)."
     %% TODO: "A graphic token shall not be the
     %%   Single Character . (dot) when . is followed
     %%   by a layout_char or single_line_comment."
 
-graphic_token_char -->              % 6.4.2
-    graphic_char                    % 6.5.1
+graphic_token_char(Opts) -->        % 6.4.2
+    graphic_char(Opts)              % 6.5.1
   | backslash_char.                 % 6.5.5
 
 quoted_token(Opts) -->              % 6.4.2
@@ -296,7 +296,7 @@ back_quoted_character(_Opts) -->    % 6.4.2.1
 
 /*
 non_quote_char(Opts) -->            % 6.4.2.1
-    graphic_char                    % 6.5.1
+    graphic_char(Opts)              % 6.5.1
   | alphanumeric_char(Opts)         % 6.5.2
   | solo_char                       % 6.5.3
   | space_char                      % 6.5.4
@@ -306,7 +306,7 @@ non_quote_char(Opts) -->            % 6.4.2.1
   | hexadecimal_escape_sequence.    % 6.4.2.1
 */
 non_quote_char(Opts, non_quote_char(PT), A, Z) :-
-  ( graphic_char(PT, A, Z)
+  ( graphic_char(Opts, PT, A, Z)
   ; alphanumeric_char(Opts, PT, A, Z)
   ; solo_char(PT, A, Z)
   ; space_char(PT, A, Z)
@@ -547,7 +547,7 @@ char(Opts, char(Tree), [C|Z], Z) :-
 %% TODO: new_line_char could consume two elements
 
 char_(Opts) -->                     % 6.5
-    graphic_char                    % 6.5.1
+    graphic_char(Opts)              % 6.5.1
   | alphanumeric_char(Opts)         % 6.5.2
   | solo_char                       % 6.5.3
   | layout_char                     % 6.5.4
@@ -555,7 +555,7 @@ char_(Opts) -->                     % 6.5
 
 /* 6.5.1 Graphic characters */
 
-graphic_char -->                    % 6.5.1
+graphic_char_(_Opts) -->             % 6.5.1
     ['#']
   | ['$']
   | ['&']
@@ -571,9 +571,14 @@ graphic_char -->                    % 6.5.1
   | ['?']
   | ['@']
   | ['^']
-  | ['~']
-  | ['§']  % not in ISO
-  | ['°']. % not in ISO
+  | ['~'].
+
+graphic_char(Opts, graphic_char(Char), [Char|Z], Z) :-
+  ( graphic_char_(Opts, graphic_char_(Char), [Char|Z], Z),
+    !
+  ; option(allow_unicode(Allow_Unicode), Opts, no),
+    yes(Allow_Unicode),
+    char_type(Char, prolog_symbol) ).
 
 /* 6.5.2 Alphanumeric characters */
 
