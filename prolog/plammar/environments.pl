@@ -74,8 +74,27 @@ target_ops(swi, Ops) :-
     op(1150,  fx, 'public'),
     op(1150,  fx, 'table'),
     op( 700, xfx, 'as'),
+    
     op(1150,  fx, 'record'),  % library(record)
-    op(1150,  fx, 'rdf_meta')   % library(semweb)
+    op(1150,  fx, 'rdf_meta'),   % library(semweb)
+
+    % library(clpfd)
+    op(760, yfx, '#<==>'),
+    op(750, xfy, '#==>'),
+    op(750, yfx, '#<=='),
+    op(740, yfx, '#\\/'),
+    op(730, yfx, '#\\'),
+    op(720, yfx, '#/\\'),
+    op(710,  fy, '#\\'),
+    op(700, xfx, '#>'),
+    op(700, xfx, '#<'),
+    op(700, xfx, '#>='),
+    op(700, xfx, '#=<'),
+    op(700, xfx, '#='),
+    op(700, xfx, '#\\='),
+    op(700, xfx, 'in'),
+    op(700, xfx, 'ins'),
+    op(450, xfx, '..')
   ], Ops).
 
 extend_ops(Target, Extension, Combined) :-
