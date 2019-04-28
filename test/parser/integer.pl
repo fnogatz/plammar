@@ -24,3 +24,7 @@ integer_token: "123".
 integer_token: "0'0".
 
 integer_token: "0b0".
+
+integer_token: "0o0".
+
+integer_token: "0xff".
