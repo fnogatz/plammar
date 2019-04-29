@@ -94,6 +94,30 @@ term_expansion(invalid(String, Options), Tests) :-
   ),
   tap:register_test(Head).
 
+term_expansion(file(Filename), Tests) :-
+  path(test, Test_Path),
+  absolute_file_name(Filename, Absolute_Filename, [relative_to(Test_Path)]),
+  Tests = [ Test1, Test2 ],
+  % Test1
+  format(atom(Head1), 'prolog_tokens(file(\'~w\'), _)', [Filename]),
+  Test1 = (
+    Head1 :-
+      statistics(walltime, [_TimeSinceStart | [_TimeSinceLastCall]]),
+      prolog_tokens(file(Absolute_Filename), _PT), !,
+      statistics(walltime, [_NewTimeSinceStart | [ExecutionTime]]),
+      tap:diag('Execution time: ~d ms - ~w', [ExecutionTime, Head1])
+  ),
+  tap:register_test(Head1),
+  % Test2
+  format(atom(Head2), 'prolog_parsetree(file(\'~w\'), _)', [Filename]),
+  Test2 = (
+    Head2 :-
+      statistics(walltime, [_TimeSinceStart | [_TimeSinceLastCall]]),
+      prolog_parsetree(file(Absolute_Filename), _PT), !,
+      statistics(walltime, [_NewTimeSinceStart | [ExecutionTime]]),
+      tap:diag('Execution time: ~d ms - ~w', [ExecutionTime, Head2])
+  ),
+  tap:register_test(Head2).
 
 define_predicate_test(Predicate, eq(A,B), Test) :-
   format(atom(Head), '~w: ~w', [Predicate, A]),
@@ -231,3 +255,8 @@ run(prolog_tokens/2). % replaced via term expansion
 
 :- load_files('predicates/prolog_parsetree.pl').
 :- load_files('predicates/operators.pl').
+
+%% files -- performance tests
+
+file('./examples/long.pl').
+file('./examples/long_body.pl').
