@@ -74,6 +74,8 @@ target_ops(swi, Ops) :-
     op(1150,  fx, 'public'),
     op(1150,  fx, 'table'),
     op( 700, xfx, 'as'),
+
+    op( 100, yfx, '.'),  % dicts
     
     op(1150,  fx, 'record'),  % library(record)
     op(1150,  fx, 'rdf_meta'),   % library(semweb)
