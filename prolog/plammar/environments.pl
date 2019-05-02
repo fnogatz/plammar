@@ -75,6 +75,8 @@ target_ops(swi, Ops) :-
     op(1150,  fx, 'table'),
     op( 700, xfx, 'as'),
 
+    op( 200,  fy, '@'),  % no idea where this comes from...
+
     op( 100, yfx, '.'),  % dicts
     
     op(1150,  fx, 'record'),  % library(record)
