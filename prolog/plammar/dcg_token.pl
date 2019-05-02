@@ -495,11 +495,27 @@ hexadecimal_constant_indicator -->  % 6.4.4
     ['0', 'x'].
 
 /* 6.4.5 Floating point numbers */
-
+/*
 float_number token Opts -->         % 6.4.5
     integer_constant(Opts)          % 6.4.4
   , fraction                        % 6.4.5
   , ?exponent(Opts).                % 6.4.5
+*/
+float_number_token(Opts, float_number_token(Atom, [PT_Integer_Constant|G]), A, Z) :-
+  integer_constant(Opts, PT_Integer_Constant, A, B),
+  option(allow_integer_exponential_notation(Allow_Integer_Exponential_Notation), Opts, no),
+  ( yes(Allow_Integer_Exponential_Notation) ->
+    call_sequence_ground(sequence('?', fraction, F), F, J, G, B, C)
+  ; otherwise ->
+    G = [PT_Fraction|J],
+    fraction(PT_Fraction, B, C)
+  ),
+  call_sequence_ground(sequence('?', exponent(Opts), I), I, [], J, C, Z),
+  ( var(Atom) ->
+    append(Chars, Z, A),
+    atom_chars(Atom, Chars)
+  ; true
+  ).
 
 fraction -->                        % 6.4.5
     decimal_point_char              % 6.4.5

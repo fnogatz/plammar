@@ -387,6 +387,16 @@ tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
     Tag = float_number,
     tokens(Opts, fraction(Ls,Exponent,Beg,Cons), Tokens, C),
     atom_chars(Atom, Cons)
+  ; exponent_char(PT_Exponent_Char, A, B),
+    option(allow_integer_exponential_notation(Allow_Integer_Exponential_Notation), Opts, no),
+    yes(Allow_Integer_Exponential_Notation),
+    decimal_digit_char(PT_Decimal_Digit_Char, B, C) ->
+    Sign = sign([]),
+    PT = float_number_token(Atom, [integer_constant(Ls0)|Exponent]),
+    Tag = float_number,
+    Exponent = [exponent([PT_Exponent_Char,Sign,integer_constant([PT_Decimal_Digit_Char|Rs])])],
+    tokens(Opts, seq_decimal_digit_char(Rs,Beg,Cons), Tokens, C),
+    atom_chars(Atom, Cons)
   ; otherwise ->
     Tag = integer,
     append(Cons, A, Beg),

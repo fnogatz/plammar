@@ -428,6 +428,16 @@ invalid("a(4.0e3_0).", [ allow_digit_groups_with_underscore(yes) ]).
 prolog( "a(3_/*some*/000).", [ allow_digit_groups_with_underscore(yes) ]).
 invalid("a(3_/*some*/_000).", [ allow_digit_groups_with_underscore(yes) ]).
 
+% allow_integer_exponential_notation
+prolog( "a(1.0e3).").
+prolog( "a(1.0E3).").
+invalid("a(1e3).").
+invalid("a(1E3).").
+
+prolog( "b(1e3).", [ allow_integer_exponential_notation(yes) ]).
+prolog( "b(1E3).", [ allow_integer_exponential_notation(yes) ]).
+
+
 %% Part V: infer operator definitions
 
 '"a b." invalid for infer_operators(no)' :-
