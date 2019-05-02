@@ -379,12 +379,19 @@ prolog( "a :- Ä = 1.", [ allow_unicode(yes) ]).
 invalid("a(_{}).").
 invalid("a(A{}).").
 invalid("a(b{}).").
-% prolog( "a(_{}).", [ dicts(yes) ]).
-% prolog( "a(A{}).", [ dicts(yes) ]).
-% prolog( "a(b{}).", [ dicts(yes) ]).
+prolog( "a(_{}).", [ dicts(yes) ]).
+prolog( "a(A{}).", [ dicts(yes) ]).
+prolog( "a(b{}).", [ dicts(yes) ]).
 
 % tag is either a variable or atom
-% invalid("a(1{}).", [ dicts(yes) ]).
+invalid("a(1{}).", [ dicts(yes) ]).
+
+% key is either an atom or small integer
+prolog( "a(_{ b: 1 }).", [ dicts(yes) ]).
+prolog( "a(_{ b: 1, c: 2 }).", [ dicts(yes) ]).
+prolog( "a(_{ 1: b }).", [ dicts(yes) ]).
+invalid( "a(_{ 1.1: b }).", [ dicts(yes) ]).
+invalid( "a(_{ X: b }).", [ dicts(yes) ]).
 
 
 %% Part V: infer operator definitions

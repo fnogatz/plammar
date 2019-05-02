@@ -531,6 +531,50 @@ term_(0, Opts) -->
 term_(0, _Opts) -->
     [ double_quoted_list(_) ].
 
-/* Extension for SWI 7+ - back quoted string notation */
+
+/* Extensions for SWI-Prolog */
+
+/* (SWI) Back quoted string notation */
 term_(0, _Opts) -->
     [ back_quoted_string(_) ].
+
+/* (SWI) Dicts */
+
+% empty key-value-list
+term_(0, Opts, term_([Tag, Open_Curly, close_curly(PT_Close_Curly)]), A, Z) :-
+  option(dicts(Dicts), Opts, no),
+  yes(Dicts),
+  Open_Curly = open_curly([open_curly_token(open_curly_char('{'))]),
+  A = [Tag, Open_Curly, close_curly(PT_Close_Curly)|Z],
+  % tag is either an atom or a variable
+  member(Tag, [name(_), variable(_)]).
+
+% non-empty key-value-list
+term_(0, Opts, term_([Tag, Open_Curly, PT_Key_Value_List, close_curly(PT_Close_Curly)]), A, Z) :-
+  option(dicts(Dicts), Opts, no),
+  yes(Dicts),
+  Open_Curly = open_curly([open_curly_token(open_curly_char('{'))]),
+  A = [Tag, Open_Curly|B],
+  key_value_list(Opts, PT_Key_Value_List, B, C),
+  C = [close_curly(PT_Close_Curly)|Z],
+  % tag is either an atom or a variable
+  member(Tag, [name(_), variable(_)]).
+
+key_value_list(Opts) -->
+    key_value(Opts).
+
+key_value_list(Opts) -->
+    key_value(Opts)
+  , [ comma(_) ]
+  , key_value_list(Opts).
+
+key_value(Opts, key_value([PT_Key, name(PT_Colon), PT_Arg]), A, Z) :-
+  % key is either an atom or (small) integer
+  ( atom(PT_Key, A, B)
+  ; A = [PT_Key|B],
+    PT_Key = integer(_)
+  ),
+  B = [name(PT_Colon)|C],
+  ( PT_Colon = [PT_Colon_Name_Token] ; PT_Colon = [_LTS, PT_Colon_Name_Token] ),
+  PT_Colon_Name_Token = name_token(':', graphic_token([graphic_token_char(graphic_char(':'))])),
+  arg(Opts, PT_Arg, C, Z).
