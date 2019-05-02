@@ -102,9 +102,9 @@ term_expansion(file(Filename), Tests) :-
   format(atom(Head1), 'prolog_tokens(file(\'~w\'), _)', [Filename]),
   Test1 = (
     Head1 :-
-      statistics(walltime, [_TimeSinceStart | [_TimeSinceLastCall]]),
-      prolog_tokens(file(Absolute_Filename), _PT), !,
-      statistics(walltime, [_NewTimeSinceStart | [ExecutionTime]]),
+      statistics(walltime, [_ | [_]]),
+      prolog_tokens(file(Absolute_Filename), _), !,
+      statistics(walltime, [_ | [ExecutionTime]]),
       tap:diag('Execution time: ~d ms - ~w', [ExecutionTime, Head1])
   ),
   tap:register_test(Head1),
@@ -112,9 +112,9 @@ term_expansion(file(Filename), Tests) :-
   format(atom(Head2), 'prolog_parsetree(file(\'~w\'), _)', [Filename]),
   Test2 = (
     Head2 :-
-      statistics(walltime, [_TimeSinceStart | [_TimeSinceLastCall]]),
-      prolog_parsetree(file(Absolute_Filename), _PT), !,
-      statistics(walltime, [_NewTimeSinceStart | [ExecutionTime]]),
+      statistics(walltime, [_ | [_]]),
+      prolog_parsetree(file(Absolute_Filename), _), !,
+      statistics(walltime, [_ | [ExecutionTime]]),
       tap:diag('Execution time: ~d ms - ~w', [ExecutionTime, Head2])
   ),
   tap:register_test(Head2).
