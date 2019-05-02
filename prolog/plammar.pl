@@ -279,8 +279,18 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
     tokens(Opts, start, Tokens, B, DL-DL)
   ; % graphic token
     graphic_token_char(Opts, PT_Graphic_Token_Char, A, B) ->
-    tokens(Opts, graphic_token(PT,A), Tokens, PT_Graphic_Token_Char, B),
-    Tag = name
+    tokens(Opts, graphic_token(PT_Graphic_Token,A), Tokens, PT_Graphic_Token_Char, B),
+    %% Sec. 6.4.2:
+    %%   A graphic token shall not be the single character . (dot)
+    %%     when . is followed by a layout char or single line comment.
+    ( PT_Graphic_Token = name_token('.', _),
+      ( layout_char(_, B, _) ; B = ['%'|_] ; B = [] ) ->
+      Tag = end,
+      PT = end_token(end_char('.'))
+    ; otherwise ->
+      Tag = name,
+      PT = PT_Graphic_Token
+    )
   ; % open or open_ct
     open_char(PT_Open_Char, A, B) ->
     PT = open_token(PT_Open_Char),
