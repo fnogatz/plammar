@@ -114,7 +114,7 @@ target_options(swi(8), Options) :-
 
 target_options(swi(7), Options) :-
   extend_options(swi(6), [
-%    dicts(yes),
+    dicts(yes),
     back_quoted_text(yes),
     allow_arg_precedence_geq_1000(yes),
     allow_operator_as_operand(yes)
@@ -136,7 +136,7 @@ target_options(iso, Options) :-
   Options = [
     allow_unicode(no),
     var_prefix(no),
-%    dicts(no),
+    dicts(no),
     back_quoted_text(no),
     allow_arg_precedence_geq_1000(no),
     allow_operator_as_operand(no),
