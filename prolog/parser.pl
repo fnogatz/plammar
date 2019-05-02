@@ -178,7 +178,8 @@ prolog(Opts, prolog(PT), A) :-
   ( append(PT_PText, [layout_text_sequence(LTS)], PT),
     B = [layout_text_sequence(LTS)]
   ; B = [],
-    PT = PT_PText ),
+    PT = PT_PText
+  ),
   *(p_text(Opts), PT_PText, A, B).
 
 /*
@@ -189,28 +190,29 @@ p_text(Opts, PT, A, C) :-
   \+ var(A), !,
   P #=< 1201,
   term(P, Opts, Term_Tree, A, B),
-  end_(End_Tree, B, C),
+  B = [end(PT_End)|C],
   principal_functor(Term_Tree, Principal_Functor),
   (  Principal_Functor = (:-)
   -> Tree_Name = directive_term,
      get_operators(Opts, Term_Tree)
   ;  Tree_Name = clause_term ),
-  PT =.. [Tree_Name, [Term_Tree, End_Tree]].
+  PT =.. [Tree_Name, [Term_Tree, end(PT_End)]].
 
 p_text(Opts, PT, A, C) :-
   \+ var(PT), !,
-  PT =.. [Tree_Name, [Term_Tree, End_Tree]],
+  PT =.. [Tree_Name, [Term_Tree, end(PT_End)]],
   term(P, Opts, Term_Tree, A, B),
   ( Tree_Name = directive_term ->
     get_operators(Opts, Term_Tree)
   ; otherwise ->
     true
   ),
-  end_(End_Tree, B, C),
+  B = [end(PT_End)|C],
+  % end_(Opts, end(PT_End), B, C),
   P #=< 1201.
 
-end_(end([end_token(end_char('.'))]), [name([name_token('.', graphic_token([graphic_token_char(graphic_char('.'))]))])|B], B).
-end_(end([Layout_Text_Sequence,end_token(end_char('.'))]), [name([Layout_Text_Sequence,name_token('.', graphic_token([graphic_token_char(graphic_char('.'))]))])|B], B).
+end_(_Opts, end([end_token(end_char('.'))]), [name([name_token('.', graphic_token([graphic_token_char(graphic_char('.'))]))])|B], B).
+end_(_Opts, end([Layout_Text_Sequence,end_token(end_char('.'))]), [name([Layout_Text_Sequence,name_token('.', graphic_token([graphic_token_char(graphic_char('.'))]))])|B], B).
 
 
 /* 6.3 TERMS */

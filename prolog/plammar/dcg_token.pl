@@ -67,6 +67,8 @@ token_(Opts, token_(Tree), A, Z) :-
     )
   ; back_quoted_string_token(Opts, Token_Tree, B, Z),
     Tree = back_quoted_string(Inner)
+  ; end_token(Token_Tree, B, Z),
+    Tree = end(Inner)
   ).
 
 /*

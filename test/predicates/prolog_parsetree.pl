@@ -344,6 +344,20 @@ prolog( "a(b :- c).", [ allow_arg_precedence_geq_1000(yes) ]).
   !,
   PTs = [ _SingleResult ].
 
+/* Correct handling of end_token */
+
+invalid("a.x."). % for '.' not an infix operator
+prolog( "a.y.", [ operators([ op(100,xfy,'.') ]) ]).
+
+'"a. b." has a single parse tree, even for \'.\' as infix operator' :-
+  Options = [
+    operators([ op(100,yfx,'.') ])
+  ],
+  prolog_parsetrees(string("a. b."), PTs, Options),
+  !,
+  PTs = [ _SingleResult ].
+
+
 /* The following is valid according to ISO and reads as:
 a("b\
 ").
@@ -392,6 +406,9 @@ prolog( "a(_{ b: 1, c: 2 }).", [ dicts(yes) ]).
 prolog( "a(_{ 1: b }).", [ dicts(yes) ]).
 invalid( "a(_{ 1.1: b }).", [ dicts(yes) ]).
 invalid( "a(_{ X: b }).", [ dicts(yes) ]).
+
+% dot operator
+prolog( "p(X) :- X = point{x:1,y:2}.x.", [ dicts(yes), operators([op(100,yfx,'.')]) ]).
 
 
 %% Part V: infer operator definitions
