@@ -412,15 +412,58 @@ variable_indicator_char -->         % 6.4.3
 /* 6.4.4 Integer numbers */
 
 integer token Opts -->              % 6.4.3
-    integer_constant                % 6.4.4
+    integer_constant_(Opts)          % 6.4.4
   | character_code_constant(Opts)   % 6.4.4
   | binary_constant                 % 6.4.4
   | octal_constant                  % 6.4.4
   | hexadecimal_constant.           % 6.4.4
 
-integer_constant -->                % 6.4.4
+% Wrapper just for SWI 6+ compatibility,
+%   to support options allow_digit_groups_with_underscore
+%   and allow_digit_groups_with_space
+integer_constant_(Opts0, integer_constant(PT), A, Z) :-
+  merge_options([is_integer(yes)], Opts0, Opts),
+  integer_constant(Opts, integer_constant(PT), A, Z).
+/*
+integer_constant(_Opts) -->         % 6.4.4
     decimal_digit_char              % 6.5.2
   , *decimal_digit_char.            % 6.5.2
+*/
+integer_constant(Opts, integer_constant([PT_Decimal_Digit_Char|PT_Rest]), A, Z) :-
+  decimal_digit_char(PT_Decimal_Digit_Char, A, B),
+  integer_constant_df(Opts, PT_Rest-PT_Rest, B, Z).
+
+integer_constant_df(Opts, Ls0-[PT_Decimal_Digit_Char|Ls1e], A, Z) :-
+  decimal_digit_char(PT_Decimal_Digit_Char, A, B),
+  !,
+  integer_constant_df(Opts, Ls0-Ls1e, B, Z).
+integer_constant_df(Opts, Ls0-[PT_Underscore_Char, PT_Decimal_Digit_Char|Ls1e], A, Z) :-
+  option(is_integer(yes), Opts, no),
+  underscore_char(PT_Underscore_Char, A, B),
+  option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+  yes(Allow_Digit_Groups_With_Underscore),
+  decimal_digit_char(PT_Decimal_Digit_Char, B, C),
+  !,
+  integer_constant_df(Opts, Ls0-Ls1e, C, Z).
+integer_constant_df(Opts, Ls0-[PT_Underscore_Char, PT_Bracketed_Comment, PT_Decimal_Digit_Char|Ls1e], A, Z) :-
+  option(is_integer(yes), Opts, no),
+  underscore_char(PT_Underscore_Char, A, B),
+  option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+  yes(Allow_Digit_Groups_With_Underscore),
+  bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
+  decimal_digit_char(PT_Decimal_Digit_Char, C, D),
+  !,
+  integer_constant_df(Opts, Ls0-Ls1e, D, Z).
+integer_constant_df(Opts, Ls0-[PT_Space_Char, PT_Decimal_Digit_Char|Ls1e], A, Z) :-
+  option(is_integer(yes), Opts, no),
+  space_char(PT_Space_Char, A, B),
+  option(allow_digit_groups_with_space(Allow_Digit_Groups_With_Space), Opts, no),
+  yes(Allow_Digit_Groups_With_Space),
+  decimal_digit_char(PT_Decimal_Digit_Char, B, C),
+  !,
+  integer_constant_df(Opts, Ls0-Ls1e, C, Z).
+integer_constant_df(_Opts, _-[], A, A).
+
 
 character_code_constant(Opts) -->   % 6.4.4
     ['0']
@@ -453,20 +496,20 @@ hexadecimal_constant_indicator -->  % 6.4.4
 
 /* 6.4.5 Floating point numbers */
 
-float_number token _Opts -->        % 6.4.5
-    integer_constant                % 6.4.4
+float_number token Opts -->         % 6.4.5
+    integer_constant(Opts)          % 6.4.4
   , fraction                        % 6.4.5
-  , ?exponent.                      % 6.4.5
+  , ?exponent(Opts).                % 6.4.5
 
 fraction -->                        % 6.4.5
     decimal_point_char              % 6.4.5
   , decimal_digit_char              % 6.5.2
   , *decimal_digit_char.            % 6.5.2
 
-exponent -->                        % 6.4.5
+exponent(Opts) -->                  % 6.4.5
     exponent_char                   % 6.4.5
   , sign                            % 6.4.5
-  , integer_constant.               % 6.4.4
+  , integer_constant(Opts).         % 6.4.4
 
 sign -->                            % 6.4.5
     negative_sign_char.             % 6.4.5

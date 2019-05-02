@@ -365,6 +365,22 @@ tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
   ( decimal_digit_char(PT_Decimal_Digit_Char, A, B) ->
     append(Ls0, [PT_Decimal_Digit_Char], Ls1),
     tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls1, B)
+  ; underscore_char(PT_Underscore_Char, A, B),
+    option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+    yes(Allow_Digit_Groups_With_Underscore) ->
+    ( decimal_digit_char(PT_Decimal_Digit_Char, B, D) ->
+      append(Ls0, [PT_Underscore_Char, PT_Decimal_Digit_Char], Ls1)
+    ; bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
+      decimal_digit_char(PT_Decimal_Digit_Char, C, D) ->
+      append(Ls0, [PT_Underscore_Char, PT_Bracketed_Comment, PT_Decimal_Digit_Char], Ls1)      
+    ),
+    tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls1, D)
+  ; space_char(PT_Space_Char, A, B),
+    option(allow_digit_groups_with_space(Allow_Digit_Groups_With_Space), Opts, no),
+    yes(Allow_Digit_Groups_With_Space),
+    decimal_digit_char(PT_Decimal_Digit_Char, B, C) ->
+    append(Ls0, [PT_Space_Char, PT_Decimal_Digit_Char], Ls1),
+    tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls1, C)
   ; decimal_point_char(PT_Decimal_Point_Char, A, B),
     decimal_digit_char(PT_Decimal_Digit_Char, B, C) ->
     PT = float_number_token(Atom, [integer_constant(Ls0), fraction([PT_Decimal_Point_Char, PT_Decimal_Digit_Char|Ls])|Exponent]),

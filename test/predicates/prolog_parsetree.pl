@@ -387,7 +387,6 @@ prolog( "é.", [ allow_unicode(yes) ]).
 invalid("a :- Ä = 1.").
 prolog( "a :- Ä = 1.", [ allow_unicode(yes) ]).
 
-
 %%% IV.b): Dicts
 
 invalid("a(_{}).").
@@ -410,6 +409,24 @@ invalid( "a(_{ X: b }).", [ dicts(yes) ]).
 % dot operator
 prolog( "p(X) :- X = point{x:1,y:2}.x.", [ dicts(yes), operators([op(100,yfx,'.')]) ]).
 
+%%% IV.c): digit groups (http://www.swi-prolog.org/pldoc/man?section=syntax#sec:2.16.1.5)
+
+invalid("a(1_000).").
+invalid("a(1 000).").
+
+prolog( "a(0_000).", [ allow_digit_groups_with_underscore(yes) ]).
+prolog( "a(2_000).", [ allow_digit_groups_with_underscore(yes) ]).
+prolog( "a(2_0_0_0).", [ allow_digit_groups_with_underscore(yes) ]).
+prolog( "a(2 000).", [ allow_digit_groups_with_space(yes) ]).
+prolog( "a(2 0 0 0).", [ allow_digit_groups_with_space(yes) ]).
+prolog( "a(2_0 0).", [ allow_digit_groups_with_space(yes), allow_digit_groups_with_underscore(yes) ]).
+
+% only allowed for integer_constants
+invalid("a(4.0e3_0).", [ allow_digit_groups_with_underscore(yes) ]).
+
+% bracketed comment allows after underscore
+prolog( "a(3_/*some*/000).", [ allow_digit_groups_with_underscore(yes) ]).
+invalid("a(3_/*some*/_000).", [ allow_digit_groups_with_underscore(yes) ]).
 
 %% Part V: infer operator definitions
 

@@ -123,7 +123,10 @@ target_options(swi(7), Options) :-
   ], Options).
 
 target_options(swi(6), Options) :-
-  extend_options(swi(5), [], Options).
+  extend_options(swi(5), [
+    allow_digit_groups_with_underscore(yes),
+    allow_digit_groups_with_space(yes)
+  ], Options).
 
 target_options(swi(5), Options) :-
   extend_options(iso, [
@@ -144,7 +147,9 @@ target_options(iso, Options) :-
     allow_operator_as_operand(no),
     allow_tab_as_quote_char(no),
     allow_newline_as_quote_char(no),
-    allow_c_as_continuation_escape_symbol(no)
+    allow_c_as_continuation_escape_symbol(no),
+    allow_digit_groups_with_underscore(no),
+    allow_digit_groups_with_space(no)
   ].
 
 extend_options(Target, Extension, Combined) :-
