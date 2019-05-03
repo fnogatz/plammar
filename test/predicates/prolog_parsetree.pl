@@ -443,6 +443,11 @@ prolog( "b(1E3).", [ allow_integer_exponential_notation(yes) ]).
 invalid("a(0'').").
 prolog( "a(0'').", [ allow_single_quote_char_in_character_code_constant(yes) ]).
 
+invalid("a().").
+prolog( "a().", [ allow_compounds_with_zero_arguments(yes) ]).
+invalid("a(pi()).").
+prolog( "a(pi()).", [ allow_compounds_with_zero_arguments(yes) ]).
+
 
 %% Part V: infer operator definitions
 

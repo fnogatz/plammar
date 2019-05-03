@@ -337,6 +337,12 @@ term_(0, Opts) -->
   , arg_list(Opts)
   , [ close(_) ].
 
+term_(0, Opts, term_([PT_Atom, open_ct(PT_Open_Ct), close(PT_Close)]), A, Z) :-
+  option(allow_compounds_with_zero_arguments(Allow_Compounds_With_Zero_Arguments), Opts, no),
+  yes(Allow_Compounds_With_Zero_Arguments),
+  atom(PT_Atom, A, B),
+  B = [open_ct(PT_Open_Ct), close(PT_Close)|Z].
+
 term_(0, Opts, term_(T), A, Z) :-
   option(allow_variable_name_as_functor(Allow), Opts),
   yes(Allow),
