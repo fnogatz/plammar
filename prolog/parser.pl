@@ -2,6 +2,7 @@
 
 :- use_module(library(yall)).
 :- use_module(library(plammar/environments)).
+:- use_module(library(plammar/library_operators)).
 
 %:- style_check(-singleton).
 
@@ -123,6 +124,29 @@ get_operators(Opts, Term_Tree) :-
       % [..., op(Prec,Spec,Functor), ... ]
       Arg1 = term([open_list(_), Items, close_list(_)]) ->
       get_operators_from_items(Opts, Items)
+    ; member(Op, [use_module, ensure_loaded]),
+      Arg_List0 = arg(term([atom(name(Name_List1)), open_ct(_), arg_list(Arg_List1), close(_)])),
+      ( Name_List1 = [Name_Token1] ; Name_List1 = [_, Name_Token1] ),
+      Name_Token1 = name_token(library, _),
+      ( Arg_List1 = arg(term(atom(name(Name_List2)))),
+        ( Name_List2 = [Name_Token2] ; Name_List2 = [_, Name_Token2] ),
+        Name_Token2 = name_token(Library_Name, _) ->
+        get_operators_from_library(Opts, Library_Name)
+      ; Arg_List1 = arg(term(yfx, [
+          term(atom(name(Name_List3))),
+          op(atom(name(Name_List2))),
+          term(atom(name(Name_List4)))
+        ])),
+        ( Name_List2 = [Name_Token2] ; Name_List2 = [_, Name_Token2] ),
+        Name_Token2 = name_token('/', _),
+        ( Name_List3 = [Name_Token3] ; Name_List3 = [_, Name_Token3] ),
+        Name_Token3 = name_token(Left, _),
+        ( Name_List4 = [Name_Token4] ; Name_List4 = [_, Name_Token4] ),
+        Name_Token4 = name_token(Right, _) ->
+        get_operators_from_library(Opts, Left/Right)
+      ; otherwise ->
+        true
+      )
     ; otherwise ->
       true
     )
@@ -161,6 +185,16 @@ get_operators_from_items(Opts, items([arg(Arg), comma(_), Items])) :-
 get_operators_from_items(Opts, items(arg(Arg))) :-
   get_operator_from_term(Opts, Arg).
 
+get_operators_from_library(Opts, Library_Name) :-
+  ( library_operators(Library_Name, Ops) ->
+    maplist(set_operator_from_library(Opts), Ops)
+  ; otherwise ->
+    true
+  ).
+
+set_operator_from_library(Opts, Op) :-
+  option(specified_operators(Open_List), Opts, _),
+  memberchk(Op, Open_List).
 
 
 /* 6.2 PROLOG TEXT AND DATA */

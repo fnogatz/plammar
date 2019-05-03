@@ -608,11 +608,14 @@ end_char -->                        % 6.4.8
 
 /* 6.5 PROCESSOR CHARACTER SET */
 
-char(Opts, char(Tree), [C|Z], Z) :-
-  char_(Opts, char_(Tree), [C|Z], Z),
-  option(disallow_chars(Disallowed), Opts, []),
-  \+ member(C, Disallowed).
-%% TODO: new_line_char could consume two elements
+char(Opts, char(Tree), A, Z) :-
+  char_(Opts, char_(Tree), A, Z),
+  ( A = [C|Z] ->
+    option(disallow_chars(Disallowed), Opts, []),
+    \+ member(C, Disallowed)
+  ; otherwise ->
+    true
+  ).
 
 char_(Opts) -->                     % 6.5
     graphic_char(Opts)              % 6.5.1
