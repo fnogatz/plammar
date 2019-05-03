@@ -3,7 +3,7 @@
 :- use_module(library(yall)).
 :- use_module(library(plammar/environments)).
 
-:- style_check(-singleton).
+%:- style_check(-singleton).
 
 is_priority(P) :-
   P #>= 0,
@@ -153,7 +153,7 @@ get_operator_from_term(Opts, term(Term)) :-
   ; otherwise ->
     true
   ).
-get_operator_from_term(Opts, term(_,_)).
+get_operator_from_term(_Opts, term(_,_)).
 
 get_operators_from_items(Opts, items([arg(Arg), comma(_), Items])) :-
   get_operator_from_term(Opts, Arg),
@@ -405,7 +405,7 @@ term_(0, Opts) -->
 */
 term_(0, Opts0, term_(Inner), A, Z) :-
   member(Open_Symbol, [open, open_ct]),
-  Opening =.. [Open_Symbol, Open_Tree],
+  Opening =.. [Open_Symbol, _Open_Tree],
   Inner = [Opening, Term_Tree, close(Close_Tree)],
   A = [Opening|B],
   merge_options([allow_comma_op(yes)], Opts0, Opts),
@@ -432,7 +432,7 @@ term(P, Opts, Res, A, Z) :-
   term(P_Term, Opts, Term_Tree, B, C),
   lterm(Opts, term(Type, [Op_Tree, Term_Tree])@Op_P, Res@P, C, Z).
 
-lterm(Opts, Term_Tree@P, Term_Tree@P, A, A).
+lterm(_Opts, Term_Tree@P, Term_Tree@P, A, A).
 
 lterm(Opts, Term1_Tree@Term1_P, Res@P, A, Z) :-
   op(Op_P, Type, Opts, Op_Tree, A, B),
@@ -449,17 +449,17 @@ term(0, Opts, Res, A, Z) :-
   ( Res = term(Inner),
     term_(_, Opts, term_(Inner), A, Z)
   ; Res = term(Type, [Term_Tree1, Op_Tree, Term_Tree2]),
-    term(P_Term1, Opts, Term_Tree1, A, B),
-    op(P_Op, Type, Opts, Op_Tree, B, C),
-    term(P_Term2, Opts, Term_Tree2, C, Z)
+    term(_P_Term1, Opts, Term_Tree1, A, B),
+    op(_P_Op, Type, Opts, Op_Tree, B, C),
+    term(_P_Term2, Opts, Term_Tree2, C, Z)
   ; Res = term(Type, [Term_Tree, Op_Tree]),
     member(Type, [xf, yf]),
-    term(P_Term, Opts, Term_Tree, A, B),
-    op(P_Op, Type, Opts, Op_Tree, B, Z)
+    term(_P_Term, Opts, Term_Tree, A, B),
+    op(_P_Op, Type, Opts, Op_Tree, B, Z)
   ; Res = term(Type, [Op_Tree, Term_Tree]),
     member(Type, [fx, fy]),
-    op(P_Op, Type, Opts, Op_Tree, A, B),
-    term(P_Term, Opts, Term_Tree, B, Z)
+    op(_P_Op, Type, Opts, Op_Tree, A, B),
+    term(_P_Term, Opts, Term_Tree, B, Z)
   ).
 
 prec_constraints(xfx, P_Op, P_Term1, P_Term2) :-
