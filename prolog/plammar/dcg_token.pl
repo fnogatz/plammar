@@ -412,7 +412,7 @@ variable_indicator_char -->         % 6.4.3
 /* 6.4.4 Integer numbers */
 
 integer token Opts -->              % 6.4.3
-    integer_constant_(Opts)          % 6.4.4
+    integer_constant_(Opts)         % 6.4.4
   | character_code_constant(Opts)   % 6.4.4
   | binary_constant                 % 6.4.4
   | octal_constant                  % 6.4.4
@@ -469,6 +469,13 @@ character_code_constant(Opts) -->   % 6.4.4
     ['0']
   , single_quote_char               % 6.5.5
   , single_quoted_character(Opts).  % 6.4.2.1
+
+character_code_constant(Opts, character_code_constant(['0', PT_Single_Quote_Char, single_quoted_character(single_quote_char('\''))]), A, Z) :-
+  A = ['0'|B],
+  single_quote_char(PT_Single_Quote_Char, B, C),
+  option(allow_single_quote_char_in_character_code_constant(Allow_Single_Quote_Char_In_Character_Code_Constant), Opts, no),
+  yes(Allow_Single_Quote_Char_In_Character_Code_Constant),
+  C = ['\''|Z].
 
 binary_constant -->                 % 6.4.4
     binary_constant_indicator       % 6.4.4

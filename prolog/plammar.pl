@@ -316,7 +316,12 @@ tokens(Opts, token, [Token|Tokens], A, LTS) :-
 
 %% character_code_constant/3
 tokens(Opts, character_code_constant(PT,Tag,Beg), Tokens, PT_Single_Quote_Char, A) :-
-  single_quoted_character(Opts, PT_Single_Quoted_Character, A, B),
+  ( single_quoted_character(Opts, PT_Single_Quoted_Character, A, B)
+  ; option(allow_single_quote_char_in_character_code_constant(Allow_Single_Quote_Char_In_Character_Code_Constant), Opts, no),
+    yes(Allow_Single_Quote_Char_In_Character_Code_Constant),
+    A = ['\''|B],
+    PT_Single_Quoted_Character = single_quoted_character(single_quote_char('\''))
+  ),
   PT = integer_token(Atom, character_code_constant([
     '0',
     PT_Single_Quote_Char,

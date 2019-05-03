@@ -438,6 +438,12 @@ prolog( "b(1e3).", [ allow_integer_exponential_notation(yes) ]).
 prolog( "b(1E3).", [ allow_integer_exponential_notation(yes) ]).
 
 
+%%% IV.d) Others
+
+invalid("a(0'').").
+prolog( "a(0'').", [ allow_single_quote_char_in_character_code_constant(yes) ]).
+
+
 %% Part V: infer operator definitions
 
 '"a b." invalid for infer_operators(no)' :-
