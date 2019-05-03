@@ -10,3 +10,5 @@ double_quoted_list_token:
                 small_letter_char(a))))))),
     double_quote_char('"') ])
   <=> "\"a\"".
+
+double_quoted_list_token: "\"\\\"\"".

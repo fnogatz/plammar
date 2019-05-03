@@ -639,6 +639,7 @@ graphic_char(Opts, graphic_char(Char), [Char|Z], Z) :-
     !
   ; option(allow_unicode(Allow_Unicode), Opts, no),
     yes(Allow_Unicode),
+    Char \= '\\',
     char_type(Char, prolog_symbol) ).
 
 /* 6.5.2 Alphanumeric characters */
