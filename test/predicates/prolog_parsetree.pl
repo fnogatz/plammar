@@ -421,6 +421,22 @@ prolog( "a(2 000).", [ allow_digit_groups_with_space(yes) ]).
 prolog( "a(2 0 0 0).", [ allow_digit_groups_with_space(yes) ]).
 prolog( "a(2_0 0).", [ allow_digit_groups_with_space(yes), allow_digit_groups_with_underscore(yes) ]).
 
+% also for different radix
+invalid("a(0b1000_0000).").
+prolog( "a(0b1000_0000).", [ allow_digit_groups_with_underscore(yes) ]).
+invalid("a(0b1000 0000).").
+prolog( "a(0b1000 0000).", [ allow_digit_groups_with_space(yes) ]).
+
+invalid("a(0o7654_3210).").
+prolog( "a(0o7654_3210).", [ allow_digit_groups_with_underscore(yes) ]).
+invalid("a(0o7654 3210).").
+prolog( "a(0o7654 3210).", [ allow_digit_groups_with_space(yes) ]).
+
+invalid("a(0xffff_FFFF).").
+prolog( "a(0xffff_FFFF).", [ allow_digit_groups_with_underscore(yes) ]).
+invalid("a(0xffff FFFF).").
+prolog( "a(0xffff FFFF).", [ allow_digit_groups_with_space(yes) ]).
+
 % only allowed for integer_constants
 invalid("a(4.0e3_0).", [ allow_digit_groups_with_underscore(yes) ]).
 

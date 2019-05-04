@@ -414,9 +414,9 @@ variable_indicator_char -->         % 6.4.3
 integer token Opts -->              % 6.4.3
     integer_constant_(Opts)         % 6.4.4
   | character_code_constant(Opts)   % 6.4.4
-  | binary_constant                 % 6.4.4
-  | octal_constant                  % 6.4.4
-  | hexadecimal_constant.           % 6.4.4
+  | binary_constant(Opts)           % 6.4.4
+  | octal_constant(Opts)            % 6.4.4
+  | hexadecimal_constant(Opts).     % 6.4.4
 
 % Wrapper just for SWI 6+ compatibility,
 %   to support options allow_digit_groups_with_underscore
@@ -476,27 +476,127 @@ character_code_constant(Opts, character_code_constant(['0', PT_Single_Quote_Char
   option(allow_single_quote_char_in_character_code_constant(Allow_Single_Quote_Char_In_Character_Code_Constant), Opts, no),
   yes(Allow_Single_Quote_Char_In_Character_Code_Constant),
   C = ['\''|Z].
-
-binary_constant -->                 % 6.4.4
+/*
+binary_constant(_Opts) -->          % 6.4.4
     binary_constant_indicator       % 6.4.4
   , binary_digit_char               % 6.5.2
   , *binary_digit_char.             % 6.5.2
+*/
+binary_constant(Opts, binary_constant([PT_Binary_Constant_Indicator, PT_Binary_Digit_Char|PT_Rest]), A, Z) :-
+  binary_constant_indicator(PT_Binary_Constant_Indicator, A, B),
+  binary_digit_char(PT_Binary_Digit_Char, B, C),
+  binary_constant_df(Opts, PT_Rest-PT_Rest, C, Z).
+
+binary_constant_df(Opts, Ls0-[PT_Binary_Digit_Char|Ls1e], A, Z) :-
+  binary_digit_char(PT_Binary_Digit_Char, A, B),
+  !,
+  binary_constant_df(Opts, Ls0-Ls1e, B, Z).
+binary_constant_df(Opts, Ls0-[PT_Underscore_Char, PT_Binary_Digit_Char|Ls1e], A, Z) :-
+  underscore_char(PT_Underscore_Char, A, B),
+  option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+  yes(Allow_Digit_Groups_With_Underscore),
+  binary_digit_char(PT_Binary_Digit_Char, B, C),
+  !,
+  binary_constant_df(Opts, Ls0-Ls1e, C, Z).
+binary_constant_df(Opts, Ls0-[PT_Underscore_Char, PT_Bracketed_Comment, PT_Binary_Digit_Char|Ls1e], A, Z) :-
+  underscore_char(PT_Underscore_Char, A, B),
+  option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+  yes(Allow_Digit_Groups_With_Underscore),
+  bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
+  binary_digit_char(PT_Binary_Digit_Char, C, D),
+  !,
+  binary_constant_df(Opts, Ls0-Ls1e, D, Z).
+binary_constant_df(Opts, Ls0-[PT_Space_Char, PT_Binary_Digit_Char|Ls1e], A, Z) :-
+  space_char(PT_Space_Char, A, B),
+  option(allow_digit_groups_with_space(Allow_Digit_Groups_With_Space), Opts, no),
+  yes(Allow_Digit_Groups_With_Space),
+  binary_digit_char(PT_Binary_Digit_Char, B, C),
+  !,
+  binary_constant_df(Opts, Ls0-Ls1e, C, Z).
+binary_constant_df(_Opts, _-[], A, A).
+
 
 binary_constant_indicator -->       % 6.4.4
     ['0', 'b'].
-
-octal_constant -->                  % 6.4.4
+/*
+octal_constant(_Opts) -->           % 6.4.4
     octal_constant_indicator        % 6.4.4
   , octal_digit_char                % 6.5.2
   , *octal_digit_char.              % 6.5.2
+*/
+octal_constant(Opts, octal_constant([PT_Octal_Constant_Indicator, PT_Octal_Digit_Char|PT_Rest]), A, Z) :-
+  octal_constant_indicator(PT_Octal_Constant_Indicator, A, B),
+  octal_digit_char(PT_Octal_Digit_Char, B, C),
+  octal_constant_df(Opts, PT_Rest-PT_Rest, C, Z).
+
+octal_constant_df(Opts, Ls0-[PT_Octal_Digit_Char|Ls1e], A, Z) :-
+  octal_digit_char(PT_Octal_Digit_Char, A, B),
+  !,
+  octal_constant_df(Opts, Ls0-Ls1e, B, Z).
+octal_constant_df(Opts, Ls0-[PT_Underscore_Char, PT_Octal_Digit_Char|Ls1e], A, Z) :-
+  underscore_char(PT_Underscore_Char, A, B),
+  option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+  yes(Allow_Digit_Groups_With_Underscore),
+  octal_digit_char(PT_Octal_Digit_Char, B, C),
+  !,
+  octal_constant_df(Opts, Ls0-Ls1e, C, Z).
+octal_constant_df(Opts, Ls0-[PT_Underscore_Char, PT_Bracketed_Comment, PT_Octal_Digit_Char|Ls1e], A, Z) :-
+  underscore_char(PT_Underscore_Char, A, B),
+  option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+  yes(Allow_Digit_Groups_With_Underscore),
+  bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
+  octal_digit_char(PT_Octal_Digit_Char, C, D),
+  !,
+  octal_constant_df(Opts, Ls0-Ls1e, D, Z).
+octal_constant_df(Opts, Ls0-[PT_Space_Char, PT_Octal_Digit_Char|Ls1e], A, Z) :-
+  space_char(PT_Space_Char, A, B),
+  option(allow_digit_groups_with_space(Allow_Digit_Groups_With_Space), Opts, no),
+  yes(Allow_Digit_Groups_With_Space),
+  octal_digit_char(PT_Octal_Digit_Char, B, C),
+  !,
+  octal_constant_df(Opts, Ls0-Ls1e, C, Z).
+octal_constant_df(_Opts, _-[], A, A).
 
 octal_constant_indicator -->        % 6.4.4
     ['0', 'o'].
-
-hexadecimal_constant -->            % 6.4.4
+/*
+hexadecimal_constant(_Opts) -->     % 6.4.4
     hexadecimal_constant_indicator  % 6.4.4
   , hexadecimal_digit_char          % 6.5.2
   , *hexadecimal_digit_char.        % 6.5.2
+*/
+hexadecimal_constant(Opts, hexadecimal_constant([PT_Hexadecimal_Constant_Indicator, PT_Hexadecimal_Digit_Char|PT_Rest]), A, Z) :-
+  hexadecimal_constant_indicator(PT_Hexadecimal_Constant_Indicator, A, B),
+  hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, B, C),
+  hexadecimal_constant_df(Opts, PT_Rest-PT_Rest, C, Z).
+
+hexadecimal_constant_df(Opts, Ls0-[PT_Hexadecimal_Digit_Char|Ls1e], A, Z) :-
+  hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, A, B),
+  !,
+  hexadecimal_constant_df(Opts, Ls0-Ls1e, B, Z).
+hexadecimal_constant_df(Opts, Ls0-[PT_Underscore_Char, PT_Hexadecimal_Digit_Char|Ls1e], A, Z) :-
+  underscore_char(PT_Underscore_Char, A, B),
+  option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+  yes(Allow_Digit_Groups_With_Underscore),
+  hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, B, C),
+  !,
+  hexadecimal_constant_df(Opts, Ls0-Ls1e, C, Z).
+hexadecimal_constant_df(Opts, Ls0-[PT_Underscore_Char, PT_Bracketed_Comment, PT_Hexadecimal_Digit_Char|Ls1e], A, Z) :-
+  underscore_char(PT_Underscore_Char, A, B),
+  option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+  yes(Allow_Digit_Groups_With_Underscore),
+  bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
+  hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, C, D),
+  !,
+  hexadecimal_constant_df(Opts, Ls0-Ls1e, D, Z).
+hexadecimal_constant_df(Opts, Ls0-[PT_Space_Char, PT_Hexadecimal_Digit_Char|Ls1e], A, Z) :-
+  space_char(PT_Space_Char, A, B),
+  option(allow_digit_groups_with_space(Allow_Digit_Groups_With_Space), Opts, no),
+  yes(Allow_Digit_Groups_With_Space),
+  hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, B, C),
+  !,
+  hexadecimal_constant_df(Opts, Ls0-Ls1e, C, Z).
+hexadecimal_constant_df(_Opts, _-[], A, A).
 
 hexadecimal_constant_indicator -->  % 6.4.4
     ['0', 'x'].

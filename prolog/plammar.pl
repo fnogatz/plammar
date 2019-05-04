@@ -606,6 +606,22 @@ tokens(Opts, seq_binary_digit_char(Ls,Beg,Cons), Tokens, A) :-
   ( binary_digit_char(PT_Binary_Digit_Char, A, B) ->
     tokens(Opts, seq_binary_digit_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Binary_Digit_Char|PTs]
+  ; underscore_char(PT_Underscore_Char, A, B),
+    option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+    yes(Allow_Digit_Groups_With_Underscore) ->
+    ( binary_digit_char(PT_Binary_Digit_Char, B, D) ->
+      Ls = [PT_Underscore_Char, PT_Binary_Digit_Char|PTs]
+    ; bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
+      binary_digit_char(PT_Binary_Digit_Char, C, D) ->
+      Ls = [PT_Underscore_Char, PT_Bracketed_Comment, PT_Binary_Digit_Char|PTs]
+    ),
+    tokens(Opts, seq_binary_digit_char(PTs,Beg,Cons), Tokens, D)
+  ; space_char(PT_Space_Char, A, B),
+    option(allow_digit_groups_with_space(Allow_Digit_Groups_With_Space), Opts, no),
+    yes(Allow_Digit_Groups_With_Space),
+    binary_digit_char(PT_Binary_Digit_Char, B, C) ->
+    Ls = [PT_Space_Char, PT_Binary_Digit_Char|PTs],
+    tokens(Opts, seq_binary_digit_char(PTs,Beg,Cons), Tokens, C)
   ; otherwise ->
     append(Cons, A, Beg),
     tokens(Opts, start, Tokens, A, DL-DL),
@@ -619,6 +635,22 @@ tokens(Opts, seq_octal_digit_char(Ls,Beg,Cons), Tokens, A) :-
   ( octal_digit_char(PT_Octal_Digit_Char, A, B) ->
     tokens(Opts, seq_octal_digit_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Octal_Digit_Char|PTs]
+  ; underscore_char(PT_Underscore_Char, A, B),
+    option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+    yes(Allow_Digit_Groups_With_Underscore) ->
+    ( octal_digit_char(PT_Octal_Digit_Char, B, D) ->
+      Ls = [PT_Underscore_Char, PT_Octal_Digit_Char|PTs]
+    ; bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
+      octal_digit_char(PT_Octal_Digit_Char, C, D) ->
+      Ls = [PT_Underscore_Char, PT_Bracketed_Comment, PT_Octal_Digit_Char|PTs]
+    ),
+    tokens(Opts, seq_octal_digit_char(PTs,Beg,Cons), Tokens, D)
+  ; space_char(PT_Space_Char, A, B),
+    option(allow_digit_groups_with_space(Allow_Digit_Groups_With_Space), Opts, no),
+    yes(Allow_Digit_Groups_With_Space),
+    octal_digit_char(PT_Octal_Digit_Char, B, C) ->
+    Ls = [PT_Space_Char, PT_Octal_Digit_Char|PTs],
+    tokens(Opts, seq_octal_digit_char(PTs,Beg,Cons), Tokens, C)  
   ; otherwise ->
     append(Cons, A, Beg),
     tokens(Opts, start, Tokens, A, DL-DL),
@@ -632,6 +664,22 @@ tokens(Opts, seq_hexadecimal_digit_char(Ls,Beg,Cons), Tokens, A) :-
   ( hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, A, B) ->
     tokens(Opts, seq_hexadecimal_digit_char(PTs,Beg,Cons), Tokens, B),
     Ls = [PT_Hexadecimal_Digit_Char|PTs]
+  ; underscore_char(PT_Underscore_Char, A, B),
+    option(allow_digit_groups_with_underscore(Allow_Digit_Groups_With_Underscore), Opts, no),
+    yes(Allow_Digit_Groups_With_Underscore) ->
+    ( hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, B, D) ->
+      Ls = [PT_Underscore_Char, PT_Hexadecimal_Digit_Char|PTs]
+    ; bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
+      hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, C, D) ->
+      Ls = [PT_Underscore_Char, PT_Bracketed_Comment, PT_Hexadecimal_Digit_Char|PTs]
+    ),
+    tokens(Opts, seq_hexadecimal_digit_char(PTs,Beg,Cons), Tokens, D)
+  ; space_char(PT_Space_Char, A, B),
+    option(allow_digit_groups_with_space(Allow_Digit_Groups_With_Space), Opts, no),
+    yes(Allow_Digit_Groups_With_Space),
+    hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, B, C) ->
+    Ls = [PT_Space_Char, PT_Hexadecimal_Digit_Char|PTs],
+    tokens(Opts, seq_hexadecimal_digit_char(PTs,Beg,Cons), Tokens, C)
   ; otherwise ->
     append(Cons, A, Beg),
     tokens(Opts, start, Tokens, A, DL-DL),
