@@ -263,6 +263,7 @@ prolog("a(fx(b)).", [ operators([ op(100, fx, fx) ]) ]).
 % Corr. 2, bar resp. ht_sep as operator
 prolog("a | b.", [ operators([ op(1050, xfy, '|') ]) ]).
 
+
 %%% III.c): Complex Example Prolog programs
 
 prolog("a :- b, d.", [ targets([swi]) ]).
@@ -463,6 +464,11 @@ invalid("a().").
 prolog( "a().", [ allow_compounds_with_zero_arguments(yes) ]).
 invalid("a(pi()).").
 prolog( "a(pi()).", [ allow_compounds_with_zero_arguments(yes) ]).
+
+invalid("#! test\na.").
+prolog( "#! test\na.", [ allow_shebang(yes) ]).
+invalid("\n#! test\na.", [ allow_shebang(yes) ]).
+invalid(" #! test2\na.", [ allow_shebang(yes) ]).
 
 
 %% Part V: infer operator definitions

@@ -201,20 +201,34 @@ set_operator_from_library(Opts, Op) :-
 
 prolog(Opts, prolog(PT), A) :-
   \+ var(A), !,
-  *(p_text(Opts), PT_PText, A, B),
-  ( B = [],
-    PT = PT_PText
-  ; B = [layout_text_sequence(_)],
-    append(PT_PText, B, PT) ).
+  ( A = [shebang(PT_Shebang)|B] ->
+    PT0 = [shebang(PT_Shebang)]
+  ; otherwise ->
+    A = B,
+    PT0 = []
+  ),
+  *(p_text(Opts), PT_PText, B, C),
+  append(PT0, PT_PText, PT1),
+  ( C = [],
+    PT = PT1
+  ; C = [layout_text_sequence(_)],
+    append(PT1, C, PT)
+  ).
 
 prolog(Opts, prolog(PT), A) :-
   \+ var(PT), !,
-  ( append(PT_PText, [layout_text_sequence(LTS)], PT),
-    B = [layout_text_sequence(LTS)]
-  ; B = [],
-    PT = PT_PText
+  ( PT = [shebang(PT_Shebang)|PT0] ->
+    A = [shebang(PT_Shebang)|B]
+  ; otherwise ->
+    PT = PT0,
+    A = B
   ),
-  *(p_text(Opts), PT_PText, A, B).
+  ( append(PT_PText, [layout_text_sequence(LTS)], PT0),
+    C = [layout_text_sequence(LTS)]
+  ; C = [],
+    PT0 = PT_PText
+  ),
+  *(p_text(Opts), PT_PText, B, C).
 
 /*
 prolog(Opts) -->

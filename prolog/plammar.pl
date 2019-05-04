@@ -160,8 +160,28 @@ tokens(Opts, Tokens, A) :-
 tokens(Opts, Tokens, A) :-
   var(Tokens),
   !,
-  tokens(Opts, start, Tokens, A, DL-DL),
+  tokens(Opts, prolog, Tokens, A, nil),
   !.
+
+
+%% prolog
+tokens(Opts0, prolog, [shebang(['#','!',PT_Comment_Text,NLC_Tree])|Tokens], ['#','!'|A], nil) :-
+  !,
+  option(allow_shebang(Allow_Shebang), Opts0, no),
+  yes(Allow_Shebang),
+  merge_options([disallow_chars(['\n'])], Opts0, Opts),
+  comment_text(Opts, PT_Comment_Text, A, B),
+  ( B = [] ->
+    NLC_Tree = end_of_file,
+    Tokens = []
+  ; otherwise ->
+    new_line_char(NLC_Tree, B, C),
+    tokens(Opts0, start, Tokens, C, DL-DL)
+  ).
+
+tokens(Opts, prolog, Tokens, A, nil) :-
+  tokens(Opts, start, Tokens, A, DL-DL).
+
 
 %% start
 tokens(Opts, start, Tokens, A, LTS0-L0) :-

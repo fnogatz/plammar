@@ -7,6 +7,7 @@
 
 % also allow newlines, etc. at the end of the file
 term(Opts) -->
+    ?shebang(Opts),
     *token(Opts),
     ?layout_text_sequence(Opts).
 /*
@@ -974,3 +975,18 @@ double_quote_char -->               % 6.5.5
 
 back_quote_char -->                 % 6.5.5
     ['`'].
+
+
+/* SWI Compatibility */
+
+shebang(Opts0, shebang(['#','!',PT_Comment_Text,PT_New_Line_Char]), ['#','!'|A], Z) :-
+  option(allow_shebang(Allow_Shebang), Opts0, no),
+  yes(Allow_Shebang),
+  merge_options([disallow_chars(['\n'])], Opts0, Opts),
+  comment_text(Opts, PT_Comment_Text, A, B),
+  ( (B == Z ; NLC_Tree == end_of_file) ->
+    NLC_Tree = end_of_file,
+    B = Z
+  ; otherwise ->
+    new_line_char(PT_New_Line_Char, B, Z)
+  ).

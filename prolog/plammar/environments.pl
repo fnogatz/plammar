@@ -112,6 +112,7 @@ target_options(swi(6), Options) :-
 
 target_options(swi(5), Options) :-
   extend_options(iso, [
+    allow_shebang(yes),
     allow_tab_as_quote_char(yes),
     allow_newline_as_quote_char(yes),
     allow_c_as_continuation_escape_symbol(yes),
@@ -123,6 +124,7 @@ target_options(swi(5), Options) :-
 
 target_options(iso, Options) :-
   Options = [
+    allow_shebang(no),
     allow_unicode(no),
     var_prefix(no),
     dicts(no),
