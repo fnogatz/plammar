@@ -294,8 +294,8 @@ non_quote_char(Opts) -->            % 6.4.2.1
   | space_char                      % 6.5.4
   | meta_escape_sequence            % 6.4.2.1
   | control_escape_sequence(Opts)   % 6.4.2.1
-  | octal_escape_sequence           % 6.4.2.1
-  | hexadecimal_escape_sequence.    % 6.4.2.1
+  | octal_escape_sequence(Opts)     % 6.4.2.1
+  | hexadecimal_escape_sequence(Opts). % 6.4.2.1
 */
 non_quote_char(Opts, non_quote_char(PT), A, Z) :-
   ( graphic_char(Opts, PT, A, Z)
@@ -304,8 +304,8 @@ non_quote_char(Opts, non_quote_char(PT), A, Z) :-
   ; space_char(PT, A, Z)
   ; meta_escape_sequence(PT, A, Z)
   ; control_escape_sequence(Opts, PT, A, Z)
-  ; octal_escape_sequence(PT, A, Z)
-  ; hexadecimal_escape_sequence(PT, A, Z)
+  ; octal_escape_sequence(Opts, PT, A, Z)
+  ; hexadecimal_escape_sequence(Opts, PT, A, Z)
   ; option(allow_tab_as_quote_char(Allow_Tab_As_Quote_Char), Opts, no),
     yes(Allow_Tab_As_Quote_Char),
     horizontal_tab_char(PT, A, Z)
@@ -363,19 +363,44 @@ symbolic_new_line_char -->          % 6.4.2.1
 
 symbolic_vertical_tab_char -->      % 6.4.2.1
     ['v'].
-
-octal_escape_sequence -->           % 6.4.2.1
+/*
+octal_escape_sequence(_Opts) -->    % 6.4.2.1
     backslash_char                  % 6.5.5
   , octal_digit_char                % 6.5.2
   , *octal_digit_char               % 6.5.2
   , backslash_char.                 % 6.5.5
-
-hexadecimal_escape_sequence -->     % 6.4.2.1
+*/
+octal_escape_sequence(Opts, octal_escape_sequence([PT_Backslash_Char,PT_Octal_Digit_Char|J]), A, Z) :-
+  backslash_char(PT_Backslash_Char, A, B),
+  octal_digit_char(PT_Octal_Digit_Char, B, C),
+  call_sequence_ground(sequence('*', octal_digit_char, I), I, K, J, C, D),
+  ( K = [PT_Backslash_Char],
+    backslash_char(PT_Backslash_Char, D, Z)
+  ; K = [],
+    option(allow_missing_closing_backslash_in_character_escape(Allow_Missing_Closing_Backslash_In_Character_Escape), Opts, no),
+    yes(Allow_Missing_Closing_Backslash_In_Character_Escape),
+    D = Z
+  ).
+/*
+hexadecimal_escape_sequence(_Opts) --> % 6.4.2.1
     backslash_char                  % 6.5.5
   , symbolic_hexadecimal_char       % 6.4.2.1
   , hexadecimal_digit_char          % 6.5.2
   , *hexadecimal_digit_char         % 6.5.2
   , backslash_char.                 % 6.5.5
+*/
+hexadecimal_escape_sequence(Opts, hexadecimal_escape_sequence([PT_Backslash_Char,PT_Symbolic_Hexadecimal_Char,PT_Hexadecimal_Digit_Char|J]), A, Z) :-
+  backslash_char(PT_Backslash_Char, A, B),
+  symbolic_hexadecimal_char(PT_Symbolic_Hexadecimal_Char, B, C),
+  hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, C, D),
+  call_sequence_ground(sequence('*', hexadecimal_digit_char, I), I, K, J, D, E),
+  ( K = [PT_Backslash_Char],
+    backslash_char(PT_Backslash_Char, E, Z)
+  ; K = [],
+    option(allow_missing_closing_backslash_in_character_escape(Allow_Missing_Closing_Backslash_In_Character_Escape), Opts, no),
+    yes(Allow_Missing_Closing_Backslash_In_Character_Escape),
+    E = Z
+  ).
 
 symbolic_hexadecimal_char -->       % 6.4.2.1
     ['x'].

@@ -460,6 +460,15 @@ invalid("a(1E3).").
 prolog( "b(1e3).", [ allow_integer_exponential_notation(yes) ]).
 prolog( "b(1E3).", [ allow_integer_exponential_notation(yes) ]).
 
+% closing backslash in character escapes
+prolog( "a(\'\\7\\\')."). % closing backslash being present
+invalid("a(\'\\7\').").
+prolog( "a(\'\\7\').", [ allow_missing_closing_backslash_in_character_escape(yes) ]).
+
+prolog( "a(\'\\x7\\\')."). % closing backslash being present
+invalid("a(\'\\x7\').").
+prolog( "a(\'\\x7\').", [ allow_missing_closing_backslash_in_character_escape(yes) ]).
+
 
 %%% IV.d) Others
 
