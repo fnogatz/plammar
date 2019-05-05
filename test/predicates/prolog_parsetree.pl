@@ -520,3 +520,9 @@ prolog(":- module(a,[b,op(600,fx,p),c/2]).\np q.").
   prolog_parsetrees(string("a(+)."), PTs, Options),
   !,
   PTs = [ _SingleResult ].
+
+prolog("a(1.0e1).").
+prolog("a(1.0e+2).").
+prolog("a(1.0e-3).").
+prolog("a(1e+4).", [ allow_integer_exponential_notation(yes) ]).
+prolog("a(1e-4).", [ allow_integer_exponential_notation(yes) ]).

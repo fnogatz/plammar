@@ -415,12 +415,12 @@ tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
   ; exponent_char(PT_Exponent_Char, A, B),
     option(allow_integer_exponential_notation(Allow_Integer_Exponential_Notation), Opts, no),
     yes(Allow_Integer_Exponential_Notation),
-    decimal_digit_char(PT_Decimal_Digit_Char, B, C) ->
-    Sign = sign([]),
+    sign(PT_Sign, B, C),
+    decimal_digit_char(PT_Decimal_Digit_Char, C, D) ->
     PT = float_number_token(Atom, [integer_constant(Ls0)|Exponent]),
     Tag = float_number,
-    Exponent = [exponent([PT_Exponent_Char,Sign,integer_constant([PT_Decimal_Digit_Char|Rs])])],
-    tokens(Opts, seq_decimal_digit_char(Rs,Beg,Cons), Tokens, C),
+    Exponent = [exponent([PT_Exponent_Char,PT_Sign,integer_constant([PT_Decimal_Digit_Char|Rs])])],
+    tokens(Opts, seq_decimal_digit_char(Rs,Beg,Cons), Tokens, D),
     atom_chars(Atom, Cons)
   ; otherwise ->
     Tag = integer,
@@ -438,11 +438,11 @@ tokens(Opts, fraction(Ls,Exponent,Beg,Cons), Tokens, A) :-
     Ls = [PT_Decimal_Digit_Char|PTs],
     tokens(Opts, fraction(PTs,Exponent,Beg,Cons), Tokens, B)
   ; exponent_char(PT_Exponent_Char, A, B),
-    decimal_digit_char(PT_Decimal_Digit_Char, B, C) ->
-    Sign = sign([]),
+    sign(PT_Sign, B, C),
+    decimal_digit_char(PT_Decimal_Digit_Char, C, D) ->
     Ls = [],
-    Exponent = [exponent([PT_Exponent_Char,Sign,integer_constant([PT_Decimal_Digit_Char|Rs])])],
-    tokens(Opts, seq_decimal_digit_char(Rs,Beg,Cons), Tokens, C)
+    Exponent = [exponent([PT_Exponent_Char,PT_Sign,integer_constant([PT_Decimal_Digit_Char|Rs])])],
+    tokens(Opts, seq_decimal_digit_char(Rs,Beg,Cons), Tokens, D)
   ; otherwise ->
     append(Cons, A, Beg),
     tokens(Opts, start, Tokens, A, DL-DL),
