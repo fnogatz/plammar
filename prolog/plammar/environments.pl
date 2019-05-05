@@ -121,7 +121,8 @@ target_options(swi(5), Options) :-
     allow_unicode(yes),
     allow_integer_exponential_notation(yes),
     allow_single_quote_char_in_character_code_constant(yes),
-    allow_missing_closing_backslash_in_character_escape(yes)
+    allow_missing_closing_backslash_in_character_escape(yes),
+    allow_unicode_character_escape(yes)
   ], Options).
 
 
@@ -144,7 +145,8 @@ target_options(iso, Options) :-
     allow_digit_groups_with_space(no),
     allow_integer_exponential_notation(no),
     allow_single_quote_char_in_character_code_constant(no),
-    allow_missing_closing_backslash_in_character_escape(no)
+    allow_missing_closing_backslash_in_character_escape(no),
+    allow_unicode_character_escape(no)
   ].
 
 extend_options(Target, Extension, Combined) :-

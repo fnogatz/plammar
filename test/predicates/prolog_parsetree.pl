@@ -469,6 +469,12 @@ prolog( "a(\'\\x7\\\')."). % closing backslash being present
 invalid("a(\'\\x7\').").
 prolog( "a(\'\\x7\').", [ allow_missing_closing_backslash_in_character_escape(yes) ]).
 
+% unicode character escapes
+invalid("a('\\u1234').").
+prolog( "a('\\u1234').", [ allow_unicode_character_escape(yes) ]).
+invalid("a('\\U12345678').").
+prolog( "a('\\U12345678').", [ allow_unicode_character_escape(yes) ]).
+
 
 %%% IV.d) Others
 

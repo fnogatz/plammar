@@ -312,6 +312,9 @@ non_quote_char(Opts, non_quote_char(PT), A, Z) :-
   ; option(allow_newline_as_quote_char(Allow_Newline_As_Quote_Char), Opts, no),
     yes(Allow_Newline_As_Quote_Char),
     new_line_char(PT, A, Z)
+  ; option(allow_unicode_character_escape(Allow_Unicode_Character_Escape), Opts, no),
+    yes(Allow_Unicode_Character_Escape),
+    unicode_escape_sequence(Opts, PT, A, Z)
   ).
 
 meta_escape_sequence -->            % 6.4.2.1
@@ -370,17 +373,24 @@ octal_escape_sequence(_Opts) -->    % 6.4.2.1
   , *octal_digit_char               % 6.5.2
   , backslash_char.                 % 6.5.5
 */
-octal_escape_sequence(Opts, octal_escape_sequence([PT_Backslash_Char,PT_Octal_Digit_Char|J]), A, Z) :-
+octal_escape_sequence(Opts, octal_escape_sequence([PT_Backslash_Char,PT_Octal_Digit_Char|Digits]), A, Z) :-
   backslash_char(PT_Backslash_Char, A, B),
   octal_digit_char(PT_Octal_Digit_Char, B, C),
-  call_sequence_ground(sequence('*', octal_digit_char, I), I, K, J, C, D),
-  ( K = [PT_Backslash_Char],
+  octal_escape_sequence_df(Opts, Digits-Digits, C, D, R),
+  ( R = [PT_Backslash_Char],
     backslash_char(PT_Backslash_Char, D, Z)
-  ; K = [],
+  ; R = [],
     option(allow_missing_closing_backslash_in_character_escape(Allow_Missing_Closing_Backslash_In_Character_Escape), Opts, no),
     yes(Allow_Missing_Closing_Backslash_In_Character_Escape),
     D = Z
   ).
+
+octal_escape_sequence_df(Opts, Ls0-[PT_Octal_Digit_Char|Ls1e], A, Z, R) :-
+  octal_digit_char(PT_Octal_Digit_Char, A, B),
+  !,
+  octal_escape_sequence_df(Opts, Ls0-Ls1e, B, Z, R).
+octal_escape_sequence_df(_Opts, _-R, A, A, R).
+
 /*
 hexadecimal_escape_sequence(_Opts) --> % 6.4.2.1
     backslash_char                  % 6.5.5
@@ -389,21 +399,56 @@ hexadecimal_escape_sequence(_Opts) --> % 6.4.2.1
   , *hexadecimal_digit_char         % 6.5.2
   , backslash_char.                 % 6.5.5
 */
-hexadecimal_escape_sequence(Opts, hexadecimal_escape_sequence([PT_Backslash_Char,PT_Symbolic_Hexadecimal_Char,PT_Hexadecimal_Digit_Char|J]), A, Z) :-
+hexadecimal_escape_sequence(Opts, hexadecimal_escape_sequence([PT_Backslash_Char,PT_Symbolic_Hexadecimal_Char,PT_Hexadecimal_Digit_Char|Digits]), A, Z) :-
   backslash_char(PT_Backslash_Char, A, B),
   symbolic_hexadecimal_char(PT_Symbolic_Hexadecimal_Char, B, C),
   hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, C, D),
-  call_sequence_ground(sequence('*', hexadecimal_digit_char, I), I, K, J, D, E),
-  ( K = [PT_Backslash_Char],
+  hexadecimal_escape_sequence_df(Opts, Digits-Digits, D, E, R),
+  ( R = [PT_Backslash_Char],
     backslash_char(PT_Backslash_Char, E, Z)
-  ; K = [],
+  ; R = [],
     option(allow_missing_closing_backslash_in_character_escape(Allow_Missing_Closing_Backslash_In_Character_Escape), Opts, no),
     yes(Allow_Missing_Closing_Backslash_In_Character_Escape),
     E = Z
   ).
 
+hexadecimal_escape_sequence_df(Opts, Ls0-[PT_Hexadecimal_Digit_Char|Ls1e], A, Z, R) :-
+  hexadecimal_digit_char(PT_Hexadecimal_Digit_Char, A, B),
+  !,
+  hexadecimal_escape_sequence_df(Opts, Ls0-Ls1e, B, Z, R).
+hexadecimal_escape_sequence_df(_Opts, _-R, A, A, R).
+
+
+
 symbolic_hexadecimal_char -->       % 6.4.2.1
     ['x'].
+
+unicode_escape_sequence(_Opts, unicode_escape_sequence([PT_Backslash_Char, PT_Symbolic_Unicode_Char, PT_Hex1, PT_Hex2, PT_Hex3, PT_Hex4]), A, Z) :-
+  backslash_char(PT_Backslash_Char, A, B),
+  symbolic_unicode4_char(PT_Symbolic_Unicode_Char, B, C),
+  hexadecimal_digit_char(PT_Hex1, C, D),
+  hexadecimal_digit_char(PT_Hex2, D, E),
+  hexadecimal_digit_char(PT_Hex3, E, F),
+  hexadecimal_digit_char(PT_Hex4, F, Z).
+
+unicode_escape_sequence(_Opts, unicode_escape_sequence([PT_Backslash_Char, PT_Symbolic_Unicode_Char, PT_Hex1, PT_Hex2, PT_Hex3, PT_Hex4, PT_Hex5, PT_Hex6, PT_Hex7, PT_Hex8]), A, Z) :-
+  backslash_char(PT_Backslash_Char, A, B),
+  symbolic_unicode8_char(PT_Symbolic_Unicode_Char, B, C),
+  hexadecimal_digit_char(PT_Hex1, C, D),
+  hexadecimal_digit_char(PT_Hex2, D, E),
+  hexadecimal_digit_char(PT_Hex3, E, F),
+  hexadecimal_digit_char(PT_Hex4, F, G),
+  hexadecimal_digit_char(PT_Hex5, G, H),
+  hexadecimal_digit_char(PT_Hex6, H, I),
+  hexadecimal_digit_char(PT_Hex7, I, J),
+  hexadecimal_digit_char(PT_Hex8, J, Z).
+
+symbolic_unicode8_char -->
+    ['U'].
+
+symbolic_unicode4_char -->
+    ['u'].
+
 
 /* 6.4.3 Variables */
 
