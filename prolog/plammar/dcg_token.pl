@@ -241,22 +241,11 @@ quoted_token(Opts) -->              % 6.4.2
 
 single_quoted_item(Opts) -->        % 6.4.2
     single_quoted_character(Opts)   % 6.4.2.1
-  | continuation_escape_sequence(Opts). % 6.4.2
-/*
-continuation_escape_sequence(_Opts) --> % 6.4.2
+  | continuation_escape_sequence.   % 6.4.2
+
+continuation_escape_sequence -->    % 6.4.2
     backslash_char                  % 6.5.5
   , new_line_char.                  % 6.5.4
-*/
-continuation_escape_sequence(Opts, continuation_escape_sequence(PT), A, Z) :-
-  backslash_char(PT_Backslash_Char, A, B),
-  ( option(allow_c_as_continuation_escape_symbol(Allow_C_As_Continuation_Escape_Symbol), Opts, no),
-    yes(Allow_C_As_Continuation_Escape_Symbol),
-    B = ['c'|C],
-    PT = [PT_Backslash_Char, 'c', PT_New_Line_Char]
-  ; B = C,
-    PT = [PT_Backslash_Char, PT_New_Line_Char]
-  ),
-  new_line_char(PT_New_Line_Char, C, Z).
 
 semicolon_token -->                 % 6.4.2
     semicolon_char.                 % 6.5.3
@@ -304,7 +293,7 @@ non_quote_char(Opts) -->            % 6.4.2.1
   | solo_char                       % 6.5.3
   | space_char                      % 6.5.4
   | meta_escape_sequence            % 6.4.2.1
-  | control_escape_sequence         % 6.4.2.1
+  | control_escape_sequence(Opts)   % 6.4.2.1
   | octal_escape_sequence           % 6.4.2.1
   | hexadecimal_escape_sequence.    % 6.4.2.1
 */
@@ -314,7 +303,7 @@ non_quote_char(Opts, non_quote_char(PT), A, Z) :-
   ; solo_char(PT, A, Z)
   ; space_char(PT, A, Z)
   ; meta_escape_sequence(PT, A, Z)
-  ; control_escape_sequence(PT, A, Z)
+  ; control_escape_sequence(Opts, PT, A, Z)
   ; octal_escape_sequence(PT, A, Z)
   ; hexadecimal_escape_sequence(PT, A, Z)
   ; option(allow_tab_as_quote_char(Allow_Tab_As_Quote_Char), Opts, no),
@@ -329,11 +318,11 @@ meta_escape_sequence -->            % 6.4.2.1
     backslash_char                  % 6.5.5
   , meta_char.                      % 6.5.5
 
-control_escape_sequence -->         % 6.4.2.1
+control_escape_sequence(Opts) -->   % 6.4.2.1
     backslash_char                  % 6.5.5
-  , symbolic_control_char.          % 6.4.2.1
+  , symbolic_control_char(Opts).    % 6.4.2.1
 
-symbolic_control_char -->           % 6.4.2.1
+symbolic_control_char(_Opts) -->    % 6.4.2.1
     symbolic_alert_char             % 6.4.2.1
   | symbolic_backspace_char         % 6.4.2.1
   | symbolic_carriage_return_char   % 6.4.2.1
@@ -341,6 +330,18 @@ symbolic_control_char -->           % 6.4.2.1
   | symbolic_horizontal_tab_char    % 6.4.2.1
   | symbolic_new_line_char          % 6.4.2.1
   | symbolic_vertical_tab_char.     % 6.4.2.1
+
+symbolic_control_char(Opts, symbolic_control_char(symbolic_no_output_char('c')), ['c'|Z], Z) :-
+  option(allow_symbolic_no_output_char_c(Allow_Control_Char), Opts, no),
+  yes(Allow_Control_Char).
+
+symbolic_control_char(Opts, symbolic_control_char(symbolic_escape_char('e')), ['e'|Z], Z) :-
+  option(allow_symbolic_escape_char_e(Allow_Control_Char), Opts, no),
+  yes(Allow_Control_Char).
+
+symbolic_control_char(Opts, symbolic_control_char(symbolic_space_char('s')), ['s'|Z], Z) :-
+  option(allow_symbolic_space_char_s(Allow_Control_Char), Opts, no),
+  yes(Allow_Control_Char).
 
 symbolic_alert_char -->             % 6.4.2.1
     ['a'].
@@ -662,7 +663,7 @@ double_quoted_list token Opts -->   % 6.4.6
 
 double_quoted_item(Opts) -->        % 6.4.6
     double_quoted_character(Opts)   % 6.4.2.1
-  | continuation_escape_sequence(Opts). % 6.4.2
+  | continuation_escape_sequence.   % 6.4.2
 
 /* 6.4.7 Back quoted strings */
 
@@ -673,7 +674,7 @@ back_quoted_string token Opts -->   % 6.4.7
 
 back_quoted_item(Opts) -->          % 6.4.7
     back_quoted_character(Opts)     % 6.4.2.1
-  | continuation_escape_sequence(Opts). % 6.4.2
+  | continuation_escape_sequence.   % 6.4.2
 
 /* 6.4.8 Other tokens */
 

@@ -371,9 +371,15 @@ prolog( "a(\"b\n\").", [ allow_newline_as_quote_char(yes) ]).
 invalid("a(\"b\t\").", [ allow_tab_as_quote_char(no) ]).
 prolog( "a(\"b\t\").", [ allow_tab_as_quote_char(yes) ]).
 
-% Allow \c continuation escape sequence for SWI-Prolog
-invalid("a(\"b\\c\n\").", [ allow_c_as_continuation_escape_symbol(no) ]).
-prolog( "a(\"b\\c\n\").", [ allow_c_as_continuation_escape_symbol(yes) ]).
+% Allow special escape chars for SWI-Prolog
+invalid("a(\"b\\c\\n\").", [ allow_symbolic_no_output_char_c(no) ]).
+prolog( "a(\"b\\c\\n\").", [ allow_symbolic_no_output_char_c(yes) ]).
+
+invalid("a(\"b\\e\\n\").", [ allow_symbolic_escape_char_e(no) ]).
+prolog( "a(\"b\\e\\n\").", [ allow_symbolic_escape_char_e(yes) ]).
+
+invalid("a(\"b\\s\\n\").", [ allow_symbolic_space_char_s(no) ]).
+prolog( "a(\"b\\s\\n\").", [ allow_symbolic_space_char_s(yes) ]).
 
 % ISO has only restricted charset
 invalid("% é Ä § ° \na.").
@@ -526,3 +532,6 @@ prolog("a(1.0e+2).").
 prolog("a(1.0e-3).").
 prolog("a(1e+4).", [ allow_integer_exponential_notation(yes) ]).
 prolog("a(1e-4).", [ allow_integer_exponential_notation(yes) ]).
+
+% a(0'\s)
+prolog("a(0'\\s).", [ allow_symbolic_space_char_s(yes) ]).
