@@ -37,6 +37,6 @@ If the given Prolog source code is not syntactically correct at all, the followi
 }
 ```
 
-We provide a [fork of astexplorer](https://github.com/fnogatz/astexplorer/tree/prolog) that uses this message protocol for a web-based editor to inspect a Prolog program's parstree (i.e., using `prolog_parsetree/3):
+We provide a [fork of astexplorer](https://github.com/fnogatz/astexplorer/tree/prolog) that uses this message protocol for a web-based editor to inspect a Prolog program's parstree (i.e., using `prolog_parsetree/3`):
 
 ![Screenshot](screenshot.png)
