@@ -1,6 +1,6 @@
 # plammar
 
-A Prolog Grammar written in Prolog.
+A Prolog grammar written in Prolog, for parsing and serialising Prolog code.
 
 ## Installation
 
