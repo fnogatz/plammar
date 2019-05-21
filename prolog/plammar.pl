@@ -4,12 +4,16 @@
     prolog_tokens/2,
     prolog_tokens/3,
     prolog_parsetree/2,
-    prolog_parsetree/3
+    prolog_parsetree/3,
+    prolog_ast/2,
+    prolog_ast/3
   ]).
 
 :- use_module(library(plammar/environments)).
 :- use_module(library(plammar/util)).
 :- use_module(library(plammar/options)).
+:- use_module(library(plammar/pt_ast)).
+:- use_module(library(plammar/state)).
 
 :- use_module(library(dcg4pt)).
 :- use_module(library(clpfd)).
@@ -124,6 +128,34 @@ prolog_parsetree_(chars(Chars), PT, Options) :-
   ( \+ var(Chars) -> Instructions = (I0, !, I1)
   ; Instructions = (I1, !, I0) ),
   call(Instructions).
+
+
+prolog_ast(Source, AST) :-
+  prolog_ast(Source, AST, []).
+
+prolog_ast(Source, AST, Opts0) :-
+  normalise_options(prolog_parsetree, Opts0, Opts),
+  I0 = prolog_parsetree(Source, PT, Opts),
+  I1 = parsetree_ast(PT, AST, Opts),
+  ( ground(Source) ->
+    Instructions = (I0, I1)
+  ; Instructions = (I1, I0) ),
+  call(Instructions), !.
+
+prolog_ast(Source, AST, Options) :-
+  \+ var(AST),
+  parsetree_ast(PT, AST, Options),
+  prolog_parsetree(Source, PT, Options).
+
+parsetree_ast(PT, AST) :-
+  parsetree_ast(PT, AST, []).
+
+parsetree_ast(PT, AST, User_Options) :-
+  normalise_options(User_Options, Options),
+  initial_state(Options, S0),
+  pt_ast(Options, S0, SN, PT, AST),
+  option(end_state(SN), Options),
+  !.
 
 
 pp(A) :-

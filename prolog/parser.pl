@@ -1,6 +1,7 @@
 :- module(parser, []).
 
 :- use_module(library(yall)).
+:- use_module(library(plammar/util)).
 :- use_module(library(plammar/environments)).
 :- use_module(library(plammar/library_operators)).
 
@@ -95,14 +96,6 @@ principal_functor(term(Spec, [_, op(Atom_Tree)]), Atom) :-
 principal_functor(term(Spec, [op(Atom_Tree), _]), Atom) :-
   member(Spec, [fy, fx]),
   atom_tree(Atom, Atom_Tree).
-
-spec_class( fx, prefix).
-spec_class( fy, prefix).
-spec_class(xfx, infix).
-spec_class(xfy, infix).
-spec_class(yfx, infix).
-spec_class(xf , postfix).
-spec_class(yf , postfix).
 
 atom_tree(Atom, atom(name(L))) :-
   ( L = [name_token(Atom, _)]
