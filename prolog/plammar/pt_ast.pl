@@ -35,7 +35,8 @@ pt_ast(Opts, S0, SN,
 ) :-
   pt_ast(Opts, S0, S1, Term, AST_Term),
   pt(Opts, S1, S2, end, PT_End),
-  set_context(S2, SN, after_clause).
+  set_context(S2, S3, after_clause),
+  inc_state(S3, SN, statistics, facts).
 
 % directive_term: rule
 pt_ast(Opts, S0, SN,
@@ -57,7 +58,8 @@ pt_ast(Opts, S0, SN,
   pt(Opts, S5, S6, end, PT_End),
   set_context(S6, S7, after_clause),
   check_entity(Opts, S7, S8, max_subgoals, AST_Body),
-  check_entity(Opts, S8, SN, max_rule_lines, [S0, S6]).
+  check_entity(Opts, S8, S9, max_rule_lines, [S0, S6]),
+  inc_state(S9, SN, statistics, rules).
 
 % directive_term: directive
 pt_ast(Opts, S0, SN,
@@ -74,7 +76,8 @@ pt_ast(Opts, S0, SN,
   set_context(S1, S2, after_directive_op),
   pt_kind(Opts, S2, S3, directive_body, PT_Body, AST_Body),
   pt(Opts, S3, S4, end, PT_End),
-  set_context(S4, SN, after_clause).
+  set_context(S4, S5, after_clause),
+  inc_state(S5, SN, statistics, directives).
 
 % term: atom
 pt_ast(Opts, S0, SN,

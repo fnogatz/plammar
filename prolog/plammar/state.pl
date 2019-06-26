@@ -10,6 +10,7 @@
     del_context/5,
     inc_context/4,
     dec_context/4,
+    inc_state/4,
     state_warn/3
   ]).
 
@@ -89,6 +90,17 @@ dec_context(S0, SN, Namespace, Prop) :-
   Value1 is Value0 - 1,
   What1 =.. [Prop, Value1],
   set_context(S1, SN, Namespace, What1).
+
+inc_state(S0, SN, Namespace, Prop) :-
+  What_NS0 =.. [Namespace, NS0],
+  select_option(What_NS0, S0, S1, []),
+  What0 =.. [Prop, Value0],
+  select_option(What0, NS0, NS1, 0),
+  Value1 is Value0 + 1,
+  What1 =.. [Prop, Value1],
+  merge_options([What1], NS1, NSN),
+  What_NS1 =.. [Namespace, NSN],
+  merge_options([What_NS1], S1, SN).
 
 state_space(S0, SN, cols(N)) :-
   option(pos(L0:C0), S0),
