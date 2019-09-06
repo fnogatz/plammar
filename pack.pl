@@ -9,3 +9,7 @@ maintainer('Falco Nogatz','fnogatz@gmail.com').
 packager('Falco Nogatz','fnogatz@gmail.com').
 
 home('https://github.com/fnogatz/plammar').
+
+requires(tap).
+requires(dcg4pt).
+requires(clitable).
