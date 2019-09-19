@@ -8,7 +8,7 @@ CLI := ./cli.exe
 all: install
 
 version:
-	echo $(version)
+	@echo $(version)
 
 install: install.packs cli
 
