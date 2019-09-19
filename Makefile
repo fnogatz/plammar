@@ -43,3 +43,5 @@ cli:
 
 server:
 	@$(SWIPL) server/server.pl --port=8081
+
+check: test
