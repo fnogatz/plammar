@@ -1,6 +1,7 @@
 .PHONY: all test clean server
 
 version := $(shell swipl -q -s pack -g 'version(V),writeln(V)' -t halt)
+packfile = plammar-$(version).tgz
 
 SWIPL := swipl
 CLI := ./cli.exe
@@ -30,6 +31,8 @@ upgrade.packs.dcg4pt:
 upgrade.packs.clitable:
 	@$(SWIPL) -q -g 'pack_install(clitable,[interactive(false),upgrade(true)]),halt(0)' -t 'halt(1)'
 
+check: test
+
 test: cli test.cli test.parser
 
 test.parser:
@@ -44,4 +47,8 @@ cli:
 server:
 	@$(SWIPL) server/server.pl --port=8081
 
-check: test
+package: test
+	tar cvzf $(packfile) prolog test pack.pl README.md LICENSE
+
+release: test
+	hub release create -m v$(version) v$(version)
