@@ -48,7 +48,7 @@ server:
 	@$(SWIPL) server/server.pl --port=8081
 
 package: test
-	tar cvzf $(packfile) prolog test pack.pl README.md LICENSE
+	tar cvzf $(packfile) prolog test pack.pl cli.pl server README.md LICENSE Makefile
 
 release: test
 	hub release create -m v$(version) v$(version)
