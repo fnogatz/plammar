@@ -21,7 +21,7 @@ read_term_(Opts) -->                % 6.4
 % Optimised version to avoid backtracking of
 %   layout_text_sequence.
 token_(Opts, token_(Tree), A, Z) :-
-  ( \+ var(A) ->
+  ( nonvar(A) ->
     ( layout_text_sequence(Opts, LTS_Tree, A, B),
       Inner = [LTS_Tree, Token_Tree]
     ; A = B,

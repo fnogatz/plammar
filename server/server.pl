@@ -49,7 +49,7 @@ handle(post, Request) :-
    ).
 
 reply_error(Msg) :-
-   \+var(Msg),
+   nonvar(Msg),
    format(user_output, 'There has been an error: ~w~n', [Msg]),
    reply_json_dict(_{
       type: error,

@@ -126,7 +126,7 @@ collect_stdin(Chars) :-
 
 process(Opts, Chars) :-
   option(dcg(DCG), Opts),
-  \+var(DCG),
+  nonvar(DCG),
   plammar:normalise_options([], Options),
   DCGBody =.. [DCG, Options],
   ( ast:tree(DCGBody, Chars, Tree) ->

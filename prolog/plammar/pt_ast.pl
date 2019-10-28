@@ -588,7 +588,7 @@ pt_ast(_, S0, S0, Q, R) :-
     Type,
     [Opts,S0,S1,A,B,Argument,Body]^(
       clause(pt_ast(Opts,S0,S1,A,B), Body),
-      \+ var(A),
+      nonvar(A),
       A =.. [Type, Argument]
     ),
     Types

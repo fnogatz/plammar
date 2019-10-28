@@ -25,12 +25,12 @@ prolog_tokens(string(String), Tokens, Options) :-
   !,
   I0 = string_chars(String, Chars),
   I1 = prolog_tokens(chars(Chars), Tokens, Options),
-  ( \+ var(String) -> Instructions = (I0, I1)
+  ( nonvar(String) -> Instructions = (I0, I1)
   ; Instructions = (I1, I0) ),
   Instructions.
 
 prolog_tokens(file(File), Tokens, Options) :-
-  \+ var(File),
+  nonvar(File),
   !,
   setup_call_cleanup(
     open(File, read, Stream),
@@ -39,7 +39,7 @@ prolog_tokens(file(File), Tokens, Options) :-
   ).
 
 prolog_tokens(stream(Stream), Tokens, Options) :-
-  \+ var(Stream),
+  nonvar(Stream),
   !,
   read_string(Stream, _Length, String),
   prolog_tokens(string(String), Tokens, Options).
@@ -56,7 +56,7 @@ prolog_tokens(_, _, _) :-
     Type,
     [Selector,Argument,Body,A,B]^(
       clause(prolog_tokens(Selector,A,B), Body),
-      \+ var(Selector),
+      nonvar(Selector),
       Selector =.. [Type, Argument]
     ),
     Types 
@@ -71,18 +71,18 @@ prolog_parsetree(A, B) :-
   prolog_parsetree(A, B, []).
 
 prolog_parsetree(string(String), PT, Options) :-
-  \+ var(String),
+  nonvar(String),
   !,
   string_chars(String, Chars),
   prolog_parsetree(chars(Chars), PT, Options).
 prolog_parsetree(string(String), PT, Options) :-
-  \+ var(PT),
+  nonvar(PT),
   !,
   prolog_parsetree(chars(Chars), PT, Options),
   string_chars(String, Chars).
 
 prolog_parsetree(file(File), PT, Options) :-
-  \+ var(File),
+  nonvar(File),
   !,
   setup_call_cleanup(
     open(File, read, Stream),
@@ -91,7 +91,7 @@ prolog_parsetree(file(File), PT, Options) :-
   ).
 
 prolog_parsetree(stream(Stream), PT, Options) :-
-  \+ var(Stream),
+  nonvar(Stream),
   !,
   read_string(Stream, _Length, String),
   prolog_parsetree(string(String), PT, Options).
@@ -115,7 +115,7 @@ prolog_parsetree(_, _, _) :-
     Type,
     [Selector,Argument,Body,A,B]^(
       clause(prolog_parsetree(Selector,A,B), Body),
-      \+ var(Selector),
+      nonvar(Selector),
       Selector =.. [Type, Argument]
     ),
     Types 
@@ -125,7 +125,7 @@ prolog_parsetree(_, _, _) :-
 prolog_parsetree_(chars(Chars), PT, Options) :-
   I0 = prolog_tokens(chars(Chars), Tokens, Options),
   I1 = prolog(Options, PT, Tokens),
-  ( \+ var(Chars) -> Instructions = (I0, !, I1)
+  ( nonvar(Chars) -> Instructions = (I0, !, I1)
   ; Instructions = (I1, !, I0) ),
   Instructions.
 
@@ -143,7 +143,7 @@ prolog_ast(Source, AST, Opts0) :-
   Instructions, !.
 
 prolog_ast(Source, AST, Options) :-
-  \+ var(AST),
+  nonvar(AST),
   parsetree_ast(PT, AST, Options),
   prolog_parsetree(Source, PT, Options).
 
@@ -185,7 +185,7 @@ test_tokens(file(File), Tokens, Opts) :-
   tokens(Opts, Tokens, Chars).
 
 tokens(Opts, Tokens, A) :-
-  \+ var(Tokens),
+  nonvar(Tokens),
   !,
   phrase(plammar:term(Opts, term(Tokens)), A, []).
 
@@ -744,7 +744,7 @@ tokens(Opts, seq_hexadecimal_digit_char(Ls,Beg,Cons), Tokens, A) :-
 %%   characters forms a valid token as specified by the above
 %%   Syntax." (6.4)
 token(Opts, Tree, In, Rest) :-
-  \+ var(In), !,
+  nonvar(In), !,
   token_(Opts, token_(Tree), In, Rest),
   Some_More_Elements = [_|_], % at least one element
   \+((
@@ -752,7 +752,7 @@ token(Opts, Tree, In, Rest) :-
     append(Some_More_Elements, Shorter_Rest, Rest)
   )).
 token(Opts, Tree, In, Rest) :-
-  \+ var(Tree), !,
+  nonvar(Tree), !,
   token_(Opts, token_(Tree), In, Rest).
 token(_Opts, Tree, In, Rest) :-
   var(Tree), var(In), !,
@@ -825,7 +825,7 @@ term_expansion(X1 --> Y1, [Rule]) :-
 :- op(800, fy, *).
 *(DCGBody, Tree, In, Out) :-
   % only if input list is given 
-  \+var(In), !,
+  nonvar(In), !,
   % use `**` to consume as most as possible at first
   sequence('**', DCGBody, Tree, In, Out).
 *(DCGBody, Tree, In, Out) :-

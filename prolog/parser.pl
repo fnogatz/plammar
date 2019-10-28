@@ -77,11 +77,11 @@ not_member(X, [Y|Ys]) :-
   not_member(X, Ys).
 
 open_member(X, Xs) :-
-  \+ var(Xs),
+  nonvar(Xs),
   Xs = [X|_],
   !.
 open_member(X, [_|Xs]) :-
-  \+ var(Xs),
+  nonvar(Xs),
   open_member(X, Xs),
   !.
 
@@ -193,7 +193,7 @@ set_operator_from_library(Opts, Op) :-
 /* 6.2 PROLOG TEXT AND DATA */
 
 prolog(Opts, prolog(PT), A) :-
-  \+ var(A), !,
+  nonvar(A), !,
   ( A = [shebang(PT_Shebang)|B] ->
     PT0 = [shebang(PT_Shebang)]
   ; otherwise ->
@@ -209,7 +209,7 @@ prolog(Opts, prolog(PT), A) :-
   ).
 
 prolog(Opts, prolog(PT), A) :-
-  \+ var(PT), !,
+  nonvar(PT), !,
   ( PT = [shebang(PT_Shebang)|PT0] ->
     A = [shebang(PT_Shebang)|B]
   ; otherwise ->
@@ -228,7 +228,7 @@ prolog(Opts) -->
     *p_text(Opts).
 */
 p_text(Opts, PT, A, C) :-
-  \+ var(A), !,
+  nonvar(A), !,
   P #=< 1201,
   term(P, Opts, Term_Tree, A, B),
   B = [end(PT_End)|C],
@@ -240,7 +240,7 @@ p_text(Opts, PT, A, C) :-
   PT =.. [Tree_Name, [Term_Tree, end(PT_End)]].
 
 p_text(Opts, PT, A, C) :-
-  \+ var(PT), !,
+  nonvar(PT), !,
   PT =.. [Tree_Name, [Term_Tree, end(PT_End)]],
   term(P, Opts, Term_Tree, A, B),
   ( Tree_Name = directive_term ->
@@ -370,7 +370,7 @@ arg_list(Opts) -->
 
 %% Optimised version:
 arg_list(Opts, arg_list(Inner), A, Z) :-
-  \+ var(A),
+  nonvar(A),
   arg(Opts, Arg, A, B),
   ( B = Z,
     Inner = Arg
@@ -379,17 +379,17 @@ arg_list(Opts, arg_list(Inner), A, Z) :-
     Inner = [ Arg, comma(Comma), Arg_List ]
   ).
 arg_list(Opts, arg_list(arg(Arg)), A, Z) :-
-  \+ var(Arg),
+  nonvar(Arg),
   arg(Opts, arg(Arg), A, Z).
 arg_list(Opts, arg_list([Arg, Comma, Arg_List]), A, Z) :-
-  \+ var(Arg),
+  nonvar(Arg),
   arg(Opts, Arg, A, [Comma|B]),
   arg_list(Opts, Arg_List, B, Z).
 
 /* 6.3.3.1 Arguments */
 
 arg(Opts0, arg(PT), In, Out) :-
-    \+ var(In)
+    nonvar(In)
   , option(allow_arg_precedence_geq_1000(Allow_Arg_Precedence_Geq_1000), Opts0, no)
   , ( no(Allow_Arg_Precedence_Geq_1000) ->
       % ISO 6.3.3.1: Priority must be less than 1000
@@ -411,7 +411,7 @@ arg(Opts0, arg(PT), In, Out) :-
 
 % This is only needed for logical purity
 arg(Opts, arg(PT), In, Out) :-
-    \+ var(PT)
+    nonvar(PT)
   , option(allow_arg_precedence_geq_1000(Allow_Arg_Precedence_Geq_1000), Opts, no)
   , ( no(Allow_Arg_Precedence_Geq_1000) ->
       % ISO 6.3.3.1: Priority must be less than 1000
@@ -465,12 +465,12 @@ term_(0, Opts0, term_(Inner), A, Z) :-
 :- op(300, xfx, '@').
 
 term(P, Opts, Res, A, Z) :-
-  \+ var(A),
+  nonvar(A),
   term_(Term1_P, Opts, term_(Term1_Tree_), A, B),
   lterm(Opts, term(Term1_Tree_)@Term1_P, Res@P, B, Z).
 
 term(P, Opts, Res, A, Z) :-
-  \+ var(A),
+  nonvar(A),
   op(Op_P, Type, Opts, Op_Tree, A, B),
   % 6.3.4.2: "The first token of a is not open_ct"
   B \= [open_ct(_)|_],
@@ -492,7 +492,7 @@ lterm(Opts, Term1_Tree@Term1_P, Res@P, A, Z) :-
     lterm(Opts, term(Type, [Term1_Tree, Op_Tree])@Op_P, Res@P, B, Z) ).
 
 term(0, Opts, Res, A, Z) :-
-  \+ var(Res),
+  nonvar(Res),
   ( Res = term(Inner),
     term_(_, Opts, term_(Inner), A, Z)
   ; Res = term(Type, [Term_Tree1, Op_Tree, Term_Tree2]),
