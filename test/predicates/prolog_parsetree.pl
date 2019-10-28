@@ -514,7 +514,7 @@ invalid(" #! test2\na.", [ allow_shebang(yes) ]).
     Ops,
     prolog_parsetree(
       string("a b."),
-      PT,
+      _PT,
       [ targets([]), infer_operators(Ops) ]
     ),
     Inferred_Ops
