@@ -2,10 +2,10 @@
     pt_ast/5
   ]).
 
-:- use_module(library(plammar/util)).
-:- use_module(library(plammar/state)).
-:- use_module(library(plammar/format_space)).
-:- use_module(library(plammar/format_check)).
+:- use_module(util).
+:- use_module(state).
+:- use_module(format_space).
+:- use_module(format_check).
 
 :- discontiguous
   pt_ast/5,

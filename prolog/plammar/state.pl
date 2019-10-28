@@ -14,7 +14,7 @@
     state_warn/3
   ]).
 
-:- use_module(library(plammar/util)).
+:- use_module(util).
 
 initial_state(Options, SN) :-
   option(initial_state(Initial_State), Options, []),

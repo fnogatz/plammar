@@ -3,7 +3,7 @@
     normalise_operators/2
   ]).
 
-:- use_module(library(plammar/util)).
+:- use_module(util).
 
 merge_operators(Old, [], Old).
 merge_operators(Old, [OpN|Ops], Merged) :-

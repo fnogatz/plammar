@@ -3,9 +3,9 @@
     check_entity/5
   ]).
 
-:- use_module(library(plammar/state)).
-:- use_module(library(plammar/options)).
-:- use_module(library(plammar/util)).
+:- use_module(state).
+:- use_module(options).
+:- use_module(util).
 
 check(Opts, S0, SN, Prop) :-
   What =.. [Prop, Value/Secondary],

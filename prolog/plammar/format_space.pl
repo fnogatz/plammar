@@ -3,10 +3,10 @@
     quoted_items/5
   ]).
 
-:- use_module(library(plammar/state)).
-:- use_module(library(plammar/util)).
-:- use_module(library(plammar/options)).
-:- use_module(library(plammar/format_check)).
+:- use_module(state).
+:- use_module(util).
+:- use_module(options).
+:- use_module(format_check).
 
 layout(Opts, S0, SN, [PT], PT) :-
   leading_layout(Opts, S0, SN, []).

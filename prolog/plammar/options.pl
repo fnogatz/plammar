@@ -5,9 +5,9 @@
     style_option/2
   ]).
 
-:- use_module(library(plammar/operators)).
-:- use_module(library(plammar/environments)).
-:- use_module(library(plammar/util)).
+:- use_module(operators).
+:- use_module(environments).
+:- use_module(util).
 
 normalise_options(User_Options, Options) :-
   O1 = User_Options,
