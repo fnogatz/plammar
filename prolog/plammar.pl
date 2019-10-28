@@ -9,6 +9,11 @@
     prolog_ast/3
   ]).
 
+:- use_module(library(apply), [maplist/3]).
+:- use_module(library(lists), [append/3]).
+:- use_module(library(readutil), [read_file_to_codes/3]).
+:- use_module(library(option), [merge_options/3,option/2,option/3]).
+
 :- use_module(library(plammar/environments)).
 :- use_module(library(plammar/util)).
 :- use_module(library(plammar/options)).
