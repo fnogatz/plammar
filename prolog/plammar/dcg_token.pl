@@ -26,7 +26,7 @@ token_(Opts, token_(Tree), A, Z) :-
       Inner = [LTS_Tree, Token_Tree]
     ; A = B,
       Inner = [Token_Tree] )
-  ; % otherwise ->
+  ; otherwise ->
     Tree =.. [_, Inner],
     ( Inner = [LTS_Tree, Token_Tree] ->
       layout_text_sequence(Opts, LTS_Tree, A, B)
@@ -63,7 +63,7 @@ token_(Opts, token_(Tree), A, Z) :-
   ; open_token(Token_Tree, B, Z),
     ( Inner = [LTS_Tree, Token_Tree] ->
       Tree = open(Inner)
-    ; % otherwise ->
+    ; otherwise ->
       Tree = open_ct(Token_Tree)
     )
   ; back_quoted_string_token(Opts, Token_Tree, B, Z),

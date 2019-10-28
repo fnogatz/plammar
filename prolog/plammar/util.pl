@@ -5,6 +5,7 @@
     list_close/1,
     yes/1,
     no/1,
+    otherwise/0,
     spec_class/2,
     set_option/3,
     integer_number/3,
@@ -33,6 +34,8 @@ yes(ok).
 no(no).
 no(false).
 no(n).
+
+otherwise.
 
 spec_class( fx, prefix).
 spec_class( fy, prefix).
