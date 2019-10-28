@@ -59,7 +59,7 @@ prolog_tokens(_, _, _) :-
       nonvar(Selector),
       Selector =.. [Type, Argument]
     ),
-    Types 
+    Types
   ),
   warning('Use one of input formats string ~w', Types).
 
@@ -118,7 +118,7 @@ prolog_parsetree(_, _, _) :-
       nonvar(Selector),
       Selector =.. [Type, Argument]
     ),
-    Types 
+    Types
   ),
   warning('Use one of input formats ~w', [Types]).
 
@@ -429,7 +429,7 @@ tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls0, A) :-
       append(Ls0, [PT_Underscore_Char, PT_Decimal_Digit_Char], Ls1)
     ; bracketed_comment(Opts, PT_Bracketed_Comment, B, C),
       decimal_digit_char(PT_Decimal_Digit_Char, C, D) ->
-      append(Ls0, [PT_Underscore_Char, PT_Bracketed_Comment, PT_Decimal_Digit_Char], Ls1)      
+      append(Ls0, [PT_Underscore_Char, PT_Bracketed_Comment, PT_Decimal_Digit_Char], Ls1)
     ),
     tokens(Opts, number_token(PT,Tag,Beg), Tokens, Ls1, D)
   ; space_char(PT_Space_Char, A, B),
@@ -702,7 +702,7 @@ tokens(Opts, seq_octal_digit_char(Ls,Beg,Cons), Tokens, A) :-
     yes(Allow_Digit_Groups_With_Space),
     octal_digit_char(PT_Octal_Digit_Char, B, C) ->
     Ls = [PT_Space_Char, PT_Octal_Digit_Char|PTs],
-    tokens(Opts, seq_octal_digit_char(PTs,Beg,Cons), Tokens, C)  
+    tokens(Opts, seq_octal_digit_char(PTs,Beg,Cons), Tokens, C)
   ; otherwise ->
     append(Cons, A, Beg),
     tokens(Opts, start, Tokens, A, DL-DL),
@@ -824,7 +824,7 @@ term_expansion(X1 --> Y1, [Rule]) :-
 */
 :- op(800, fy, *).
 *(DCGBody, Tree, In, Out) :-
-  % only if input list is given 
+  % only if input list is given
   nonvar(In), !,
   % use `**` to consume as most as possible at first
   sequence('**', DCGBody, Tree, In, Out).

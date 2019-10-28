@@ -433,7 +433,7 @@ pt_ast(Opts, S0, SN,
 pt_ast(Opts, S0, SN,
   term(atom([
     open_list(PT_Open_List),
-    close_list(PT_Close_List) 
+    close_list(PT_Close_List)
   ])),
   list([], eol)
 ) :-

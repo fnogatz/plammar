@@ -1,6 +1,6 @@
 :- use_module(library(yall)).
 
-%% Part I: string given, parse tree unbound 
+%% Part I: string given, parse tree unbound
 
 '"a" is not a valid Prolog program' :-
   % missing end token after clause

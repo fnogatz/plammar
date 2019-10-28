@@ -10,10 +10,10 @@ merge_operators(Old, [OpN|Ops], Merged) :-
   OpN = op(PrecN, Spec, Name),
   OpO = op(PrecO, Spec, Name),
   member(OpO, Old),
-  ( 
+  (
     PrecN = PrecO,
     merge_operators(Old, Ops, Merged)
-  ; 
+  ;
     !,
     warning('Conflicting operators: ~p, ~p', [OpN, OpO]),
     false

@@ -46,7 +46,7 @@ target_ops(iso, Ops) :-
     op( 400, yfx, '>>'),
     op( 200, xfx, '**'),
     op( 200, xfy, '^'),
-    op( 200,  fy, '+'),    % ISO 13211 Corr. 2 
+    op( 200,  fy, '+'),    % ISO 13211 Corr. 2
     op( 200,  fy, '-'),
     op( 200,  fy, '\\')
   ].

@@ -78,7 +78,7 @@ reply_tree(json, Tree) :-
    tree_to_dict(Tree, Dict),
    with_output_to(string(S),
       print_term(Tree, [indent_arguments(2),tab_width(0),output(current_output)])),
-   reply_json_dict(Dict.put('__source', S)). 
+   reply_json_dict(Dict.put('__source', S)).
 reply_tree(prolog, Tree) :-
    format('Content-Type: text/x-prolog~n~n', []),
    print_term(Tree, [indent_arguments(2),tab_width(0),output(current_output)]).
