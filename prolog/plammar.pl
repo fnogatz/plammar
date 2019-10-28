@@ -762,7 +762,7 @@ token(_Opts, Tree, In, Rest) :-
 :- op(600, xfx, token).
 :- discontiguous plammar:token/4.
 
-user:term_expansion(X1 token Opts --> Y1, [Rule]) :-
+term_expansion(X1 token Opts --> Y1, [Rule]) :-
   atom_concat(X1, '_token', X1_token),
   X1_token_with_Opts =.. [X1_token, Opts],
   dcg4pt:dcg4pt_rule_to_dcg_rule(X1_token_with_Opts --> Y1, X2 --> Y2),
@@ -786,7 +786,7 @@ user:term_expansion(X1 token Opts --> Y1, [Rule]) :-
 
 :- op(600, xf, wrap_text).
 
-user:term_expansion(Head wrap_text --> Y1, [Rule]) :-
+term_expansion(Head wrap_text --> Y1, [Rule]) :-
   dcg4pt:dcg4pt_rule_to_dcg_rule(Head --> Y1, X2 --> Y2),
   dcg_translate_rule(X2 --> Y2, Expanded_DCG_Rule),
   Expanded_DCG_Rule = (
@@ -806,7 +806,7 @@ user:term_expansion(Head wrap_text --> Y1, [Rule]) :-
       ; true )
   ).
 
-user:term_expansion(X1 --> Y1, [Rule]) :-
+term_expansion(X1 --> Y1, [Rule]) :-
   dcg4pt:dcg4pt_rule_to_dcg_rule(X1 --> Y1, X2 --> Y2),
   dcg_translate_rule(X2 --> Y2, Rule).
 
