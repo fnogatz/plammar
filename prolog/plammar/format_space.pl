@@ -164,7 +164,7 @@ quoted_space_item(Opts, S0, SN, Character, Inner, Cs0e, Cs1e) :-
   state_space(S0, S1, cols(1)), % single character
   PT =.. [Character, Inner],
   Callable =.. [Character, Opts, PT, Chars, []],
-  call(plammar:Callable),
+  plammar:Callable,
   append(Chars, Cs1e, Cs0e),
   ( Chars = [Char],
     Char = '\t',
