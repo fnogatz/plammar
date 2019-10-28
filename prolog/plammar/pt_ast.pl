@@ -583,7 +583,7 @@ pt(Opts, S0, SN, ':-', PT) :-
 pt_ast(_, S0, S0, Q, R) :-
   var(R),
   option(pos(L0:C0), S0, na:na),
-  Q =.. [Kind|_],
+  functor(Q, Kind, _),
   setof(
     Type,
     [Opts,S0,S1,A,B,Argument,Body]^(
