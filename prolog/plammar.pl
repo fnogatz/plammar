@@ -27,7 +27,7 @@ prolog_tokens(string(String), Tokens, Options) :-
   I1 = prolog_tokens(chars(Chars), Tokens, Options),
   ( \+ var(String) -> Instructions = (I0, I1)
   ; Instructions = (I1, I0) ),
-  call(Instructions).
+  Instructions.
 
 prolog_tokens(file(File), Tokens, Options) :-
   \+ var(File),
@@ -127,7 +127,7 @@ prolog_parsetree_(chars(Chars), PT, Options) :-
   I1 = prolog(Options, PT, Tokens),
   ( \+ var(Chars) -> Instructions = (I0, !, I1)
   ; Instructions = (I1, !, I0) ),
-  call(Instructions).
+  Instructions.
 
 
 prolog_ast(Source, AST) :-
@@ -140,7 +140,7 @@ prolog_ast(Source, AST, Opts0) :-
   ( ground(Source) ->
     Instructions = (I0, I1)
   ; Instructions = (I1, I0) ),
-  call(Instructions), !.
+  Instructions, !.
 
 prolog_ast(Source, AST, Options) :-
   \+ var(AST),
