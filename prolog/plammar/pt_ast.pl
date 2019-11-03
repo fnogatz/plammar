@@ -2,6 +2,9 @@
     pt_ast/5
   ]).
 
+:- use_module(library(lists), [append/3]).
+:- use_module(library(option), [option/3]).
+
 :- use_module(util).
 :- use_module(state).
 :- use_module(format_space).

@@ -3,6 +3,9 @@
     normalise_operators/2
   ]).
 
+:- use_module(library(lists), [member/2, append/3]).
+:- use_module(library(apply), [maplist/3]).
+
 :- use_module(util).
 
 merge_operators(Old, [], Old).

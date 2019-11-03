@@ -14,6 +14,9 @@
     state_warn/3
   ]).
 
+:- use_module(library(lists), [append/3]).
+:- use_module(library(option), [merge_options/3, option/2, option/3, select_option/4]).
+
 :- use_module(util).
 
 initial_state(Options, SN) :-

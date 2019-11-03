@@ -3,6 +3,9 @@
     check_entity/5
   ]).
 
+:- use_module(library(lists), [append/3, delete/3, member/2]).
+:- use_module(library(option), [option/2, option/3]).
+
 :- use_module(state).
 :- use_module(options).
 :- use_module(util).

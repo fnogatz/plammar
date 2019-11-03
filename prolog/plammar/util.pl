@@ -13,6 +13,9 @@
     use_msg/4
   ]).
 
+:- use_module(library(lists), [append/3]).
+:- use_module(library(option), [merge_options/3]).
+
 warning(Format, Arguments) :-
   print_message(warning, format(Format, Arguments)).
 warning(Msg) :-

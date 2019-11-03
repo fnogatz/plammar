@@ -1,9 +1,14 @@
 :- module(parser, []).
 
 :- use_module(library(yall)).
-:- use_module(library(plammar/util)).
-:- use_module(library(plammar/environments)).
-:- use_module(library(plammar/library_operators)).
+:- use_module(library(clpfd)).
+:- use_module(library(lists), [append/3, member/2]).
+:- use_module(library(option), [merge_options/3, option/2, option/3]).
+:- use_module(library(apply), [maplist/2]).
+
+:- use_module(plammar/util).
+:- use_module(plammar/environments).
+:- use_module(plammar/library_operators).
 
 %:- style_check(-singleton).
 

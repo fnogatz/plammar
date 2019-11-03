@@ -3,6 +3,9 @@
     quoted_items/5
   ]).
 
+:- use_module(library(lists), [append/3, member/2]).
+:- use_module(library(option), [option/2]).
+
 :- use_module(state).
 :- use_module(util).
 :- use_module(options).

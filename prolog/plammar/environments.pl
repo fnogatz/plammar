@@ -3,6 +3,8 @@
     target_options/2
   ]).
 
+:- use_module(library(lists), [append/3]).
+:- use_module(library(option), [merge_options/3]).
 
 %% Operators for Environments
 

@@ -5,6 +5,9 @@
     style_option/2
   ]).
 
+:- use_module(library(option), [merge_options/3, option/2, option/3]).
+:- use_module(library(apply), [maplist/3]).
+
 :- use_module(operators).
 :- use_module(environments).
 :- use_module(util).
