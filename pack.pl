@@ -1,6 +1,6 @@
 name(plammar).
 
-version('1.0.1').
+version('1.0.2').
 download('https://github.com/fnogatz/plammar/releases/*.zip').
 
 title('Prolog parser and serialiser written in Prolog').
