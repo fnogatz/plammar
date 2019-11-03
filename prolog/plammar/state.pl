@@ -73,13 +73,7 @@ del_context(S0, SN, Namespace, Value, Default) :-
   What1 =.. [Namespace, NS1],
   set_option(What1, Context0, Context1),
   set_option(context(Context1), S0, SN).
-/*
-del_context(S0, SN, Namespace) :-
-  option(context(Context0), S0, []),
-  What =.. [Namespace, _],
-  select_option(What, Context0, Context1, _),
-  set_option(context(Context1), S0, SN).
-*/
+
 inc_context(S0, SN, Namespace, Prop) :-
   What0 =.. [Prop, Value0],
   del_context(S0, S1, Namespace, What0, 0),

@@ -426,11 +426,11 @@ arg(Opts, arg(PT), In, Out) :-
       %% TODO: Do not allow comma at top-level to disambigue
       %%   terms like a(b :- c, d)
     )
-  , ( PT = atom(_) ->
+  , ( functor(PT, atom, _) ->
       phrase(atom(PT), In, Out),
       atom_tree(Atom, PT),
       once(is_operator(op(_,_,Atom), Opts))
-    ; PT =.. [term|_] ->
+    ; functor(PT, term, _) ->
       phrase(term(P, Opts, PT), In, Out)
     ).
 
