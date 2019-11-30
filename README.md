@@ -11,7 +11,7 @@ We make use of the following packages:
 - [`library(dcg4pt)`](https://github.com/fnogatz/dcg4pt)
 - [`library(clitable)`](https://github.com/fnogatz/clitable)
 
-All can be installed by calling `?- pack_install(tap).` etc. in SWI-Prolog.
+All can be installed by calling `?- pack_install(tap),pack_install(dcg4pt),pack_install(clitable).` . in SWI-Prolog.
 
 ### Development Version
 
