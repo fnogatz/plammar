@@ -11,7 +11,11 @@ We make use of the following packages:
 - [`library(dcg4pt)`](https://github.com/fnogatz/dcg4pt)
 - [`library(clitable)`](https://github.com/fnogatz/clitable)
 
-All can be installed by calling `?- pack_install(tap).` etc. in SWI-Prolog.
+All can be installed by calling the following query in SWI-Prolog:
+
+```prolog
+?- pack_install(tap), pack_install(dcg4pt), pack_install(clitable).
+```
 
 ### Development Version
 
@@ -19,7 +23,7 @@ To get the latest development version, clone it via git, and link it to your `~/
 
 ```shell
 git clone https://github.com/fnogatz/plammar.git
-ln -s plammar ~/lib/swipl/pack/plammar
+ln -s $PWD/plammar ~/lib/swipl/pack/plammar
 ```
 
 ### Pre-Compilation
