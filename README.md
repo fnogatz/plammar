@@ -19,7 +19,7 @@ To get the latest development version, clone it via git, and link it to your `~/
 
 ```shell
 git clone https://github.com/fnogatz/plammar.git
-ln -s plammar ~/lib/swipl/pack/plammar
+ln -s $PWD/plammar ~/lib/swipl/pack/plammar
 ```
 
 ### Pre-Compilation
