@@ -824,7 +824,7 @@ term_expansion(X1 --> Y1, [Rule]) :-
   if the input list `In` is given, it is more
   likely that many items can be consumed;
   whereas with an unbound `In` and given `Tree`
-  we want to created the smallest possibilities
+  we want to create the smallest possibilities
   at first.
 */
 :- op(800, fy, *).
