@@ -9,12 +9,12 @@ First, you need [SWI-Prolog](http://www.swi-prolog.org/). See there for installa
 We make use of the following packages:
 - [`library(tap)`](https://github.com/fnogatz/tap)
 - [`library(dcg4pt)`](https://github.com/fnogatz/dcg4pt)
-- [`library(clitable)`](https://github.com/fnogatz/clitable)
+- [`library(cli_table)`](https://github.com/fnogatz/cli_table)
 
 All can be installed by calling the following query in SWI-Prolog:
 
 ```prolog
-?- pack_install(tap), pack_install(dcg4pt), pack_install(clitable).
+?- pack_install(tap), pack_install(dcg4pt), pack_install(cli_table).
 ```
 
 ### Development Version

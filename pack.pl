@@ -12,4 +12,4 @@ home('https://github.com/fnogatz/plammar').
 
 requires(tap).
 requires(dcg4pt).
-requires(clitable).
+requires(cli_table).

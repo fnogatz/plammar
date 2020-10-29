@@ -1,6 +1,7 @@
 :- consult('pack.pl').
 :- use_module(library(plammar)).
-:- use_module(library(clitable)).
+:- use_module(library(plammar/environments)).
+:- use_module(library(cli_table)).
 
 opts_spec([
   [
@@ -140,7 +141,7 @@ process(Opts, Chars) :-
   option(ops(User_Ops), Opts),
   option(nots(Nots), Opts),
 
-  iso_operators(ISO_Ops),
+  target_ops(iso, ISO_Ops),
   append(ISO_Ops, User_Ops, Ops),
 
   !,
@@ -186,7 +187,7 @@ print_operators(_Opts, []) :-
   writeln('(none)').
 print_operators(Opts, Ops) :-
   maplist_op_entry(Opts, Ops, Op_List),
-  clitable(Op_List, [head(['Precedence', 'Type', 'Name'])]).
+  cli_table(Op_List, [head(['Precedence', 'Type', 'Name'])]).
 
 maplist_op_entry(_Opts, Xs, []) :-
   var(Xs),
