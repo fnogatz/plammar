@@ -28,7 +28,7 @@ ln -s $PWD/plammar ~/lib/swipl/pack/plammar
 
 ### Pre-Compilation
 
-It is possible to create a pre-compiled file which increases the tool's performance significantly. The command line interface is compiled using swipl's [`-c` option](http://www.swi-prolog.org/pldoc/doc_for?object=section%282,%272.10%27,swi%28%27/doc/Manual/compilation.html%27%29%29):
+It is possible to create a pre-compiled file which increases the tool's performance significantly. The command line interface is compiled using swipl's [`-c` option](https://www.swi-prolog.org/pldoc/man?section=compilation):
 
 ```sh
 swipl -g main -o cli.exe -c cli.pl
