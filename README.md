@@ -24,6 +24,8 @@ To get the latest development version, clone it via git, and link it to your `~/
 ```shell
 git clone https://github.com/fnogatz/plammar.git
 ln -s $PWD/plammar ~/lib/swipl/pack/plammar
+# or for newer swi-prolog versions:
+ln -s $PWD/plammar ~/.local/share/swi-prolog/pack	
 ```
 
 ### Pre-Compilation
