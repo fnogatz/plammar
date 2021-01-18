@@ -19,11 +19,11 @@ All can be installed by calling the following query in SWI-Prolog:
 
 ### Development Version
 
-To get the latest development version, clone it via git, and link it to your `~/lib/swipl/pack/` directory:
+To get the latest development version, clone it via git and link it to the package directory of SWI-Prolog:
 
-```shell
+```sh
 git clone https://github.com/fnogatz/plammar.git
-ln -s $PWD/plammar ~/lib/swipl/pack/plammar
+ln -s $PWD/plammar $(swipl -q -g "absolute_file_name(pack(.),D,[file_type(directory)]), write(D), halt")
 ```
 
 ### Pre-Compilation
