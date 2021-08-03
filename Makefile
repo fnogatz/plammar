@@ -16,20 +16,20 @@ install: install.packs cli
 install.packs: install.packs.dcg4pt install.packs.cli_table
 
 install.packs.dcg4pt:
-	@$(SWIPL) -q -g 'pack_install(dcg4pt,[interactive(false)]),halt(0)' -t 'halt(1)'
+	@$(SWIPL) -g 'pack_install(dcg4pt,[interactive(false)]),halt(0)' -t 'halt(1)'
 
 install.packs.cli_table:
-	@$(SWIPL) -q -g 'pack_install(cli_table,[interactive(false)]),halt(0)' -t 'halt(1)'
+	@$(SWIPL) -g 'pack_install(cli_table,[interactive(false)]),halt(0)' -t 'halt(1)'
 
 upgrade: upgrade.packs
 
 upgrade.packs: upgrade.packs.dcg4pt upgrade.packs.cli_table
 
 upgrade.packs.dcg4pt:
-	@$(SWIPL) -q -g 'pack_install(dcg4pt,[interactive(false),upgrade(true)]),halt(0)' -t 'halt(1)'
+	@$(SWIPL) -g 'pack_install(dcg4pt,[interactive(false),upgrade(true)]),halt(0)' -t 'halt(1)'
 
 upgrade.packs.cli_table:
-	@$(SWIPL) -q -g 'pack_install(cli_table,[interactive(false),upgrade(true)]),halt(0)' -t 'halt(1)'
+	@$(SWIPL) -g 'pack_install(cli_table,[interactive(false),upgrade(true)]),halt(0)' -t 'halt(1)'
 
 check: test
 
