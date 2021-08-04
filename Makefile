@@ -1,6 +1,6 @@
 .PHONY: all test clean server
 
-version := $(shell swipl -q -s pack -g 'version(V),writeln(V)' -t halt)
+version := $(shell swipl -q -s pack -g 'version(V),writeln(V)' -t 'halt(1)')
 packfile = plammar-$(version).tgz
 
 SWIPL := swipl
