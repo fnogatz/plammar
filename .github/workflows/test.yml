@@ -20,6 +20,11 @@ jobs:
       with:
         swi-prolog-version: ${{ matrix.swipl }}
 
+    - name: Install SWI-Prolog pack dependencies
+      run: |
+        source ~/.swivm/swivm.sh
+        make install
+
     - name: Run tests
       run: |
         source ~/.swivm/swivm.sh
