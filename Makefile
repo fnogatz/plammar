@@ -1,9 +1,11 @@
 .PHONY: all test clean server
 
-version := $(shell swipl -q -s pack -g 'version(V),writeln(V)' -t 'halt(1)')
-packfile = plammar-$(version).tgz
+SWIPL ?= swipl
 
-SWIPL := swipl
+version = $(shell swipl -q -s pack -g 'version(V),writeln(V)' -t 'halt(1)')
+packfile = plammar-$(version).tgz
+pwd := $(shell pwd)
+
 CLI := ./cli.exe
 
 all: install
@@ -36,16 +38,16 @@ check: test
 test: cli test.cli test.parser
 
 test.parser:
-	@$(SWIPL) -q -g 'main,halt(0)' -t 'halt(1)' -s test/test.pl
+	$(SWIPL) -q -p library=$(pwd)/prolog -g 'main,halt(0)' -t 'halt(1)' -s test/test.pl
 
 test.cli:
 	echo 'Var' | $(CLI) --dcg=named_variable
 
 cli:
-	@$(SWIPL) -g main -o $(CLI) -c cli.pl && chmod +x $(CLI)
+	$(SWIPL) -p library=$(pwd)/prolog -g main -o $(CLI) -c cli.pl && chmod +x $(CLI)
 
 server:
-	@$(SWIPL) server/server.pl --port=8081
+	$(SWIPL) -p library=$(pwd)/prolog server/server.pl --port=8081
 
 package: test
 	tar cvzf $(packfile) prolog test pack.pl cli.pl server README.md LICENSE Makefile
